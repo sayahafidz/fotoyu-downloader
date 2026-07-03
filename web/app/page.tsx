@@ -1,23 +1,40 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import ModeTabs, { type Mode } from "@/components/ModeTabs";
 import PasteForm from "@/components/PasteForm";
+import TokenForm from "@/components/TokenForm";
 import PhotoGrid from "@/components/PhotoGrid";
 import ProgressOverlay from "@/components/ProgressOverlay";
 import HelpSection from "@/components/HelpSection";
 import { downloadAllAsZip } from "@/lib/download";
+import {
+  fetchCartViaToken,
+  loadToken,
+  saveToken,
+  clearToken,
+} from "@/lib/session";
 import type { Photo } from "@/lib/parse";
 import type { ZipProgress } from "@/lib/download";
 
 type Phase = "idle" | "parsing" | "preview" | "zipping" | "error";
 
 export default function HomePage() {
+  const [mode, setMode] = useState<Mode>("token");
   const [phase, setPhase] = useState<Phase>("idle");
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<ZipProgress | null>(null);
+  const [savedToken, setSavedToken] = useState<string | null>(null);
 
-  const handleProcess = useCallback(async (raw: string) => {
+  // Load saved token on mount (client-side only).
+  useEffect(() => {
+    const t = loadToken();
+    setSavedToken(t);
+  }, []);
+
+  // Handler for paste JSON mode (existing).
+  const handleProcessJSON = useCallback(async (raw: string) => {
     setPhase("parsing");
     setError(null);
     try {
@@ -42,6 +59,36 @@ export default function HomePage() {
     }
   }, []);
 
+  // Handler for token mode (new).
+  const handleFetchCart = useCallback(async (token: string) => {
+    setPhase("parsing");
+    setError(null);
+    try {
+      const photos = await fetchCartViaToken(token);
+      if (photos.length === 0) {
+        throw new Error("Cart kosong atau tidak ada foto.");
+      }
+      // Save token on success.
+      saveToken(token);
+      setSavedToken(token);
+      setPhotos(photos);
+      setPhase("preview");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Terjadi kesalahan.";
+      const status =
+        e instanceof Error && "status" in e
+          ? (e as Error & { status?: number }).status
+          : null;
+      // If 401, suggest clearing token.
+      if (status === 401) {
+        clearToken();
+        setSavedToken(null);
+      }
+      setError(msg);
+      setPhase("error");
+    }
+  }, []);
+
   const handleDownloadAll = useCallback(async () => {
     setPhase("zipping");
     setError(null);
@@ -54,9 +101,7 @@ export default function HomePage() {
       const msg = e instanceof Error ? e.message : "Gagal membuat ZIP.";
       setError(msg);
       setPhase("preview");
-      // keep progress visible with error overlay
       setProgress((p) => (p ? { ...p, current: msg } : null));
-      // clear after a short delay so user sees error
       setTimeout(() => {
         setProgress(null);
         setError(null);
@@ -95,10 +140,8 @@ export default function HomePage() {
               <span className="text-gradient">Fotoyu</span> Downloader
             </h1>
             <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-              Tempelkan (paste) response JSON dari fotoyu, klik{" "}
-              <span className="font-semibold text-slate-800">Proses</span>,
-              lalu unduh semua foto sekaligus sebagai ZIP. Tanpa install,
-              tanpa login — langsung jalan di browser.
+              Login dengan token fotoyu atau paste response JSON, lalu unduh semua
+              foto sekaligus sebagai ZIP. Tanpa install — langsung jalan di browser.
             </p>
             <a
               href="https://github.com/sayahafidz/fotoyu-downloader"
@@ -130,7 +173,19 @@ export default function HomePage() {
 
         {(phase === "idle" || phase === "parsing" || phase === "error") && (
           <div className="space-y-5">
-            <PasteForm onProcess={handleProcess} loading={phase === "parsing"} />
+            <ModeTabs mode={mode} onChange={setMode} />
+
+            {mode === "token" ? (
+              <TokenForm
+                onFetchCart={handleFetchCart}
+                loading={phase === "parsing"}
+              />
+            ) : (
+              <PasteForm
+                onProcess={handleProcessJSON}
+                loading={phase === "parsing"}
+              />
+            )}
 
             {phase === "error" && error && (
               <div className="rounded-xl border border-red-200 bg-red-50 p-4 animate-fade-in">
@@ -138,7 +193,7 @@ export default function HomePage() {
               </div>
             )}
 
-            <HelpSection />
+            <HelpSection mode={mode} />
           </div>
         )}
 
@@ -160,7 +215,10 @@ export default function HomePage() {
       </footer>
 
       {/* ZIP progress / error overlay */}
-      <ProgressOverlay progress={progress} error={phase === "zipping" ? null : error && progress ? error : null} />
+      <ProgressOverlay
+        progress={progress}
+        error={phase === "zipping" ? null : error && progress ? error : null}
+      />
     </main>
   );
 }

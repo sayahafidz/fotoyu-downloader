@@ -59,15 +59,21 @@ semua URL foto, lalu mengunduhnya secara concurrent.
 
 ```mermaid
 flowchart LR
-    Response["Response JSON dari fotoyu"] --> A{Pilih cara}
-    A -->|"Lebih suka browser"| Web["Web App<br/>paste → klik Proses → ZIP"]
-    A -->|"Lebih suka terminal"| CLI["Script Python<br/>python downloader.py"]
-    Web --> Result["Foto tersimpan"]
-    CLI --> Result
+    Response["Cart fotoyu"] --> A{Pilih mode}
+    A -->|"Mode Token (baru)"| Token["Ambil Bearer token<br/>dari fotoyu.com"]
+    A -->|"Mode Paste JSON"| Paste["Paste response JSON"]
+    A -->|"Python CLI"| CLI["Script Python<br/>python downloader.py"]
+    Token -->|"klik Ambil cart"| Preview["Preview grid + ZIP"]
+    Paste -->|"klik Proses"| Preview
+    CLI --> Result["Foto tersimpan"]
+    Preview --> Result
 ```
 
-- **Pilih Web App** jika kamu tidak mau install Python atau mau pakai dari
-  HP / komputer lain tanpa setup.
+- **Pilih Mode Token** (baru, paling praktis) — ambil Bearer token sekali
+  dari fotoyu, lalu cart langsung ter-fetch otomatis. Token disimpan di
+  browser agar tidak perlu paste ulang.
+- **Pilih Mode Paste JSON** — sama seperti sebelumnya, paste response JSON
+  dari DevTools.
 - **Pilih Script Python** jika kamu sering download foto dan mau otomatisasi
   via terminal (lebih cepat untuk batch besar).
 
@@ -75,8 +81,24 @@ flowchart LR
 
 ## Cara Mendapatkan Response dari Fotoyu
 
-Script Python maupun Web App butuh JSON response dari endpoint cart preview
-fotoyu. Berikut langkah mendapatkannya:
+### Opsi A: Mode Token (rekomendasi — paling praktis)
+
+Mode ini hanya butuh Bearer token dari fotoyu. Setelah login di fotoyu.com,
+copy token dari DevTools, paste ke web app, dan cart langsung ter-fetch.
+
+1. Buka [fotoyu.com](https://fotoyu.com) di tab baru dan **login**.
+2. Pilih foto-foto di aplikasi fotoyu, tambahkan ke **keranjang (cart)**.
+3. Di tab fotoyu.com, tekan `F12` → buka tab **Application**.
+4. Sidebar kiri: **Storage** → **Local Storage** → **https://fotoyu.com**.
+5. Cari key `access_token` atau `token`, klik kanan → **Copy** value-nya.
+6. Paste token ke web app → klik **Ambil cart**.
+
+Token biasanya berlaku beberapa jam. Jika expired, ambil token baru.
+
+### Opsi B: Paste JSON response (cara lama, tetap tersedia)
+
+Script Python maupun Web App (mode paste) butuh JSON response dari endpoint
+cart preview fotoyu. Berikut langkah mendapatkannya:
 
 ### Langkah 1 — Pilih foto di aplikasi fotoyu
 
@@ -114,7 +136,7 @@ fotoyu. Berikut langkah mendapatkannya:
    atau salin manual teks JSON-nya.
 
 Setelah itu:
-- **Web App**: paste langsung ke kotak textarea di halaman → klik Proses.
+- **Web App (mode paste)**: paste langsung ke kotak textarea → klik Proses.
 - **Script Python**: paste ke file `response-fotoyu.txt` di folder project.
 
 Struktur response harus seperti ini (ringkas):

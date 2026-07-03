@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const STEPS: Array<{ title: string; body: string }> = [
+const JSON_STEPS: Array<{ title: string; body: string }> = [
   {
     title: "Pilih foto di aplikasi fotoyu",
     body:
@@ -25,8 +25,41 @@ const STEPS: Array<{ title: string; body: string }> = [
   },
 ];
 
-export default function HelpSection() {
+const TOKEN_STEPS: Array<{ title: string; body: string }> = [
+  {
+    title: "Login ke fotoyu.com",
+    body:
+      "Buka fotoyu.com di tab baru. Login dengan akunmu. Pastikan foto-foto sudah ditambahkan ke cart lewat aplikasi sebelumnya.",
+  },
+  {
+    title: "Buka DevTools",
+    body:
+      "Tekan F12 di keyboard. Buka tab Application (atau Storage di beberapa browser).",
+  },
+  {
+    title: "Ambil access token",
+    body:
+      "Di sidebar kiri: Storage → Local Storage → https://fotoyu.com. Cari key access_token atau token. Copy value-nya (klik kanan → Copy).",
+  },
+  {
+    title: "Paste token di sini",
+    body:
+      "Paste token ke kotak di atas, lalu klik Ambil cart. Token akan disimpan otomatis agar tidak perlu di-paste ulang sampai expired.",
+  },
+];
+
+interface HelpSectionProps {
+  mode?: "token" | "paste";
+}
+
+export default function HelpSection({ mode = "token" }: HelpSectionProps) {
   const [open, setOpen] = useState(false);
+
+  const steps = mode === "token" ? TOKEN_STEPS : JSON_STEPS;
+  const label =
+    mode === "token"
+      ? "Bagaimana cara mendapatkan Bearer token dari fotoyu?"
+      : "Bagaimana cara mendapatkan response dari fotoyu?";
 
   return (
     <section className="w-full">
@@ -37,7 +70,7 @@ export default function HelpSection() {
       >
         <span className="inline-flex items-center gap-2">
           <InfoIcon />
-          Bagaimana cara mendapatkan response dari fotoyu?
+          {label}
         </span>
         <svg
           className={[
@@ -57,7 +90,7 @@ export default function HelpSection() {
 
       {open && (
         <div className="mt-3 grid gap-3 sm:grid-cols-2 animate-fade-in">
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <div
               key={i}
               className="rounded-xl border border-slate-200 bg-white p-4"
