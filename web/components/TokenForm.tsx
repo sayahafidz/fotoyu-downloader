@@ -8,42 +8,56 @@ interface TokenFormProps {
 }
 
 export default function TokenForm({ onFetchCart, loading }: TokenFormProps) {
-  const [token, setToken] = useState("");
-  const [showToken, setShowToken] = useState(false);
+  const [value, setValue] = useState("");
+  const [showValue, setShowValue] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (token.trim()) onFetchCart(token.trim());
+    if (value.trim()) onFetchCart(value.trim());
   };
 
   return (
     <form onSubmit={handleSubmit} className="w-full animate-fade-in space-y-4">
       <div className="rounded-2xl border-2 border-slate-300 bg-white p-6 transition-colors hover:border-slate-400">
-        <label htmlFor="token-input" className="block text-sm font-medium text-slate-700 mb-2">
-          Bearer Token dari fotoyu
+        <label
+          htmlFor="token-input"
+          className="block text-sm font-medium text-slate-700 mb-2"
+        >
+          Data login fotoyu (persist:root)
         </label>
         <div className="relative">
-          <input
+          <textarea
             id="token-input"
-            type={showToken ? "text" : "password"}
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="Paste token disini (mis. eyJhbGc...)"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder={
+              "Paste seluruh value dari key persist:root disini...\n\n" +
+              "Caranya:\n" +
+              "1. Login ke fotoyu.com\n" +
+              "2. F12 → Application → Local Storage → fotoyu.com\n" +
+              "3. Cari key persist:root → klik kanan value → Copy\n" +
+              "4. Paste di sini"
+            }
             spellCheck={false}
-            className="block w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 font-mono text-sm text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            rows={6}
+            className={
+              "block w-full resize-y rounded-xl border border-slate-300 bg-slate-50 p-4 font-mono text-xs leading-relaxed text-slate-800 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 " +
+              (showValue ? "" : "[&:not(:focus)]:blur-sm")
+            }
           />
           <button
             type="button"
-            onClick={() => setShowToken((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-            aria-label={showToken ? "Sembunyikan token" : "Tampilkan token"}
+            onClick={() => setShowValue((v) => !v)}
+            className="absolute right-3 top-3 rounded-md bg-white/80 p-1.5 text-slate-400 hover:text-slate-600 backdrop-blur-sm"
+            aria-label={showValue ? "Sembunyikan" : "Tampilkan"}
           >
-            {showToken ? <EyeOffIcon /> : <EyeIcon />}
+            {showValue ? <EyeOffIcon /> : <EyeIcon />}
           </button>
         </div>
-        {token.trim() && (
+        {value.trim() && (
           <p className="mt-2 text-xs text-slate-500">
-            Token akan disimpan di browser agar tidak perlu paste ulang.
+            Data akan disimpan di browser agar tidak perlu paste ulang. Backend hanya
+            mengekstrak access_token dari data ini.
           </p>
         )}
       </div>
@@ -51,7 +65,7 @@ export default function TokenForm({ onFetchCart, loading }: TokenFormProps) {
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="submit"
-          disabled={loading || !token.trim()}
+          disabled={loading || !value.trim()}
           className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-indigo-500/40 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
@@ -67,10 +81,10 @@ export default function TokenForm({ onFetchCart, loading }: TokenFormProps) {
           )}
         </button>
 
-        {token.trim() && (
+        {value.trim() && (
           <button
             type="button"
-            onClick={() => setToken("")}
+            onClick={() => setValue("")}
             className="text-sm font-medium text-slate-500 hover:text-slate-700"
           >
             Bersihkan
@@ -83,17 +97,39 @@ export default function TokenForm({ onFetchCart, loading }: TokenFormProps) {
           <InfoIcon />
           <div className="flex-1 space-y-2 text-sm">
             <p className="font-medium text-blue-900">
-              Cara mendapatkan Bearer token:
+              Cara mendapatkan data login:
             </p>
             <ol className="list-decimal list-inside space-y-1 text-blue-800 leading-relaxed">
-              <li>Login ke <a href="https://fotoyu.com" target="_blank" rel="noreferrer" className="underline hover:text-blue-900">fotoyu.com</a> (tab baru)</li>
-              <li>Tekan <kbd className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">F12</kbd> → buka tab <strong>Application</strong></li>
-              <li>Sidebar kiri: <strong>Storage</strong> → <strong>Local Storage</strong> → <strong>https://fotoyu.com</strong></li>
-              <li>Cari key <code className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">access_token</code> atau <code className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">token</code></li>
-              <li>Copy value-nya (klik kanan → Copy) → paste ke kotak di atas</li>
+              <li>
+                Buka{" "}
+                <a
+                  href="https://fotoyu.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline hover:text-blue-900"
+                >
+                  fotoyu.com
+                </a>{" "}
+                di tab baru dan <strong>login</strong>
+              </li>
+              <li>
+                Tekan <kbd className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">F12</kbd> → buka tab{" "}
+                <strong>Application</strong>
+              </li>
+              <li>
+                Sidebar kiri: <strong>Local Storage</strong> →{" "}
+                <strong>https://fotoyu.com</strong>
+              </li>
+              <li>
+                Cari key <code className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">persist:root</code>
+              </li>
+              <li>
+                Klik kanan value-nya → <strong>Copy</strong> → paste ke kotak di atas
+              </li>
             </ol>
             <p className="text-xs text-blue-700 mt-2">
-              Token biasanya berlaku beberapa jam. Jika gagal, ambil token baru.
+              Backend akan otomatis mengekstrak access_token dari data ini.
+              Data hanya disimpan di browsermu, tidak dikirim ke server pihak lain.
             </p>
           </div>
         </div>

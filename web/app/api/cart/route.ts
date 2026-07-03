@@ -7,7 +7,6 @@ export const maxDuration = 30;
 const FOTOYU_CART_URL = "https://api.fotoyu.com/gs/v1/carts/preview";
 
 const BROWSER_HEADERS: HeadersInit = {
-  Authorization: "", // diisi per-request di bawah
   Accept: "application/json, text/plain, */*",
   "Accept-Language": "en-US,en;q=0.9",
   "User-Agent":
@@ -23,6 +22,46 @@ interface CartRequestBody {
   body?: unknown;
 }
 
+// Extract access_token from a raw persist:root value (Redux persisted state).
+// The user field inside persist:root is itself a JSON-encoded string.
+// Returns the Bearer token or null if not found.
+function extractToken(rawInput: string): string | null {
+  // 1. Try rawInput as a direct Bearer token (plain JWT).
+  if (/^eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/.test(rawInput.trim())) {
+    return rawInput.trim();
+  }
+
+  // 2. Try rawInput as a persist:root JSON object.
+  let root: unknown;
+  try {
+    root = JSON.parse(rawInput);
+  } catch {
+    return null;
+  }
+
+  // persist:root is an object like { user: "...", giftshopState: "...", ... }
+  if (!root || typeof root !== "object") return null;
+
+  const userStr = (root as Record<string, unknown>).user;
+  if (typeof userStr !== "string") return null;
+
+  let user: unknown;
+  try {
+    user = JSON.parse(userStr);
+  } catch {
+    return null;
+  }
+
+  if (!user || typeof user !== "object") return null;
+
+  const accessToken = (user as Record<string, unknown>).access_token;
+  if (typeof accessToken === "string" && accessToken.startsWith("eyJ")) {
+    return accessToken;
+  }
+
+  return null;
+}
+
 export async function POST(req: Request) {
   let payload: CartRequestBody;
   try {
@@ -34,10 +73,26 @@ export async function POST(req: Request) {
     );
   }
 
-  const token = payload.token;
-  if (!token || typeof token !== "string") {
+  const rawInput = payload.token;
+  if (!rawInput || typeof rawInput !== "string") {
     return NextResponse.json(
-      { error: "Field `token` wajib diisi." },
+      {
+        error:
+          "Field `token` wajib diisi. Paste seluruh value dari localStorage key `persist:root` atau token Bearer langsung.",
+      },
+      { status: 400 }
+    );
+  }
+
+  const token = extractToken(rawInput);
+  if (!token) {
+    return NextResponse.json(
+      {
+        error:
+          "Gagal menemukan access_token di data yang kamu paste. " +
+          "Pastikan kamu menyalin seluruh value dari key `persist:root` " +
+          "di DevTools → Application → Local Storage → fotoyu.com.",
+      },
       { status: 400 }
     );
   }
@@ -67,7 +122,7 @@ export async function POST(req: Request) {
 
   if (upstream.status === 401 || upstream.status === 403) {
     return NextResponse.json(
-      { error: "Token tidak valid atau sudah expired. Silakan ambil token baru." },
+      { error: "Token tidak valid atau sudah expired. Silakan ambil data persist:root baru." },
       { status: 401 }
     );
   }

@@ -37,14 +37,14 @@ const TOKEN_STEPS: Array<{ title: string; body: string }> = [
       "Tekan F12 di keyboard. Buka tab Application (atau Storage di beberapa browser).",
   },
   {
-    title: "Ambil access token",
+    title: "Copy value key persist:root",
     body:
-      "Di sidebar kiri: Storage → Local Storage → https://fotoyu.com. Cari key access_token atau token. Copy value-nya (klik kanan → Copy).",
+      "Di sidebar kiri: Storage → Local Storage → https://fotoyu.com. Cari key persist:root. Klik kanan value-nya → Copy (ini akan menyalin seluruh data, termasuk access_token yang tersembunyi di dalamnya).",
   },
   {
-    title: "Paste token di sini",
+    title: "Paste di web app ini",
     body:
-      "Paste token ke kotak di atas, lalu klik Ambil cart. Token akan disimpan otomatis agar tidak perlu di-paste ulang sampai expired.",
+      "Paste seluruh value persist:root ke kotak di atas, lalu klik Ambil cart. Backend akan otomatis mengekstrak access_token dari data ini. Data akan disimpan otomatis di browser agar tidak perlu di-paste ulang sampai expired.",
   },
 ];
 
@@ -58,7 +58,7 @@ export default function HelpSection({ mode = "token" }: HelpSectionProps) {
   const steps = mode === "token" ? TOKEN_STEPS : JSON_STEPS;
   const label =
     mode === "token"
-      ? "Bagaimana cara mendapatkan Bearer token dari fotoyu?"
+      ? "Bagaimana cara mendapatkan data login dari fotoyu?"
       : "Bagaimana cara mendapatkan response dari fotoyu?";
 
   return (
