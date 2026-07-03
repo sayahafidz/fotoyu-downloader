@@ -26,28 +26,28 @@ interface CartRequestBody {
 // The user field inside persist:root is itself a JSON-encoded string.
 // Returns the Bearer token or null if not found.
 //
-// Handles two input forms:
-// 1. Raw persist:root JSON string (what DevTools copies)
-// 2. JSON-stringified persist:root (double-escaped, because frontend wraps it
-//    in JSON.stringify({ token: rawInput }))
+// Robust against truncated/malformed input: instead of requiring the entire
+// persist:root JSON to be valid, we regex-extract the user field's
+// access_token JWT directly. This works even if the pasted value is cut off.
 function extractToken(rawInput: string): string | null {
   // 1. Try rawInput as a direct Bearer token (plain JWT).
   if (/^eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/.test(rawInput.trim())) {
     return rawInput.trim();
   }
 
-  // 2. Try to parse rawInput as JSON. It could be:
-  //    a) The actual persist:root object  → { user: "...", ... }
-  //    b) A double-stringified string     → "{\"user\":\"...\",...}"
+  // 2. Regex-extract access_token from the (possibly truncated) persist:root.
+  //    The token is a JWT inside a "access_token":"..." string field.
+  //    We match the JWT format directly so we don't need the full JSON to be valid.
+  const m = rawInput.match(/"access_token"\s*:\s*"(eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)"/);
+  if (m && m[1]) return m[1];
+
+  // 3. Fallback: try full JSON parse (handles well-formed input + double-stringified)
   let root: unknown;
   try {
     root = JSON.parse(rawInput);
   } catch {
     return null;
   }
-
-  // If the result of JSON.parse is a string, it means the input was
-  // double-escaped (frontend wrapped it in JSON.stringify). Parse again.
   if (typeof root === "string") {
     try {
       root = JSON.parse(root);
@@ -55,8 +55,6 @@ function extractToken(rawInput: string): string | null {
       return null;
     }
   }
-
-  // persist:root is an object like { user: "...", giftshopState: "...", ... }
   if (!root || typeof root !== "object") return null;
 
   const userStr = (root as Record<string, unknown>).user;
@@ -68,7 +66,6 @@ function extractToken(rawInput: string): string | null {
   } catch {
     return null;
   }
-
   if (!user || typeof user !== "object") return null;
 
   const accessToken = (user as Record<string, unknown>).access_token;
