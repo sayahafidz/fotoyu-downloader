@@ -43,29 +43,6 @@ export async function fetchCartViaToken(
   token: string,
   options: CartFetchOptions = {}
 ): Promise<Photo[]> {
-  // #region agent log
-  try {
-    await fetch("http://127.0.0.1:7316/ingest/55a14728-2337-435e-b1ac-0b1e2bba7bc7", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "39b4d3" },
-      body: JSON.stringify({
-        sessionId: "39b4d3",
-        runId: "run1",
-        hypothesisId: "B",
-        location: "session.ts:fetchCartViaToken:entry",
-        message: "fetchCartViaToken called",
-        data: {
-          inputLen: token.length,
-          inputStart: token.slice(0, 80),
-          inputEnd: token.slice(-80),
-          hasAccessToken: token.includes("access_token"),
-        },
-        timestamp: Date.now(),
-      }),
-    });
-  } catch {}
-  // #endregion
-
   const res = await fetch("/api/cart", {
     method: "POST",
     headers: { "Content-Type": "application/json" },

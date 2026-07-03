@@ -22,18 +22,6 @@ interface CartRequestBody {
   body?: unknown;
 }
 
-// #region agent log
-async function dbg(hypothesisId: string, location: string, message: string, data?: Record<string, unknown>) {
-  try {
-    await fetch("http://127.0.0.1:7316/ingest/55a14728-2337-435e-b1ac-0b1e2bba7bc7", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "39b4d3" },
-      body: JSON.stringify({ sessionId: "39b4d3", runId: "run1", hypothesisId, location, message, data: data ?? {}, timestamp: Date.now() }),
-    });
-  } catch {}
-}
-// #endregion
-
 // Extract access_token from a raw persist:root value (Redux persisted state).
 // The user field inside persist:root is itself a JSON-encoded string.
 // Returns the Bearer token or null if not found.
@@ -41,34 +29,20 @@ async function dbg(hypothesisId: string, location: string, message: string, data
 // Robust against truncated/malformed input: instead of requiring the entire
 // persist:root JSON to be valid, we regex-extract the user field's
 // access_token JWT directly. This works even if the pasted value is cut off.
-async function extractToken(rawInput: string): Promise<string | null> {
-  // #region agent log
-  await dbg("B", "cart/route.ts:extractToken:entry", "extractToken called", {
-    inputLen: rawInput.length,
-    startsWith: rawInput.slice(0, 60),
-    endsWith: rawInput.slice(-60),
-    hasAccessTokenLiteral: rawInput.includes("access_token"),
-    hasEscapedAccess: rawInput.includes('\\"access_token\\"'),
-  });
-  // #endregion
-
+// The regex also handles both literal "access_token":"..." and escaped
+// \"access_token\":\"...\" (when input is double-JSON-stringified).
+function extractToken(rawInput: string): string | null {
   // 1. Try rawInput as a direct Bearer token (plain JWT).
   if (/^eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/.test(rawInput.trim())) {
-    // #region agent log
-    await dbg("A", "cart/route.ts:extractToken:jwt-direct", "Matched direct JWT");
-    // #endregion
     return rawInput.trim();
   }
 
   // 2. Regex-extract access_token from the (possibly truncated) persist:root.
-  const m = rawInput.match(/"access_token"\s*:\s*"(eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)"/);
-  // #region agent log
-  await dbg("D", "cart/route.ts:extractToken:regex", "Regex match attempt", {
-    matched: !!(m && m[1]),
-    matchedTokenPreview: m && m[1] ? m[1].slice(0, 40) + "..." : null,
-    pattern: '"access_token"\\s*:\\s*"(eyJ[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+\\.[a-zA-Z0-9_-]+)"',
-  });
-  // #endregion
+  //    Match against both literal "access_token":"..." and escaped \"access_token\":\"..."
+  //    because the input may be single or double JSON-stringified.
+  const m = rawInput.match(
+    /\\?"access_token\\?"\s*:\s*\\?"(eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)\\?"/
+  );
   if (m && m[1]) return m[1];
 
   // 3. Fallback: try full JSON parse (handles well-formed input + double-stringified)
@@ -76,9 +50,6 @@ async function extractToken(rawInput: string): Promise<string | null> {
   try {
     root = JSON.parse(rawInput);
   } catch {
-    // #region agent log
-    await dbg("A", "cart/route.ts:extractToken:json-parse-failed", "JSON.parse failed (expected for truncated input)");
-    // #endregion
     return null;
   }
   if (typeof root === "string") {
@@ -113,32 +84,15 @@ export async function POST(req: Request) {
   let payload: CartRequestBody;
   try {
     payload = (await req.json()) as CartRequestBody;
-  } catch (e) {
-    // #region agent log
-    await dbg("C", "cart/route.ts:POST:body-parse-failed", "Body JSON parse failed", { err: String(e) });
-    // #endregion
+  } catch {
     return NextResponse.json(
       { error: "Body harus berupa JSON valid." },
       { status: 400 }
     );
   }
 
-  // #region agent log
-  await dbg("B", "cart/route.ts:POST:payload-received", "Payload received", {
-    hasToken: !!payload.token,
-    tokenType: typeof payload.token,
-    tokenLen: payload.token ? payload.token.length : 0,
-    tokenPreview: payload.token ? payload.token.slice(0, 80) : null,
-    tokenEnd: payload.token ? payload.token.slice(-80) : null,
-    method: payload.method,
-  });
-  // #endregion
-
   const rawInput = payload.token;
   if (!rawInput || typeof rawInput !== "string") {
-    // #region agent log
-    await dbg("B", "cart/route.ts:POST:empty-token", "Token field empty or not string", { hasToken: !!rawInput });
-    // #endregion
     return NextResponse.json(
       {
         error:
@@ -148,13 +102,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const token = await extractToken(rawInput);
-  // #region agent log
-  await dbg("A", "cart/route.ts:POST:extract-result", "extractToken returned", {
-    success: !!token,
-    tokenPreview: token ? token.slice(0, 30) + "..." : null,
-  });
-  // #endregion
+  const token = extractToken(rawInput);
   if (!token) {
     return NextResponse.json(
       {
