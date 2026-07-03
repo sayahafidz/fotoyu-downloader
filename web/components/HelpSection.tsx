@@ -48,18 +48,43 @@ const TOKEN_STEPS: Array<{ title: string; body: string }> = [
   },
 ];
 
+const ENHANCE_STEPS: Array<{ title: string; body: string }> = [
+  {
+    title: "Download foto dulu",
+    body:
+      "Pakai tab 'Login dengan token' atau 'Paste JSON' untuk mengunduh foto dari cart fotoyu. Tab prompt AI ini untuk mempercantik foto yang sudah kamu download.",
+  },
+  {
+    title: "Pilih varian prompt",
+    body:
+      "Pilih salah satu varian di atas: Indonesia Lengkap, English Full (paling kompatibel untuk AI luar), atau Indonesia Singkat untuk penggunaan cepat.",
+  },
+  {
+    title: "Copy prompt atau download .txt",
+    body:
+      "Klik 'Copy prompt' untuk menyalin ke clipboard, atau 'Download .txt' untuk menyimpan sebagai file. Lalu buka ChatGPT, Gemini, atau AI image editor favoritmu.",
+  },
+  {
+    title: "Upload foto + paste prompt",
+    body:
+      "Di AI editor: upload foto hasil download, paste prompt tadi, lalu jalankan. Tunggu proses selesai dan download hasilnya. Gunakan AI berbayar (ChatGPT Plus, Gemini Advanced, Photoshop) untuk hasil terbaik.",
+  },
+];
+
 interface HelpSectionProps {
-  mode?: "token" | "paste";
+  mode?: "token" | "paste" | "enhance";
 }
 
 export default function HelpSection({ mode = "token" }: HelpSectionProps) {
   const [open, setOpen] = useState(false);
 
-  const steps = mode === "token" ? TOKEN_STEPS : JSON_STEPS;
+  const steps = mode === "token" ? TOKEN_STEPS : mode === "paste" ? JSON_STEPS : ENHANCE_STEPS;
   const label =
     mode === "token"
       ? "Bagaimana cara mendapatkan data login dari fotoyu?"
-      : "Bagaimana cara mendapatkan response dari fotoyu?";
+      : mode === "paste"
+      ? "Bagaimana cara mendapatkan response dari fotoyu?"
+      : "Bagaimana cara pakai prompt AI ini?";
 
   return (
     <section className="w-full">

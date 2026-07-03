@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import ModeTabs, { type Mode } from "@/components/ModeTabs";
 import PasteForm from "@/components/PasteForm";
 import TokenForm from "@/components/TokenForm";
+import EnhanceForm from "@/components/EnhanceForm";
 import PhotoGrid from "@/components/PhotoGrid";
 import ProgressOverlay from "@/components/ProgressOverlay";
 import HelpSection from "@/components/HelpSection";
@@ -180,11 +181,13 @@ export default function HomePage() {
                 onFetchCart={handleFetchCart}
                 loading={phase === "parsing"}
               />
-            ) : (
+            ) : mode === "paste" ? (
               <PasteForm
                 onProcess={handleProcessJSON}
                 loading={phase === "parsing"}
               />
+            ) : (
+              <EnhanceForm />
             )}
 
             {phase === "error" && error && (
