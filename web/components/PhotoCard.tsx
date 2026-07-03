@@ -23,6 +23,7 @@ function formatSize(bytes: number): string {
 
 export default function PhotoCard({ photo, index }: PhotoCardProps) {
   const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
+  const [src, setSrc] = useState<string>(proxyUrl);
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -49,13 +50,21 @@ export default function PhotoCard({ photo, index }: PhotoCardProps) {
         {!errored ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={proxyUrl}
+            src={src}
             alt={photo.title}
             loading="lazy"
             onLoad={() => setLoaded(true)}
             onError={() => {
-              setErrored(true);
-              setLoaded(true);
+              // First failure: assume the server-side proxy was blocked by
+              // the upstream CDN (datacenter IP → 403). Retry with the
+              // direct CDN URL; the browser fetches from the user's IP,
+              // which is usually allowed.
+              if (src === proxyUrl) {
+                setSrc(photo.url);
+              } else {
+                setErrored(true);
+                setLoaded(true);
+              }
             }}
             className={[
               "h-full w-full object-cover transition-all duration-500",

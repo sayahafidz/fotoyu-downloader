@@ -16,13 +16,31 @@ export function downloadBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Download a single photo via the proxy route.
+// Download a single photo via the proxy route, with automatic fallback to
+// the direct CDN URL if the proxy is blocked (upstream 403 from datacenter IP).
 export async function fetchPhotoBlob(photo: Photo): Promise<Blob> {
-  const res = await fetch(`/api/proxy?url=${encodeURIComponent(photo.url)}`);
-  if (!res.ok) {
-    throw new Error(`Gagal mengunduh ${photo.filename} (HTTP ${res.status})`);
+  const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
+  const res = await fetch(proxyUrl);
+  if (res.ok) {
+    return res.blob();
   }
-  return res.blob();
+
+  // Proxy failed (typically 502 with "Upstream mengembalikan HTTP 403").
+  // Retry the direct CDN URL from the browser — the user's residential IP
+  // is usually allowed by the CDN even when Vercel's datacenter IP is not.
+  try {
+    const direct = await fetch(photo.url, { mode: "cors" });
+    if (direct.ok) {
+      return direct.blob();
+    }
+    throw new Error(`HTTP ${direct.status}`);
+  } catch (e) {
+    const reason = e instanceof Error ? e.message : "unknown error";
+    throw new Error(
+      `Gagal mengunduh ${photo.filename} (proxy HTTP ${res.status}; direct ${reason}). ` +
+        `Coba download per foto via tombol Download, atau gunakan script Python.`
+    );
+  }
 }
 
 // Run async tasks with a concurrency limit.
