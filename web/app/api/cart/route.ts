@@ -25,18 +25,35 @@ interface CartRequestBody {
 // Extract access_token from a raw persist:root value (Redux persisted state).
 // The user field inside persist:root is itself a JSON-encoded string.
 // Returns the Bearer token or null if not found.
+//
+// Handles two input forms:
+// 1. Raw persist:root JSON string (what DevTools copies)
+// 2. JSON-stringified persist:root (double-escaped, because frontend wraps it
+//    in JSON.stringify({ token: rawInput }))
 function extractToken(rawInput: string): string | null {
   // 1. Try rawInput as a direct Bearer token (plain JWT).
   if (/^eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/.test(rawInput.trim())) {
     return rawInput.trim();
   }
 
-  // 2. Try rawInput as a persist:root JSON object.
+  // 2. Try to parse rawInput as JSON. It could be:
+  //    a) The actual persist:root object  → { user: "...", ... }
+  //    b) A double-stringified string     → "{\"user\":\"...\",...}"
   let root: unknown;
   try {
     root = JSON.parse(rawInput);
   } catch {
     return null;
+  }
+
+  // If the result of JSON.parse is a string, it means the input was
+  // double-escaped (frontend wrapped it in JSON.stringify). Parse again.
+  if (typeof root === "string") {
+    try {
+      root = JSON.parse(root);
+    } catch {
+      return null;
+    }
   }
 
   // persist:root is an object like { user: "...", giftshopState: "...", ... }
