@@ -1,19 +1,30 @@
 # Fotoyu Downloader
 
 Fast concurrent downloader untuk foto dari [fotoyu.com](https://fotoyu.com).
-Script ini membaca file JSON response dari API cart preview fotoyu, mengekstrak
-semua URL foto, lalu mengunduhnya secara concurrent ke folder `media/`.
+Tersedia dalam dua bentuk:
+
+1. **Script Python (CLI)** — `downloader.py`, jalankan di terminal.
+2. **Web app (Next.js + Vercel)** — folder `web/`, jalankan di browser, paste
+   response → klik Proses → download semua foto sebagai ZIP.
+
+Keduanya membaca JSON response dari API cart preview fotoyu, mengekstrak
+semua URL foto, lalu mengunduhnya secara concurrent.
 
 ---
 
 ## Daftar Isi
 
 - [Fitur](#fitur)
-- [Requirements](#requirements)
-- [Instalasi](#instalasi)
+- [Dua Cara Pakai](#dua-cara-pakai)
 - [Cara Mendapatkan Response dari Fotoyu](#cara-mendapatkan-response-dari-fotoyu)
-- [Cara Menjalankan](#cara-menjalankan)
-- [Opsi Command Line](#opsi-command-line)
+- [Opsi A: Web App](#opsi-a-web-app)
+  - [Menjalankan Web App Lokal](#menjalankan-web-app-lokal)
+  - [Deploy ke Vercel](#deploy-ke-vercel)
+- [Opsi B: Script Python (CLI)](#opsi-b-script-python-cli)
+  - [Requirements](#requirements)
+  - [Instalasi](#instalasi)
+  - [Cara Menjalankan](#cara-menjalankan)
+  - [Opsi Command Line](#opsi-command-line)
 - [Struktur Output](#struktur-output)
 - [Cara Kerja](#cara-kerja)
 - [Exit Codes](#exit-codes)
@@ -23,6 +34,15 @@ semua URL foto, lalu mengunduhnya secara concurrent ke folder `media/`.
 
 ## Fitur
 
+### Web App (`web/`)
+- **Tanpa install** — buka di browser, paste response, klik Proses.
+- **Pratinjau thumbnail** semua foto sebelum download.
+- **Download per foto** atau **download semua sebagai ZIP** (dibuat di browser).
+- **Proxy server-side** untuk mengatasi CORS dari `cfsimgproxy.fototree.com`.
+- **Progress bar** realtime saat membuat ZIP.
+- **Drag & drop** file response langsung ke halaman.
+
+### Script Python (`downloader.py`)
 - **Download concurrent** menggunakan `asyncio` + `aiohttp` (default 10 paralel).
 - **Resume support** — file yang sudah ada di-skip otomatis.
 - **Retry otomatis** — hingga 3 percobaan per file dengan exponential backoff.
@@ -35,7 +55,137 @@ semua URL foto, lalu mengunduhnya secara concurrent ke folder `media/`.
 
 ---
 
-## Requirements
+## Dua Cara Pakai
+
+```mermaid
+flowchart LR
+    Response["Response JSON dari fotoyu"] --> A{Pilih cara}
+    A -->|"Lebih suka browser"| Web["Web App<br/>paste → klik Proses → ZIP"]
+    A -->|"Lebih suka terminal"| CLI["Script Python<br/>python downloader.py"]
+    Web --> Result["Foto tersimpan"]
+    CLI --> Result
+```
+
+- **Pilih Web App** jika kamu tidak mau install Python atau mau pakai dari
+  HP / komputer lain tanpa setup.
+- **Pilih Script Python** jika kamu sering download foto dan mau otomatisasi
+  via terminal (lebih cepat untuk batch besar).
+
+---
+
+## Cara Mendapatkan Response dari Fotoyu
+
+Script Python maupun Web App butuh JSON response dari endpoint cart preview
+fotoyu. Berikut langkah mendapatkannya:
+
+### Langkah 1 — Pilih foto di aplikasi fotoyu
+
+1. Buka aplikasi **fotoyu** (mis. dari `ancodebuddy/io`).
+2. Pilih foto-foto yang ingin kamu download.
+3. Tambahkan foto-foto tersebut ke **keranjang (cart)**.
+
+### Langkah 2 — Buka web fotoyu dari laptop
+
+1. Buka browser (Chrome / Edge) di laptop.
+2. Aktifkan **mode tampilan HP (mobile mode)** lewat DevTools:
+   - Tekan `F12` untuk membuka DevTools.
+   - Klik icon **Toggle device toolbar** (Ctrl+Shift+M) untuk beralih ke
+     tampilan mobile.
+3. Kunjungi `https://fotoyu.com`.
+4. **Login** dengan akun yang sama dengan yang kamu pakai di aplikasi.
+
+### Langkah 3 — Buka cart dan tangkap response API
+
+1. Dengan DevTools masih terbuka, buka **cart / keranjang** yang berisi
+   foto-foto yang sudah kamu pilih.
+2. Di DevTools, buka tab **Network**.
+3. Filter dengan **Fetch/XHR**.
+4. Cari request dengan URL:
+   ```
+   https://api.fotoyu.com/gs/v1/carts/preview
+   ```
+   > Tips: pakai kotak filter dan ketik `carts/preview` untuk mempersempit
+   > pencarian. Klik request-nya untuk membuka panel detail.
+
+### Langkah 4 — Salin response
+
+1. Pada panel detail request, buka tab **Response** (atau **Preview**).
+2. Salin seluruh isi response (berupa JSON) — klik kanan → **Copy response**,
+   atau salin manual teks JSON-nya.
+
+Setelah itu:
+- **Web App**: paste langsung ke kotak textarea di halaman → klik Proses.
+- **Script Python**: paste ke file `response-fotoyu.txt` di folder project.
+
+Struktur response harus seperti ini (ringkas):
+
+```json
+{
+  "result": {
+    "data": [
+      {
+        "product_id": "...",
+        "title": "ANN_7577.JPG",
+        "url": "https://cfsimgproxy.fototree.com/.../....jpeg",
+        "content_type": "photo",
+        ...
+      },
+      ...
+    ]
+  },
+  "message": "OK"
+}
+```
+
+---
+
+## Opsi A: Web App
+
+Web app berada di folder `web/`. Dibangun dengan Next.js 16 + TypeScript +
+Tailwind CSS, dan di-deploy ke Vercel. Tidak perlu Python.
+
+### Menjalankan Web App Lokal
+
+```powershell
+cd web
+npm install
+npm run dev
+```
+
+Buka `http://localhost:3000` di browser. Lalu:
+
+1. Paste response JSON ke kotak besar (atau drag & drop file
+   `response-fotoyu.txt` ke kotak).
+2. Klik tombol **Proses**.
+3. Akan muncul grid thumbnail semua foto.
+4. Klik **Download** di tiap foto, atau **Download semua (ZIP)** untuk
+   mengunduh semua foto sekaligus sebagai satu file ZIP.
+
+### Deploy ke Vercel
+
+1. Push repo ini ke GitHub (sudah ada di
+   `https://github.com/sayahafidz/fotoyu-downloader`).
+2. Buka [vercel.com](https://vercel.com) → **Add New Project** → import repo
+   `sayahafidz/fotoyu-downloader`.
+3. Di pengaturan project:
+   - **Root Directory**: ubah ke `web`
+   - **Framework Preset**: Next.js (terdeteksi otomatis)
+   - **Build Command**: `npm run build` (default)
+   - **Install Command**: `npm install` (default)
+4. Klik **Deploy**. Selesai dalam ~1 menit.
+
+Tidak ada environment variable yang dibutuhkan — semua URL foto adalah CDN
+public. Setelah deploy, web app bisa diakses dari mana saja (HP / laptop).
+
+> Catatan: Web app memakai proxy server-side (`/api/proxy`) untuk mengatasi
+> CORS dari `cfsimgproxy.fototree.com`. Host yang diizinkan di-allowlist di
+> `web/lib/parse.ts` agar route tidak menjadi open proxy.
+
+---
+
+## Opsi B: Script Python (CLI)
+
+### Requirements
 
 - Python 3.10 atau lebih baru
 - `aiohttp`
@@ -43,9 +193,7 @@ semua URL foto, lalu mengunduhnya secara concurrent ke folder `media/`.
 
 Semua dependency sudah disediakan via virtual environment (lihat Instalasi).
 
----
-
-## Instalasi
+### Instalasi
 
 Project ini sudah memiliki virtual environment (`.venv`) yang siap pakai.
 Ikuti langkah berikut untuk mulai menggunakannya.
@@ -90,78 +238,6 @@ Atau tanpa aktivasi venv, panggil python venv langsung:
 ```powershell
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
-
----
-
-## Cara Mendapatkan Response dari Fotoyu
-
-Script ini butuh file `response-fotoyu.txt` berisi JSON response dari endpoint
-cart preview fotoyu. Berikut langkah mendapatkannya:
-
-### Langkah 1 — Pilih foto di aplikasi fotoyu
-
-1. Buka aplikasi **fotoyu** (mis. dari `ancodebuddy/io`).
-2. Pilih foto-foto yang ingin kamu download.
-3. Tambahkan foto-foto tersebut ke **keranjang (cart)**.
-
-### Langkah 2 — Buka web fotoyu dari laptop
-
-1. Buka browser (Chrome / Edge) di laptop.
-2. Aktifkan **mode tampilan HP (mobile mode)** lewat DevTools:
-   - Tekan `F12` untuk membuka DevTools.
-   - Klik icon **Toggle device toolbar** (Ctrl+Shift+M) untuk beralih ke
-     tampilan mobile.
-3. Kunjungi `https://fotoyu.com`.
-4. **Login** dengan akun yang sama dengan yang kamu pakai di aplikasi.
-
-### Langkah 3 — Buka cart dan tangkap response API
-
-1. Dengan DevTools masih terbuka, buka **cart / keranjang** yang berisi
-   foto-foto yang sudah kamu pilih.
-2. Di DevTools, buka tab **Network**.
-3. Filter dengan **Fetch/XHR**.
-4. Cari request dengan URL:
-   ```
-   https://api.fotoyu.com/gs/v1/carts/preview
-   ```
-   > Tips: kamu bisa pakai kotak filter dan ketik `carts/preview` untuk
-   > mempersempit pencarian. Klik request-nya untuk membuka panel detail.
-
-### Langkah 4 — Salin response
-
-1. Pada panel detail request, buka tab **Response** (atau **Preview**).
-2. Salin seluruh isi response (berupa JSON) — klik kanan → **Copy response**,
-   atau salin manual teks JSON-nya.
-3. Paste ke file `response-fotoyu.txt` di folder project ini, **menimpa**
-   isi yang lama.
-
-   ```powershell
-   # Bisa juga diedit dengan editor apa pun (VSCode, Notepad, dll.)
-   notepad response-fotoyu.txt
-   ```
-
-Struktur response harus seperti ini (ringkas):
-
-```json
-{
-  "result": {
-    "data": [
-      {
-        "product_id": "...",
-        "title": "ANN_7577.JPG",
-        "url": "https://cfsimgproxy.fototree.com/.../....jpeg",
-        "content_type": "photo",
-        ...
-      },
-      ...
-    ]
-  },
-  "message": "OK"
-}
-```
-
-Setelah file `response-fotoyu.txt` berisi response terbaru, lanjut ke
-[Cara Menjalankan](#cara-menjalankan).
 
 ---
 
@@ -244,12 +320,17 @@ python downloader.py -c 20
 
 ```
 fotoyu downloader/
-├── .venv/                  # virtual environment (tidak perlu disentuh)
+├── .venv/                  # virtual environment Python (tidak perlu disentuh)
 ├── response-fotoyu.txt     # file response JSON (di-paste dari DevTools)
-├── downloader.py           # script utama
-├── requirements.txt        # daftar dependency
+├── downloader.py           # script Python utama (Opsi B)
+├── requirements.txt        # daftar dependency Python
 ├── README.md               # file ini
-└── media/                  # folder hasil download (dibuat otomatis)
+├── web/                    # Next.js web app (Opsi A)
+│   ├── app/                # halaman + API routes
+│   ├── components/         # komponen React
+│   ├── lib/                # parser + download helper
+│   └── package.json
+└── media/                  # folder hasil download Python (dibuat otomatis)
     ├── ANN_7577.JPG
     ├── ANN_7583.JPG
     ├── AFR_7096.JPG
