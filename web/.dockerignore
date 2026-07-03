@@ -1,0 +1,40 @@
+# Next.js build output
+.next/
+out/
+
+# dependencies
+node_modules/
+
+# Python (not needed in Docker)
+.venv/
+__pycache__/
+*.py[cod]
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Env (should be set via docker-compose)
+.env
+.env.local
+.env.*.local
+
+# Debug logs
+*.log
+
+# Test files
+coverage/
+.nyc_output/
+
+# Misc
+.cursor/
+*.tsbuildinfo
+next-env.d.ts

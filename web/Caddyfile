@@ -1,0 +1,17 @@
+# Replace fotoyu.example.com with your actual domain.
+# APP_DOMAIN is set via docker-compose environment (from .env).
+
+{$APP_DOMAIN} {
+	encode zstd gzip
+
+	# Proxy all requests to the Next.js container.
+	reverse_proxy web:3000
+
+	# Cache the image proxy responses at the edge so repeated thumbnails
+	# don't hit the upstream CDN every time.
+	@proxy path /api/proxy*
+	handle @proxy {
+		header Cache-Control "public, max-age=86400, immutable"
+		reverse_proxy web:3000
+	}
+}

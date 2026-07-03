@@ -196,12 +196,64 @@ Buka `http://localhost:3000` di browser. Lalu:
    - **Install Command**: `npm install` (default)
 4. Klik **Deploy**. Selesai dalam ~1 menit.
 
-Tidak ada environment variable yang dibutuhkan — semua URL foto adalah CDN
-public. Setelah deploy, web app bisa diakses dari mana saja (HP / laptop).
+> **Catatan untuk Vercel:** CDN `cfsimgproxy.fototree.com` memblokir IP
+> datacenter Vercel. Proxy preview dan ZIP download mungkin tidak berfungsi.
+> Untuk fitur penuh (proxy + ZIP), deploy di server sendiri (lihat
+> [Deploy dengan Docker](#deploy-dengan-docker) di bawah).
 
-> Catatan: Web app memakai proxy server-side (`/api/proxy`) untuk mengatasi
-> CORS dari `cfsimgproxy.fototree.com`. Host yang diizinkan di-allowlist di
-> `web/lib/parse.ts` agar route tidak menjadi open proxy.
+### Deploy dengan Docker (rekomendasi — semua fitur jalan)
+
+Deploy di VPS sendiri (DigitalOcean, Vultr, Linode, dll) agar proxy jalan 100%
+dan ZIP download berfungsi. VPS Indonesia biasanya tidak di-block oleh CDN fotoyu.
+
+#### Requirements di VPS
+
+- Docker & Docker Compose (v2)
+- Domain yang A/AAAA DNS-nya sudah pointing ke IP VPS
+- Port 80 & 443 terbuka di firewall
+
+#### Langkah deploy
+
+```bash
+# 1. Clone repo di VPS
+git clone https://github.com/sayahafidz/fotoyu-downloader.git
+cd fotoyu-downloader/web
+
+# 2. Setup env
+cp .env.example .env
+# Edit .env — set NEXT_PUBLIC_APP_URL ke domain kamu,
+# dan APP_DOMAIN juga ke domain kamu (untuk Caddy).
+
+# 3. Edit Caddyfile — ganti fotoyu.example.com dengan domain kamu.
+
+# 4. Build & jalankan
+docker compose up -d --build
+```
+
+Setelah itu web app bisa diakses di `https://domain-kamu.com`. Caddy
+otomatis mengambil sertifikat SSL dari Let's Encrypt.
+
+#### Update / redeploy
+
+```bash
+cd fotoyu-downloader/web
+git pull
+docker compose up -d --build
+```
+
+#### Arsitektur Docker
+
+```mermaid
+flowchart LR
+    Internet[Internet] -->|"HTTPS :443"| Caddy[Caddy reverse proxy]
+    Caddy -->|"proxy_pass web:3000"| NextJS[Next.js container]
+    NextJS -->|"fetch (server-side)"| CDN[cfsimgproxy.fototree.com]
+    NextJS -->|"API calls"| API[api.fotoyu.com]
+``
+
+- **Caddy**: reverse proxy + auto HTTPS (Let's Encrypt). Cache response proxy.
+- **Next.js**: standalone build, user `nextjs` non-root.
+- **Network**: internal bridge, hanya Caddy yang exposed ke internet.
 
 ---
 

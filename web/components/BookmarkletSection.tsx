@@ -2,6 +2,14 @@
 
 import { useState } from "react";
 
+// Domain this app is served from. Configurable via NEXT_PUBLIC_APP_URL so the
+// same image works for Vercel deploys (fakyu.sayahafidz.my.id) and self-hosted
+// Docker deployments (fotoyu.example.com). Falls back to the current origin
+// if the env var is not set (e.g. during local dev).
+const APP_URL =
+  process.env.NEXT_PUBLIC_APP_URL ||
+  (typeof window !== "undefined" ? window.location.origin : "");
+
 // Bookmarklet yang jalan di fotoyu.com: baca localStorage key `persist:root`,
 // lalu redirect ke web app ini dengan data di URL hash (bukan query string,
 // agar tidak terkirim ke server log / Vercel analytics).
@@ -13,8 +21,7 @@ const BOOKMARKLET_CODE = `javascript:(function(){
     var v = localStorage.getItem('persist:root');
     if (!v) { alert('persist:root tidak ditemukan. Pastikan kamu sudah login di fotoyu.com.'); return; }
     var enc = encodeURIComponent(v);
-    var base = location.origin;
-    var newUrl = '${"https://fakyu.sayahafidz.my.id/"}#t=' + enc;
+    var newUrl = '${APP_URL}/#t=' + enc;
     location.href = newUrl;
   } catch (e) { alert('Error: ' + e.message); }
 })();`;
