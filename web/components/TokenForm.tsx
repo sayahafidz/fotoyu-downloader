@@ -1,15 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import BookmarkletSection from "@/components/BookmarkletSection";
 
 interface TokenFormProps {
   onFetchCart: (token: string) => void;
   loading: boolean;
+  pendingToken?: string | null;
+  onPendingTokenConsumed?: () => void;
 }
 
-export default function TokenForm({ onFetchCart, loading }: TokenFormProps) {
+export default function TokenForm({
+  onFetchCart,
+  loading,
+  pendingToken,
+  onPendingTokenConsumed,
+}: TokenFormProps) {
   const [value, setValue] = useState("");
   const [showValue, setShowValue] = useState(false);
+
+  // When the bookmarklet redirects back to this app with a token in the URL
+  // hash, the parent page extracts it and passes it down via `pendingToken`.
+  // We fill the textarea and auto-trigger cart fetch.
+  useEffect(() => {
+    if (pendingToken) {
+      setValue(pendingToken);
+      setShowValue(true);
+      onPendingTokenConsumed?.();
+      onFetchCart(pendingToken);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingToken]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,6 +154,9 @@ export default function TokenForm({ onFetchCart, loading }: TokenFormProps) {
             </p>
           </div>
         </div>
+      </div>
+      <div className="space-y-4">
+        <BookmarkletSection onTokenReceived={(t) => setValue(t)} />
       </div>
     </form>
   );

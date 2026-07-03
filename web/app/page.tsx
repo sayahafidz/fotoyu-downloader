@@ -27,11 +27,33 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState<ZipProgress | null>(null);
   const [savedToken, setSavedToken] = useState<string | null>(null);
+  const [pendingToken, setPendingToken] = useState<string | null>(null);
 
-  // Load saved token on mount (client-side only).
+  // Load saved token on mount, and also check URL hash for token passed by
+  // the bookmarklet (format: #t=<encoded persist:root>).
   useEffect(() => {
     const t = loadToken();
     setSavedToken(t);
+
+    // Bookmarklet callback: token arrives via URL hash so it never hits the
+    // server. Parse it, clear the hash for cleanliness, and surface it to the
+    // TokenForm via `pendingToken`.
+    if (typeof window !== "undefined" && window.location.hash) {
+      const hash = window.location.hash.slice(1);
+      const match = hash.match(/^t=(.+)$/);
+      if (match) {
+        try {
+          const decoded = decodeURIComponent(match[1]);
+          if (decoded) {
+            setPendingToken(decoded);
+            // Clean the URL so the token doesn't linger in browser history.
+            window.history.replaceState(null, "", window.location.pathname);
+          }
+        } catch {
+          // ignore malformed hash
+        }
+      }
+    }
   }, []);
 
   // Handler for paste JSON mode (existing).
@@ -180,6 +202,8 @@ export default function HomePage() {
               <TokenForm
                 onFetchCart={handleFetchCart}
                 loading={phase === "parsing"}
+                pendingToken={pendingToken}
+                onPendingTokenConsumed={() => setPendingToken(null)}
               />
             ) : mode === "paste" ? (
               <PasteForm
