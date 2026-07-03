@@ -16,9 +16,27 @@ export function downloadBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Download a single photo via the proxy route, with automatic fallback to
-// the direct CDN URL if the proxy is blocked (upstream 403 from datacenter IP).
-export async function fetchPhotoBlob(photo: Photo): Promise<Blob> {
+// Download a single photo. The proxy is blocked by the upstream CDN
+// (datacenter IP → 403), and the direct URL is blocked by CORS when
+// fetched with fetch(). So we use an invisible <a download> element
+// which tells the browser to fetch the image via its own network stack
+// (user IP, no CORS restriction) and save it to disk.
+export function downloadPhotoDirect(photo: Photo): void {
+  const a = document.createElement("a");
+  a.href = photo.url;
+  a.download = photo.filename;
+  a.style.display = "none";
+  a.rel = "noopener noreferrer";
+  document.body.appendChild(a);
+  a.click();
+  // Remove after a short delay so the download has time to start.
+  setTimeout(() => a.remove(), 1000);
+}
+
+// Download a single photo via the proxy route. Used by the ZIP flow where
+// we need the raw image bytes (Blob) for JSZip. Falls back to the direct
+// CDN URL as a last resort (works only if the CDN sends CORS headers).
+export async function fetchPhotoBlobViaProxy(photo: Photo): Promise<Blob> {
   const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
   const res = await fetch(proxyUrl);
   if (res.ok) {
@@ -26,8 +44,8 @@ export async function fetchPhotoBlob(photo: Photo): Promise<Blob> {
   }
 
   // Proxy failed (typically 502 with "Upstream mengembalikan HTTP 403").
-  // Retry the direct CDN URL from the browser — the user's residential IP
-  // is usually allowed by the CDN even when Vercel's datacenter IP is not.
+  // Try the direct CDN URL — this usually fails with CORS but might work
+  // if the CDN sends Access-Control-Allow-Origin.
   try {
     const direct = await fetch(photo.url, { mode: "cors" });
     if (direct.ok) {
@@ -81,7 +99,8 @@ export interface ZipProgress {
 }
 
 // Fetch all photos concurrently through the proxy and pack them into
-// a single ZIP file generated in the browser.
+// a single ZIP file generated in the browser. If the proxy is blocked,
+// each individual download falls back to the direct CDN URL.
 export async function downloadAllAsZip(
   photos: Photo[],
   onProgress: (p: ZipProgress) => void,
@@ -94,7 +113,7 @@ export async function downloadAllAsZip(
   await withConcurrency(
     concurrency,
     photos.map((p) => async () => {
-      const blob = await fetchPhotoBlob(p);
+      const blob = await fetchPhotoBlobViaProxy(p);
       zip.file(p.filename, blob);
       done += 1;
       onProgress({ done, total: photos.length, current: p.filename });

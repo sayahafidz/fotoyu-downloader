@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Photo } from "@/lib/parse";
-import { downloadBlob, fetchPhotoBlob } from "@/lib/download";
+import { downloadPhotoDirect } from "@/lib/download";
 
 interface PhotoCardProps {
   photo: Photo;
@@ -28,16 +28,16 @@ export default function PhotoCard({ photo, index }: PhotoCardProps) {
   const [errored, setErrored] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     setDownloading(true);
     try {
-      const blob = await fetchPhotoBlob(photo);
-      downloadBlob(blob, photo.filename);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Gagal mengunduh.";
-      alert(msg);
+      // Use a direct <a download> click — the browser fetches the image
+      // from the user's IP (bypassing the Vercel datacenter IP block)
+      // and saves it without needing CORS headers.
+      downloadPhotoDirect(photo);
     } finally {
-      setDownloading(false);
+      // Brief visual feedback; the browser handles the actual download.
+      setTimeout(() => setDownloading(false), 800);
     }
   };
 
