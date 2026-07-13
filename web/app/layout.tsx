@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { DARK_MODE_SCRIPT } from "@/lib/dark-mode";
 
 export const metadata: Metadata = {
   title: "Fotoyu Downloader",
@@ -22,6 +23,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: DARK_MODE_SCRIPT }} />
+      </head>
       <body>{children}</body>
     </html>
   );

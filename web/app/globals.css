@@ -16,7 +16,8 @@ body {
   font-family: var(--font-sans);
 }
 
-.dark body {
+/* Dark mode – body.dark controlled via JS */
+html.dark body {
   @apply bg-slate-950 text-slate-100;
 }
 
@@ -31,13 +32,13 @@ body {
 ::-webkit-scrollbar-thumb {
   @apply bg-slate-300 rounded-full;
 }
-.dark ::-webkit-scrollbar-thumb {
+html.dark ::-webkit-scrollbar-thumb {
   @apply bg-slate-700;
 }
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-400;
 }
-.dark ::-webkit-scrollbar-thumb:hover {
+html.dark ::-webkit-scrollbar-thumb:hover {
   @apply bg-slate-600;
 }
 
@@ -45,3 +46,56 @@ body {
 .text-gradient {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500;
 }
+
+/* ---------- Animations ---------- */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in-down {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(100%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+}
+
+.animate-fade-in       { animation: fade-in 0.3s ease-out; }
+.animate-fade-in-up    { animation: fade-in-up 0.4s ease-out; }
+.animate-fade-in-down  { animation: fade-in-down 0.3s ease-out; }
+.animate-slide-up      { animation: slide-up 0.4s ease-out; }
+.animate-slide-in-right{ animation: slide-in-right 0.35s ease-out; }
+.animate-scale-in      { animation: scale-in 0.25s ease-out; }
+.animate-shimmer       { background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.15) 50%, transparent 75%);
+                         background-size: 800px 100%;
+                         animation: shimmer 1.5s infinite; }
+.animate-pulse-glow    { animation: pulse-glow 2s infinite; }
