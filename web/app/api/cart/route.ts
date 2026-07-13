@@ -8,18 +8,24 @@ const FOTOYU_CART_URL = "https://api.fotoyu.com/gs/v1/carts/preview";
 
 const BROWSER_HEADERS: HeadersInit = {
   Accept: "application/json, text/plain, */*",
-  "Accept-Language": "en-US,en;q=0.9",
+  "Accept-Language": "en-US,en;q=0.9,id;q=0.8",
   "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  Referer: "https://fotoyu.com/",
-  Origin: "https://fotoyu.com",
+    "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 " +
+    "(KHTML, like Gecko) Chrome/150.0.0.0 Mobile Safari/537.36",
+  Referer: "https://www.fotoyu.com/",
+  Origin: "https://www.fotoyu.com",
+  "Sec-Fetch-Dest": "empty",
+  "Sec-Fetch-Mode": "cors",
+  "Sec-Fetch-Site": "same-site",
+  "Sec-GPC": "1",
+  Priority: "u=1, i",
 };
 
 interface CartRequestBody {
   token?: string;
   method?: "GET" | "POST";
   body?: unknown;
+  cookies?: string;
 }
 
 // Extract access_token from a raw persist:root value (Redux persisted state).
@@ -115,17 +121,22 @@ export async function POST(req: Request) {
     );
   }
 
-  const method = payload.method === "POST" ? "POST" : "GET";
+  // The upstream cart preview endpoint now requires POST with a pagination
+  // payload. Default to the same body the fotoyu web app sends.
+  const method = payload.method === "GET" ? "GET" : "POST";
   const headers = new Headers(BROWSER_HEADERS as HeadersInit);
   headers.set("Authorization", `Bearer ${token}`);
 
   const fetchInit: RequestInit = { method, headers };
+  if (typeof payload.cookies === "string" && payload.cookies) {
+    headers.set("Cookie", payload.cookies);
+  }
   if (method === "POST") {
     headers.set("Content-Type", "application/json");
     fetchInit.body =
       payload.body !== undefined
         ? JSON.stringify(payload.body)
-        : JSON.stringify({});
+        : JSON.stringify({ page: 1, limit: 100, selected_products: [] });
   }
 
   let upstream: Response;
@@ -139,8 +150,10 @@ export async function POST(req: Request) {
   }
 
   if (upstream.status === 401 || upstream.status === 403) {
+    const upstreamBody = await upstream.text().catch(() => "");
+    console.error("[cart] upstream 401/403:", upstream.status, upstreamBody.slice(0, 500));
     return NextResponse.json(
-      { error: "Token tidak valid atau sudah expired. Silakan ambil data persist:root baru." },
+      { error: "Token tidak valid atau sudah expired. Silakan ambil data persist:root baru.", debug: upstreamBody.slice(0, 500) },
       { status: 401 }
     );
   }

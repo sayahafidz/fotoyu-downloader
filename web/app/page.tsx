@@ -15,6 +15,7 @@ import {
   saveToken,
   clearToken,
 } from "@/lib/session";
+import { extractPhotos } from "@/lib/parse";
 import type { Photo } from "@/lib/parse";
 
 type Phase = "idle" | "parsing" | "preview" | "zipping" | "error";
@@ -28,29 +29,52 @@ export default function HomePage() {
   const [savedToken, setSavedToken] = useState<string | null>(null);
   const [pendingToken, setPendingToken] = useState<string | null>(null);
 
-  // Load saved token on mount, and also check URL hash for token passed by
-  // the bookmarklet (format: #t=<encoded persist:root>).
+  // Load saved token on mount, and also check URL hash for data passed by
+  // the bookmarklet:
+  //   - #t=<encoded persist:root>  -> token mode (legacy / fallback)
+  //   - #cart=<encoded cart JSON>  -> direct cart data fetched same-site
   useEffect(() => {
     const t = loadToken();
     setSavedToken(t);
 
-    // Bookmarklet callback: token arrives via URL hash so it never hits the
-    // server. Parse it, clear the hash for cleanliness, and surface it to the
-    // TokenForm via `pendingToken`.
-    if (typeof window !== "undefined" && window.location.hash) {
-      const hash = window.location.hash.slice(1);
-      const match = hash.match(/^t=(.+)$/);
-      if (match) {
-        try {
-          const decoded = decodeURIComponent(match[1]);
-          if (decoded) {
-            setPendingToken(decoded);
-            // Clean the URL so the token doesn't linger in browser history.
-            window.history.replaceState(null, "", window.location.pathname);
-          }
-        } catch {
-          // ignore malformed hash
+    if (typeof window === "undefined" || !window.location.hash) return;
+    const hash = window.location.hash.slice(1);
+
+    // Direct cart JSON from bookmarklet (seamless mode).
+    const cartMatch = hash.match(/^cart=(.+)$/);
+    if (cartMatch) {
+      try {
+        const decoded = decodeURIComponent(cartMatch[1]);
+        const cartJson = JSON.parse(decoded);
+        const photos = extractPhotos(JSON.stringify(cartJson));
+        if (photos.length > 0) {
+          setPhotos(photos);
+          setPhase("preview");
+        } else {
+          setError("Cart kosong atau tidak ada foto.");
+          setPhase("error");
         }
+      } catch {
+        setError("Data cart dari bookmarklet tidak valid.");
+        setPhase("error");
+      } finally {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+      return;
+    }
+
+    // Legacy token hash fallback.
+    const tokenMatch = hash.match(/^t=(.+)$/);
+    if (tokenMatch) {
+      try {
+        const decoded = decodeURIComponent(tokenMatch[1]);
+        if (decoded) {
+          setPendingToken(decoded);
+        }
+      } catch {
+        // ignore malformed hash
+      } finally {
+        window.history.replaceState(null, "", window.location.pathname);
       }
     }
   }, []);
@@ -162,8 +186,8 @@ export default function HomePage() {
               <span className="text-gradient">Fotoyu</span> Downloader
             </h1>
             <p className="max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-              Login dengan token fotoyu atau paste response JSON, lalu unduh semua
-              foto sekaligus sebagai ZIP. Tanpa install — langsung jalan di browser.
+              Login dengan token fotoyu, paste response JSON, atau pakai bookmarklet
+              1 klik. Unduh semua foto langsung di browser tanpa install.
             </p>
             <a
               href="https://github.com/sayahafidz/fotoyu-downloader"

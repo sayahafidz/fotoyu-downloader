@@ -10,19 +10,36 @@ const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
   (typeof window !== "undefined" ? window.location.origin : "");
 
-// Bookmarklet yang jalan di fotoyu.com: baca localStorage key `persist:root`,
-// lalu redirect ke web app ini dengan data di URL hash (bukan query string,
-// agar tidak terkirim ke server log / Vercel analytics).
+// Bookmarklet yang jalan di fotoyu.com.
+// Langkah 1: coba fetch cart preview LANGSUNG dari origin fotoyu.com
+//            (same-site, jadi browser otomatis mengirim cookie + fingerprint).
+// Langkah 2: kalau berhasil, redirect ke web app dengan data cart di hash.
+// Langkah 3: kalau gagal, fallback ke cara lama (kirim persist:root via hash).
 //
-// Kenapa hash? Karena #fragment TIDAK dikirim ke server dalam HTTP request,
-// jadi token tetap client-side only.
+// Hash (#fragment) TIDAK dikirim ke server, jadi data tetap client-side.
 const BOOKMARKLET_CODE = `javascript:(function(){
   try {
-    var v = localStorage.getItem('persist:root');
-    if (!v) { alert('persist:root tidak ditemukan. Pastikan kamu sudah login di fotoyu.com.'); return; }
-    var enc = encodeURIComponent(v);
-    var newUrl = '${APP_URL}/#t=' + enc;
-    location.href = newUrl;
+    var APP_URL = '${APP_URL}';
+    function fallback() {
+      var v = localStorage.getItem('persist:root');
+      if (!v) { alert('persist:root tidak ditemukan. Pastikan kamu sudah login di fotoyu.com.'); return; }
+      location.href = APP_URL + '/#t=' + encodeURIComponent(v);
+    }
+    fetch('https://api.fotoyu.com/gs/v1/carts/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json, text/plain, */*' },
+      body: JSON.stringify({page:1,limit:100,selected_products:[]}),
+      credentials: 'include'
+    })
+    .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,json:j}; }); })
+    .then(function(o){
+      if (o.ok && o.json && o.json.result && Array.isArray(o.json.result.data)) {
+        location.href = APP_URL + '/#cart=' + encodeURIComponent(JSON.stringify(o.json));
+      } else {
+        fallback();
+      }
+    })
+    .catch(function(){ fallback(); });
   } catch (e) { alert('Error: ' + e.message); }
 })();`;
 
@@ -58,8 +75,8 @@ export default function BookmarkletSection({
             </h3>
             <p className="mt-0.5 text-xs leading-relaxed text-emerald-800">
               Drag tombol di bawah ke bookmark bar browser kamu. Setelah login
-              di fotoyu.com, cukup klik bookmark tersebut — kamu akan otomatis
-              diarahkan kembali ke web app ini dengan data login terisi.
+              di fotoyu.com, cukup klik bookmark tersebut — fotonya akan otomatis
+              muncul di web app ini tanpa perlu paste token.
             </p>
           </div>
 
@@ -146,12 +163,10 @@ export default function BookmarkletSection({
           </ol>
 
           <p className="rounded-lg bg-white/60 p-2.5 text-[11px] leading-relaxed text-emerald-700">
-            <strong>Privasi:</strong> bookmarklet hanya baca{" "}
-            <code className="font-mono">localStorage</code> di fotoyu.com lalu
-            pindah ke web app ini via URL hash (<code className="font-mono">
-              #t=...
-            </code>). Hash tidak dikirim ke server, jadi data tetap di browser
-            kamu.
+            <strong>Privasi:</strong> bookmarklet memanggil API fotoyu.com
+            langsung dari browser kamu, lalu membawa hasilnya ke web app ini via
+            URL hash (<code className="font-mono">#cart=...</code>). Hash tidak
+            dikirim ke server, jadi data tetap di browser kamu.
           </p>
         </div>
       </div>

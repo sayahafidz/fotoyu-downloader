@@ -48,8 +48,8 @@ export async function fetchCartViaToken(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       token,
-      method: options.method ?? "GET",
-      body: options.body,
+      method: options.method ?? "POST",
+      body: options.body ?? { page: 1, limit: 100, selected_products: [] },
     }),
   });
 
