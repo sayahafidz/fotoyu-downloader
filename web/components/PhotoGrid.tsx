@@ -38,12 +38,12 @@ export default function PhotoGrid({
           {zipping ? (
             <>
               <Spinner />
-              Mengarsipkan...
+              Mengunduh...
             </>
           ) : (
             <>
               <ZipIcon />
-              Download semua (ZIP)
+              Download semua
             </>
           )}
         </button>

@@ -1,5 +1,9 @@
-// Browser-side helpers for triggering downloads and building a ZIP
-// from proxied image blobs.
+// Browser-side helpers for triggering downloads. The "download all" flow uses
+// individual <a download> clicks (staggered) instead of building a ZIP in
+// JS, because the upstream CDN blocks server-side fetches (datacenter IP →
+// 403) and direct browser fetch() calls (no CORS headers). The <a download>
+// attribute tells the browser to fetch the image via its own network stack
+// (user IP, no CORS restriction) and save it to disk.
 
 import type { Photo } from "./parse";
 
@@ -33,99 +37,31 @@ export function downloadPhotoDirect(photo: Photo): void {
   setTimeout(() => a.remove(), 1000);
 }
 
-// Download a single photo via the proxy route. Used by the ZIP flow where
-// we need the raw image bytes (Blob) for JSZip. Falls back to the direct
-// CDN URL as a last resort (works only if the CDN sends CORS headers).
-export async function fetchPhotoBlobViaProxy(photo: Photo): Promise<Blob> {
-  const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
-  const res = await fetch(proxyUrl);
-  if (res.ok) {
-    return res.blob();
-  }
-
-  // Proxy failed (typically 502 with "Upstream mengembalikan HTTP 403").
-  // Try the direct CDN URL — this usually fails with CORS but might work
-  // if the CDN sends Access-Control-Allow-Origin.
-  try {
-    const direct = await fetch(photo.url, { mode: "cors" });
-    if (direct.ok) {
-      return direct.blob();
-    }
-    throw new Error(`HTTP ${direct.status}`);
-  } catch (e) {
-    const reason = e instanceof Error ? e.message : "unknown error";
-    throw new Error(
-      `Gagal mengunduh ${photo.filename} (proxy HTTP ${res.status}; direct ${reason}). ` +
-        `Coba download per foto via tombol Download, atau gunakan script Python.`
-    );
-  }
-}
-
-// Run async tasks with a concurrency limit.
-async function withConcurrency<T>(
-  limit: number,
-  tasks: Array<() => Promise<T>>
-): Promise<T[]> {
-  const results: T[] = new Array(tasks.length);
-  let cursor = 0;
-  let active = 0;
-
-  return new Promise((resolve, reject) => {
-    const launch = () => {
-      while (active < limit && cursor < tasks.length) {
-        const idx = cursor;
-        cursor += 1;
-        active += 1;
-        tasks[idx]()
-          .then((v) => {
-            results[idx] = v;
-          })
-          .catch(reject)
-          .finally(() => {
-            active -= 1;
-            if (cursor >= tasks.length && active === 0) resolve(results);
-            else launch();
-          });
-      }
-    };
-    launch();
-  });
-}
-
-export interface ZipProgress {
+export interface DownloadAllProgress {
   done: number;
   total: number;
   current: string;
 }
 
-// Fetch all photos concurrently through the proxy and pack them into
-// a single ZIP file generated in the browser. If the proxy is blocked,
-// each individual download falls back to the direct CDN URL.
-export async function downloadAllAsZip(
+// Download every photo by triggering a staggered series of <a download>
+// clicks. Staggering avoids the browser treating rapid clicks as popup
+// spam and blocking them. Each download uses the user's IP (no CORS, no
+// datacenter IP block), so this works reliably in production on Vercel.
+export async function downloadAllDirect(
   photos: Photo[],
-  onProgress: (p: ZipProgress) => void,
-  concurrency = 6
+  onProgress: (p: DownloadAllProgress) => void,
+  delayMs = 250
 ): Promise<void> {
-  const JSZip = (await import("jszip")).default;
-  const zip = new JSZip();
+  const total = photos.length;
   let done = 0;
-
-  await withConcurrency(
-    concurrency,
-    photos.map((p) => async () => {
-      const blob = await fetchPhotoBlobViaProxy(p);
-      zip.file(p.filename, blob);
-      done += 1;
-      onProgress({ done, total: photos.length, current: p.filename });
-    })
-  );
-
-  const zipBlob = await zip.generateAsync({
-    type: "blob",
-    compression: "DEFLATE",
-    compressionOptions: { level: 6 },
-  });
-
-  const stamp = new Date().toISOString().slice(0, 10);
-  downloadBlob(zipBlob, `fotoyu-photos-${stamp}.zip`);
+  for (const p of photos) {
+    onProgress({ done, total, current: p.filename });
+    downloadPhotoDirect(p);
+    done += 1;
+    onProgress({ done, total, current: p.filename });
+    // Stagger clicks so the browser doesn't treat them as popup spam.
+    if (done < total) {
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
 }

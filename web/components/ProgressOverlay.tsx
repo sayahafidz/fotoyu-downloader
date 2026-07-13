@@ -1,9 +1,9 @@
 "use client";
 
-import type { ZipProgress } from "@/lib/download";
+import type { DownloadAllProgress } from "@/lib/download";
 
 interface ProgressOverlayProps {
-  progress: ZipProgress | null;
+  progress: DownloadAllProgress | null;
   error: string | null;
 }
 
@@ -38,7 +38,7 @@ export default function ProgressOverlay({
               </svg>
             </div>
             <h3 className="text-center text-base font-semibold text-slate-900">
-              Gagal membuat ZIP
+              Gagal mengunduh foto
             </h3>
             <p className="mt-2 break-words text-center text-sm text-slate-500">
               {error}
@@ -69,7 +69,7 @@ export default function ProgressOverlay({
               </svg>
             </div>
             <h3 className="text-center text-base font-semibold text-slate-900">
-              Mengarsipkan foto...
+              Mengunduh foto...
             </h3>
             <p className="mt-1 truncate text-center text-xs text-slate-500">
               {progress?.current}

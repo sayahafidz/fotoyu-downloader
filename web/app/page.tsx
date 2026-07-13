@@ -8,7 +8,7 @@ import EnhanceForm from "@/components/EnhanceForm";
 import PhotoGrid from "@/components/PhotoGrid";
 import ProgressOverlay from "@/components/ProgressOverlay";
 import HelpSection from "@/components/HelpSection";
-import { downloadAllAsZip } from "@/lib/download";
+import { downloadAllDirect, type DownloadAllProgress } from "@/lib/download";
 import {
   fetchCartViaToken,
   loadToken,
@@ -16,7 +16,6 @@ import {
   clearToken,
 } from "@/lib/session";
 import type { Photo } from "@/lib/parse";
-import type { ZipProgress } from "@/lib/download";
 
 type Phase = "idle" | "parsing" | "preview" | "zipping" | "error";
 
@@ -25,7 +24,7 @@ export default function HomePage() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState<ZipProgress | null>(null);
+  const [progress, setProgress] = useState<DownloadAllProgress | null>(null);
   const [savedToken, setSavedToken] = useState<string | null>(null);
   const [pendingToken, setPendingToken] = useState<string | null>(null);
 
@@ -117,7 +116,7 @@ export default function HomePage() {
     setError(null);
     setProgress({ done: 0, total: photos.length, current: "Memulai..." });
     try {
-      await downloadAllAsZip(photos, (p) => setProgress(p));
+      await downloadAllDirect(photos, (p) => setProgress(p));
       setPhase("preview");
       setProgress(null);
     } catch (e) {
