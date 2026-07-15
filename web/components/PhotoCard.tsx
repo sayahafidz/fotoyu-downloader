@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { Photo } from "@/lib/parse";
 import { downloadPhotoDirect } from "@/lib/download";
+import { removeWatermark, type WatermarkRemovalSettings } from "@/lib/watermark-removal";
+import { downloadBlob } from "@/lib/download";
 
 interface PhotoCardProps {
   photo: Photo;
@@ -10,6 +12,7 @@ interface PhotoCardProps {
   isSelected: boolean;
   onToggleSelect: () => void;
   onImageClick: () => void;
+  watermarkSettings?: WatermarkRemovalSettings;
 }
 
 function formatSize(bytes: number): string {
@@ -24,20 +27,68 @@ function formatSize(bytes: number): string {
   return `${n.toFixed(n < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
 }
 
-export default function PhotoCard({ photo, index, isSelected, onToggleSelect, onImageClick }: PhotoCardProps) {
+export default function PhotoCard({ 
+  photo, 
+  index, 
+  isSelected, 
+  onToggleSelect, 
+  onImageClick,
+  watermarkSettings,
+}: PhotoCardProps) {
   const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
   const [src, setSrc] = useState<string>(proxyUrl);
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [removingWatermark, setRemovingWatermark] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleDownload = (e: React.MouseEvent) => {
     e.stopPropagation();
     setDownloading(true);
+    setErrorMessage(null);
     try {
       downloadPhotoDirect(photo);
     } finally {
       setTimeout(() => setDownloading(false), 800);
+    }
+  };
+
+  const handleDownloadWithWatermarkRemoval = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDropdown(false);
+    setRemovingWatermark(true);
+    setErrorMessage(null);
+
+    try {
+      const settings = watermarkSettings || {
+        enabled: true,
+        removeText: true,
+        autoDetect: true,
+      };
+
+      const result = await removeWatermark(photo, settings);
+
+      if (result.success && result.processedImageBlob) {
+        // Download the processed image
+        downloadBlob(result.processedImageBlob, photo.filename);
+        
+        // Clean up object URL
+        if (result.processedImageUrl) {
+          const urlToRevoke = result.processedImageUrl;
+          setTimeout(() => URL.revokeObjectURL(urlToRevoke), 5000);
+        }
+      } else {
+        // Fallback to original if watermark removal failed
+        setErrorMessage(result.error || "Gagal menghapus watermark");
+        downloadPhotoDirect(photo);
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Terjadi kesalahan");
+      downloadPhotoDirect(photo);
+    } finally {
+      setRemovingWatermark(false);
     }
   };
 
@@ -140,24 +191,85 @@ export default function PhotoCard({ photo, index, isSelected, onToggleSelect, on
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={handleDownload}
-          disabled={downloading}
-          className="mt-auto inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-700 dark:hover:bg-indigo-600"
-        >
-          {downloading ? (
+        {/* Download button with dropdown */}
+        <div className="relative mt-auto">
+          {errorMessage && (
+            <div className="mb-2 rounded-md bg-red-50 px-2 py-1 text-[10px] text-red-600 dark:bg-red-900/20 dark:text-red-400">
+              {errorMessage}
+            </div>
+          )}
+          
+          <div className="flex gap-1">
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={downloading || removingWatermark}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-700 dark:hover:bg-indigo-600"
+            >
+              {downloading ? (
+                <>
+                  <MiniSpinner />
+                  Mengunduh...
+                </>
+              ) : removingWatermark ? (
+                <>
+                  <MiniSpinner />
+                  Hapus watermark...
+                </>
+              ) : (
+                <>
+                  <DownloadIcon />
+                  Download
+                </>
+              )}
+            </button>
+
+            {/* Dropdown toggle */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDropdown(!showDropdown);
+              }}
+              disabled={downloading || removingWatermark}
+              className="inline-flex items-center justify-center rounded-lg bg-slate-900 px-2 py-2 text-xs font-medium text-white transition-colors hover:bg-indigo-600 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-700 dark:hover:bg-indigo-600"
+            >
+              <ChevronIcon />
+            </button>
+          </div>
+
+          {/* Dropdown menu */}
+          {showDropdown && (
             <>
-              <MiniSpinner />
-              Mengunduh...
-            </>
-          ) : (
-            <>
-              <DownloadIcon />
-              Download
+              <div 
+                className="fixed inset-0 z-10" 
+                onClick={() => setShowDropdown(false)}
+              />
+              <div className="absolute bottom-full left-0 right-0 z-20 mb-1 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+                <button
+                  type="button"
+                  onClick={handleDownload}
+                  className="w-full px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700"
+                >
+                  Download original
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDownloadWithWatermarkRemoval}
+                  className="w-full px-3 py-2 text-left text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <SparkleIcon />
+                    <span>Hapus watermark (AI)</span>
+                  </div>
+                  <div className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
+                    Processing 2-5 detik
+                  </div>
+                </button>
+              </div>
             </>
           )}
-        </button>
+        </div>
       </div>
     </div>
   );
@@ -188,6 +300,22 @@ function BrokenIcon() {
       <rect x="3" y="3" width="18" height="18" rx="2" />
       <path d="M3 15l5-5 4 4 3-3 6 6" />
       <circle cx="9" cy="9" r="1.5" />
+    </svg>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+function SparkleIcon() {
+  return (
+    <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z" />
     </svg>
   );
 }

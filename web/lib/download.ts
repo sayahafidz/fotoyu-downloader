@@ -6,6 +6,7 @@
 // (user IP, no CORS restriction) and save it to disk.
 
 import type { Photo } from "./parse";
+import { removeWatermark, type WatermarkRemovalSettings } from "./watermark-removal";
 
 // Trigger a browser download for a Blob with the given filename.
 export function downloadBlob(blob: Blob, filename: string): void {
@@ -37,10 +38,55 @@ export function downloadPhotoDirect(photo: Photo): void {
   setTimeout(() => a.remove(), 1000);
 }
 
+// Download a single photo with optional watermark removal
+export async function downloadPhotoWithOptions(
+  photo: Photo,
+  options?: {
+    removeWatermark?: boolean;
+    watermarkSettings?: WatermarkRemovalSettings;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  if (!options?.removeWatermark || !options?.watermarkSettings) {
+    // No watermark removal, use direct download
+    downloadPhotoDirect(photo);
+    return { success: true };
+  }
+
+  try {
+    const result = await removeWatermark(photo, options.watermarkSettings);
+
+    if (result.success && result.processedImageBlob) {
+      // Download processed image
+      downloadBlob(result.processedImageBlob, photo.filename);
+
+      // Clean up object URL
+      if (result.processedImageUrl) {
+        const urlToRevoke = result.processedImageUrl;
+        setTimeout(() => URL.revokeObjectURL(urlToRevoke), 5000);
+      }
+
+      return { success: true };
+    } else {
+      // Fallback to original on failure
+      downloadPhotoDirect(photo);
+      return { success: false, error: result.error || "Watermark removal failed" };
+    }
+  } catch (error) {
+    // Fallback to original on error
+    downloadPhotoDirect(photo);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    };
+  }
+}
+
 export interface DownloadAllProgress {
   done: number;
   total: number;
   current: string;
+  watermarkSuccess?: number;
+  watermarkFailed?: number;
 }
 
 // Download every photo by triggering a staggered series of <a download>
@@ -62,6 +108,64 @@ export async function downloadAllDirect(
     // Stagger clicks so the browser doesn't treat them as popup spam.
     if (done < total) {
       await new Promise((r) => setTimeout(r, delayMs));
+    }
+  }
+}
+
+// Download all photos with optional watermark removal
+// This handles watermark removal with proper progress tracking
+export async function downloadAllWithOptions(
+  photos: Photo[],
+  onProgress: (p: DownloadAllProgress) => void,
+  options?: {
+    removeWatermark?: boolean;
+    watermarkSettings?: WatermarkRemovalSettings;
+  },
+  delayMs = 250
+): Promise<void> {
+  const total = photos.length;
+  let done = 0;
+  let watermarkSuccess = 0;
+  let watermarkFailed = 0;
+
+  if (!options?.removeWatermark || !options?.watermarkSettings) {
+    // No watermark removal, use simple direct download
+    return downloadAllDirect(photos, onProgress, delayMs);
+  }
+
+  // Process with watermark removal
+  // Use sequential processing to avoid overwhelming the API
+  for (const photo of photos) {
+    onProgress({ 
+      done, 
+      total, 
+      current: photo.filename,
+      watermarkSuccess,
+      watermarkFailed,
+    });
+
+    const result = await downloadPhotoWithOptions(photo, options);
+
+    if (result.success) {
+      watermarkSuccess += 1;
+    } else {
+      watermarkFailed += 1;
+    }
+
+    done += 1;
+
+    onProgress({ 
+      done, 
+      total, 
+      current: photo.filename,
+      watermarkSuccess,
+      watermarkFailed,
+    });
+
+    // Add delay between downloads (longer for watermark removal to account for API processing)
+    if (done < total) {
+      const delay = options.removeWatermark ? 1000 : delayMs;
+      await new Promise((r) => setTimeout(r, delay));
     }
   }
 }

@@ -6,6 +6,8 @@ import PhotoCard from "./PhotoCard";
 import Lightbox from "./Lightbox";
 import SkeletonGrid from "./SkeletonGrid";
 import EmptyState from "./EmptyState";
+import WatermarkRemovalSettingsPanel from "./WatermarkRemovalSettings";
+import { DEFAULT_WATERMARK_SETTINGS, type WatermarkRemovalSettings } from "@/lib/watermark-removal";
 
 interface PhotoGridProps {
   photos: Photo[];
@@ -29,6 +31,7 @@ export default function PhotoGrid({
   onSelectedChange,
 }: PhotoGridProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [watermarkSettings, setWatermarkSettings] = useState<WatermarkRemovalSettings>(DEFAULT_WATERMARK_SETTINGS);
 
   const totalSize = photos.reduce((sum, p) => sum + (p.size || 0), 0);
   const totalSizeText =
@@ -60,8 +63,17 @@ export default function PhotoGrid({
     return <SkeletonGrid />;
   }
 
+  const displayPhotoCount = selectedIds.size > 0 ? selectedIds.size : photos.length;
+
   return (
     <div className="w-full animate-fade-in space-y-5">
+      {/* Watermark removal settings */}
+      <WatermarkRemovalSettingsPanel
+        settings={watermarkSettings}
+        photoCount={displayPhotoCount}
+        onChange={setWatermarkSettings}
+      />
+
       {/* Stats + controls bar */}
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
         {/* Row 1: stats + download button */}
@@ -139,6 +151,7 @@ export default function PhotoGrid({
                   const idx = photos.findIndex((p) => p.product_id === photo.product_id);
                   setLightboxIndex(idx >= 0 ? idx : null);
                 }}
+                watermarkSettings={watermarkSettings}
               />
             </div>
           ))}
