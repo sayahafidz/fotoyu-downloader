@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { DARK_MODE_SCRIPT } from "@/lib/dark-mode";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: "Fotoyu Downloader",
