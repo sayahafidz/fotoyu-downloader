@@ -4,11 +4,12 @@ Fast concurrent downloader untuk foto dari [fotoyu.com](https://fotoyu.com).
 Tersedia dalam dua bentuk:
 
 1. **Script Python (CLI)** — `downloader.py`, jalankan di terminal.
-2. **Web app (Next.js + Vercel)** — folder `web/`, jalankan di browser, paste
-   response → klik Proses → download semua foto sebagai ZIP.
+2. **Web app (Next.js + Vercel)** — folder `web/`, buka di browser, gunakan
+   salah satu dari 3 mode: Bookmarklet (1-klik dari fotoyu), Token (fetch otomatis),
+   atau Paste JSON (manual) → download semua foto sebagai ZIP.
 
-Keduanya membaca JSON response dari API cart preview fotoyu, mengekstrak
-semua URL foto, lalu mengunduhnya secara concurrent.
+Keduanya membaca data cart dari fotoyu.com, mengekstrak semua URL foto, lalu
+mengunduhnya secara concurrent.
 
 ---
 
@@ -36,11 +37,19 @@ semua URL foto, lalu mengunduhnya secara concurrent.
 
 ### Web App (`web/`)
 - **Tanpa install** — buka di browser, paste response, klik Proses.
+- **3 mode penggunaan**:
+  - **Token mode** — login dengan Bearer token, cart ter-fetch otomatis.
+  - **Paste mode** — paste JSON response dari DevTools (cara lama).
+  - **Bookmarklet mode** — 1 klik dari fotoyu.com langsung download (seamless).
 - **Pratinjau thumbnail** semua foto sebelum download.
+- **Search & filter** — cari foto berdasarkan nama file atau creator.
+- **Bulk selection** — pilih foto tertentu untuk diunduh.
 - **Download per foto** atau **download semua sebagai ZIP** (dibuat di browser).
 - **Proxy server-side** untuk mengatasi CORS dari `cfsimgproxy.fototree.com`.
 - **Progress bar** realtime saat membuat ZIP.
+- **Dark mode** — toggle tema gelap/terang.
 - **Drag & drop** file response langsung ke halaman.
+- **Vercel Analytics** — tracking penggunaan (opsional, hanya di production).
 
 ### Script Python (`downloader.py`)
 - **Download concurrent** menggunakan `asyncio` + `aiohttp` (default 10 paralel).
@@ -60,28 +69,56 @@ semua URL foto, lalu mengunduhnya secara concurrent.
 ```mermaid
 flowchart LR
     Response["Cart fotoyu"] --> A{Pilih mode}
-    A -->|"Mode Token (baru)"| Token["Ambil Bearer token<br/>dari fotoyu.com"]
+    A -->|"Mode Token (praktis)"| Token["Ambil Bearer token<br/>dari fotoyu.com"]
+    A -->|"Mode Bookmarklet (1-klik)"| Book["Install bookmarklet<br/>klik dari fotoyu"]
     A -->|"Mode Paste JSON"| Paste["Paste response JSON"]
     A -->|"Python CLI"| CLI["Script Python<br/>python downloader.py"]
     Token -->|"klik Ambil cart"| Preview["Preview grid + ZIP"]
+    Book -->|"otomatis"| Preview
     Paste -->|"klik Proses"| Preview
     CLI --> Result["Foto tersimpan"]
     Preview --> Result
 ```
 
-- **Pilih Mode Token** (baru, paling praktis) — ambil Bearer token sekali
-  dari fotoyu, lalu cart langsung ter-fetch otomatis. Token disimpan di
-  browser agar tidak perlu paste ulang.
-- **Pilih Mode Paste JSON** — sama seperti sebelumnya, paste response JSON
-  dari DevTools.
-- **Pilih Script Python** jika kamu sering download foto dan mau otomatisasi
-  via terminal (lebih cepat untuk batch besar).
+- **Mode Bookmarklet** (paling praktis, baru) — install bookmarklet 1x, lalu tinggal
+  klik dari halaman cart fotoyu. Cart langsung ter-load otomatis tanpa copy-paste.
+- **Mode Token** (praktis) — ambil Bearer token sekali dari fotoyu, lalu cart langsung
+  ter-fetch otomatis. Token disimpan di browser agar tidak perlu paste ulang.
+- **Mode Paste JSON** (cara lama) — paste response JSON dari DevTools.
+- **Script Python** — jika kamu sering download foto dan mau otomatisasi via terminal
+  (lebih cepat untuk batch besar).
 
 ---
 
 ## Cara Mendapatkan Response dari Fotoyu
 
-### Opsi A: Mode Token (rekomendasi — paling praktis)
+### Opsi A: Mode Bookmarklet (rekomendasi — paling praktis, 1 klik)
+
+Mode ini tidak butuh copy-paste sama sekali. Install bookmarklet sekali, lalu
+tinggal klik dari halaman cart fotoyu.
+
+#### Cara install bookmarklet:
+
+1. Buka web app fotoyu downloader (misalnya `https://fakyu.sayahafidz.my.id`).
+2. Di halaman utama, pilih tab **"Bookmarklet"** atau **"Enhance"**.
+3. Drag tombol bookmarklet ke bookmark bar browser kamu, atau klik kanan →
+   **Add to bookmarks**.
+4. Selesai! Bookmarklet sudah terinstall.
+
+#### Cara pakai:
+
+1. Buka [fotoyu.com](https://fotoyu.com), login, dan buka **cart** yang berisi
+   foto-foto yang ingin kamu download.
+2. Klik bookmarklet yang sudah kamu install di bookmark bar.
+3. Browser akan otomatis membuka tab baru ke web app downloader dengan cart
+   yang sudah ter-load. Tinggal klik **Download semua (ZIP)**.
+
+> **Catatan:** Bookmarklet bekerja dengan mengambil data cart langsung dari
+> halaman fotoyu (same-site fetch), jadi tidak perlu DevTools sama sekali.
+
+---
+
+### Opsi B: Mode Token (praktis — copy token 1x)
 
 Mode ini hanya butuh Bearer token dari fotoyu. Setelah login di fotoyu.com,
 copy token dari DevTools, paste ke web app, dan cart langsung ter-fetch.
@@ -90,12 +127,14 @@ copy token dari DevTools, paste ke web app, dan cart langsung ter-fetch.
 2. Pilih foto-foto di aplikasi fotoyu, tambahkan ke **keranjang (cart)**.
 3. Di tab fotoyu.com, tekan `F12` → buka tab **Application**.
 4. Sidebar kiri: **Storage** → **Local Storage** → **https://fotoyu.com**.
-5. Cari key `access_token` atau `token`, klik kanan → **Copy** value-nya.
-6. Paste token ke web app → klik **Ambil cart**.
+5. Cari key `persist:root`, klik kanan → **Copy** value-nya (seluruh JSON string).
+6. Paste ke web app (tab Token) → klik **Ambil cart**.
 
 Token biasanya berlaku beberapa jam. Jika expired, ambil token baru.
 
-### Opsi B: Paste JSON response (cara lama, tetap tersedia)
+---
+
+### Opsi C: Paste JSON response (cara lama, tetap tersedia)
 
 Script Python maupun Web App (mode paste) butuh JSON response dari endpoint
 cart preview fotoyu. Berikut langkah mendapatkannya:
@@ -166,6 +205,15 @@ Struktur response harus seperti ini (ringkas):
 Web app berada di folder `web/`. Dibangun dengan Next.js 16 + TypeScript +
 Tailwind CSS, dan di-deploy ke Vercel. Tidak perlu Python.
 
+### Fitur Web App
+
+- **3 mode:** Bookmarklet (1-klik), Token (fetch otomatis), Paste JSON (manual)
+- **Search & filter:** Cari foto by filename atau creator name
+- **Bulk selection:** Pilih foto tertentu untuk diunduh
+- **Dark mode:** Toggle tema gelap/terang
+- **Responsive:** Desktop & mobile friendly
+- **Vercel Analytics:** Tracking penggunaan (opsional, production only)
+
 ### Menjalankan Web App Lokal
 
 ```powershell
@@ -174,14 +222,25 @@ npm install
 npm run dev
 ```
 
-Buka `http://localhost:3000` di browser. Lalu:
+Buka `http://localhost:3000` di browser. Pilih salah satu mode:
 
-1. Paste response JSON ke kotak besar (atau drag & drop file
-   `response-fotoyu.txt` ke kotak).
-2. Klik tombol **Proses**.
-3. Akan muncul grid thumbnail semua foto.
-4. Klik **Download** di tiap foto, atau **Download semua (ZIP)** untuk
-   mengunduh semua foto sekaligus sebagai satu file ZIP.
+**Mode Bookmarklet (paling praktis):**
+1. Install bookmarklet dari tab "Enhance/Bookmarklet"
+2. Buka fotoyu.com, masuk ke cart
+3. Klik bookmarklet → otomatis membuka downloader dengan cart ter-load
+
+**Mode Token (praktis):**
+1. Copy `persist:root` dari Local Storage fotoyu.com (F12 → Application)
+2. Paste ke kotak token → klik **Ambil cart**
+3. Preview foto muncul → pilih foto atau klik **Download semua (ZIP)**
+
+**Mode Paste JSON (manual):**
+1. Copy response JSON dari DevTools (Network → `carts/preview`)
+2. Paste ke kotak besar atau drag & drop file `response-fotoyu.txt`
+3. Klik **Proses** → preview muncul → download
+
+> **Fitur tambahan:** Gunakan **search box** untuk filter foto, **checkbox** untuk
+> pilih foto tertentu, dan **dark mode toggle** (pojok kanan atas) untuk kenyamanan mata.
 
 ### Deploy ke Vercel
 
@@ -504,3 +563,49 @@ Hapus folder `media` lalu jalankan ulang script:
 Remove-Item -Recurse -Force media
 .\.venv\Scripts\python.exe downloader.py
 ```
+
+---
+
+## Troubleshooting Web App
+
+### Token tidak valid / expired (HTTP 401)
+
+Token Bearer dari `persist:root` biasanya berlaku beberapa jam. Jika muncul error
+"Token tidak valid atau sudah expired":
+
+1. Refresh halaman fotoyu.com dan login ulang jika perlu
+2. Ambil `persist:root` baru dari DevTools → Application → Local Storage
+3. Paste token baru ke web app
+
+### Bookmarklet tidak bekerja
+
+Jika bookmarklet tidak membuka tab baru atau error:
+
+1. Pastikan kamu sedang di halaman **cart** fotoyu.com (bukan halaman lain)
+2. Pastikan kamu sudah **login** di fotoyu.com
+3. Clear cache browser dan coba lagi
+4. Coba gunakan mode Token sebagai alternatif
+
+### Preview foto tidak muncul / CORS error
+
+Jika preview thumbnail tidak muncul (gambar broken):
+
+- **Di Vercel:** CDN `cfsimgproxy.fototree.com` sering memblokir IP datacenter.
+  Solusi: deploy di VPS sendiri dengan Docker (lihat section Deploy dengan Docker).
+- **Di localhost:** Seharusnya tidak ada masalah CORS. Pastikan dev server berjalan.
+
+### ZIP download gagal / stuck
+
+Jika download ZIP tidak jalan atau stuck di progress bar:
+
+1. Coba download per foto dulu untuk verifikasi koneksi
+2. Gunakan browser modern (Chrome, Edge, Firefox terbaru)
+3. Disable extension browser yang mungkin block download (adblocker, dll)
+4. Coba dengan jumlah foto lebih sedikit dulu (pilih beberapa foto via checkbox)
+
+### Bookmarklet mengatakan "Cart kosong"
+
+Pastikan:
+1. Kamu sudah menambahkan foto ke cart di fotoyu.com
+2. Halaman cart sudah fully loaded sebelum klik bookmarklet
+3. Coba refresh halaman cart lalu klik bookmarklet lagi
