@@ -2,6 +2,29 @@
 
 import { useState } from "react";
 
+const BOOKMARKLET_STEPS: Array<{ title: string; body: string }> = [
+  {
+    title: "Tampilkan bookmark bar browser",
+    body:
+      "Tekan Ctrl+Shift+B (Windows) atau Cmd+Shift+B (Mac) untuk menampilkan bookmark bar di bagian atas browser. Jika sudah terlihat, skip langkah ini.",
+  },
+  {
+    title: "Drag tombol ke bookmark bar",
+    body:
+      "Lihat tombol hijau 'Ambil cart fotoyu' di bawah. Klik tahan tombol tersebut, lalu drag (geser) ke bookmark bar browser kamu. Lepaskan mouse untuk menyimpannya sebagai bookmark.",
+  },
+  {
+    title: "Login ke fotoyu.com",
+    body:
+      "Buka tab baru, kunjungi fotoyu.com dan login dengan akunmu. Pastikan foto-foto yang ingin di-download sudah ada di cart (keranjang).",
+  },
+  {
+    title: "Klik bookmark yang tadi disimpan",
+    body:
+      "Klik bookmark 'Ambil cart fotoyu' yang tadi kamu simpan. Halaman akan otomatis kembali ke web app ini dengan data cart terisi. Foto-foto siap di-download!",
+  },
+];
+
 const JSON_STEPS: Array<{ title: string; body: string }> = [
   {
     title: "Pilih foto di aplikasi fotoyu",
@@ -72,19 +95,26 @@ const ENHANCE_STEPS: Array<{ title: string; body: string }> = [
 ];
 
 interface HelpSectionProps {
-  mode?: "token" | "paste" | "enhance";
+  mode?: "bookmarklet" | "token" | "paste" | "enhance";
 }
 
-export default function HelpSection({ mode = "token" }: HelpSectionProps) {
+export default function HelpSection({ mode = "bookmarklet" }: HelpSectionProps) {
   const [open, setOpen] = useState(false);
 
-  const steps = mode === "token" ? TOKEN_STEPS : mode === "paste" ? JSON_STEPS : ENHANCE_STEPS;
+  const steps = 
+    mode === "bookmarklet" ? BOOKMARKLET_STEPS :
+    mode === "token" ? TOKEN_STEPS : 
+    mode === "paste" ? JSON_STEPS : 
+    ENHANCE_STEPS;
+    
   const label =
-    mode === "token"
-      ? "Bagaimana cara mendapatkan data login dari fotoyu?"
+    mode === "bookmarklet"
+      ? "📚 Panduan: Cara pakai bookmark 1-klik"
+      : mode === "token"
+      ? "📚 Panduan: Cara mendapatkan data login"
       : mode === "paste"
-      ? "Bagaimana cara mendapatkan response dari fotoyu?"
-      : "Bagaimana cara pakai prompt AI ini?";
+      ? "📚 Panduan: Cara mendapatkan JSON (untuk pengguna teknis)"
+      : "📚 Panduan: Cara pakai prompt AI";
 
   return (
     <section className="w-full">

@@ -5,6 +5,7 @@ import ModeTabs, { type Mode } from "@/components/ModeTabs";
 import PasteForm from "@/components/PasteForm";
 import TokenForm from "@/components/TokenForm";
 import EnhanceForm from "@/components/EnhanceForm";
+import BookmarkletSection from "@/components/BookmarkletSection";
 import PhotoGrid from "@/components/PhotoGrid";
 import ProgressOverlay from "@/components/ProgressOverlay";
 import HelpSection from "@/components/HelpSection";
@@ -23,7 +24,7 @@ import type { Photo } from "@/lib/parse";
 type Phase = "idle" | "parsing" | "preview" | "zipping" | "error";
 
 export default function HomePage() {
-  const [mode, setMode] = useState<Mode>("token");
+  const [mode, setMode] = useState<Mode>("bookmarklet");
   const [phase, setPhase] = useState<Phase>("idle");
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -248,7 +249,12 @@ export default function HomePage() {
           <div className="space-y-5">
             <ModeTabs mode={mode} onChange={setMode} />
 
-            {mode === "token" ? (
+            {mode === "bookmarklet" ? (
+              <BookmarkletSection onTokenReceived={(token) => {
+                setPendingToken(token);
+                setMode("token");
+              }} />
+            ) : mode === "token" ? (
               <TokenForm
                 onFetchCart={handleFetchCart}
                 loading={phase === "parsing"}

@@ -135,7 +135,103 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
           </button>
         )}
       </div>
+
+      {/* Tutorial Section */}
+      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white">
+            <InfoIcon />
+          </span>
+          <div className="flex-1 space-y-2 text-sm">
+            <p className="font-semibold text-blue-900">
+              ⚠️ Penting: Gunakan tampilan mobile di DevTools
+            </p>
+            <p className="text-blue-800 leading-relaxed">
+              Response JSON dari fotoyu.com <strong>hanya include field <code className="rounded bg-blue-100 px-1 py-0.5 font-mono text-xs">url:</code> (link foto)</strong> ketika diakses dari tampilan mobile. Ikuti langkah berikut:
+            </p>
+            <ol className="list-decimal list-inside space-y-1.5 text-blue-800 leading-relaxed">
+              <li>
+                Buka{" "}
+                <a
+                  href="https://fotoyu.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline hover:text-blue-900 font-medium"
+                >
+                  fotoyu.com
+                </a>{" "}
+                dan <strong>login</strong>
+              </li>
+              <li>
+                Tekan <kbd className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">F12</kbd> untuk buka <strong>Developer Tools</strong>
+              </li>
+              <li>
+                <strong className="text-blue-900">Aktifkan tampilan mobile:</strong> klik icon{" "}
+                <span className="inline-flex items-center gap-1 rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">
+                  <MobileIcon className="inline h-3 w-3" /> Toggle device toolbar
+                </span>{" "}
+                atau tekan <kbd className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">Ctrl+Shift+M</kbd>
+              </li>
+              <li>
+                Buka tab <strong>Network</strong> di DevTools
+              </li>
+              <li>
+                Navigasi ke halaman cart atau refresh halaman
+              </li>
+              <li>
+                Cari request ke <code className="rounded bg-blue-100 px-1 py-0.5 font-mono text-xs">carts/preview</code> atau API endpoint yang berisi data foto
+              </li>
+              <li>
+                Klik request tersebut → tab <strong>Response</strong> → klik kanan → <strong>Copy response</strong>
+              </li>
+              <li>
+                Paste JSON response ke kotak di atas
+              </li>
+            </ol>
+            <div className="rounded-lg bg-blue-100/50 p-2.5 mt-3">
+              <p className="text-xs text-blue-900 leading-relaxed">
+                <strong>Kenapa harus mobile view?</strong> API fotoyu.com mengembalikan data yang berbeda untuk desktop vs mobile. Tampilan desktop tidak include field <code className="font-mono">url:</code> pada response JSON, sehingga downloader tidak bisa mendapatkan link foto. Tampilan mobile include semua field yang dibutuhkan termasuk <code className="font-mono">url:</code> untuk setiap foto.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </form>
+  );
+}
+
+function InfoIcon() {
+  return (
+    <svg
+      className="h-3.5 w-3.5"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+  );
+}
+
+function MobileIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+      <line x1="12" y1="18" x2="12.01" y2="18" />
+    </svg>
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-export type Mode = "token" | "paste" | "enhance";
+export type Mode = "bookmarklet" | "token" | "paste" | "enhance";
 
 interface ModeTabsProps {
   mode: Mode;
@@ -9,25 +9,53 @@ interface ModeTabsProps {
 
 export default function ModeTabs({ mode, onChange }: ModeTabsProps) {
   return (
-    <div className="flex w-full flex-col gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 sm:flex-row sm:max-w-2xl">
-      <TabButton
-        active={mode === "token"}
-        onClick={() => onChange("token")}
-        icon={<KeyIcon active={mode === "token"} />}
-        label="Login dengan token"
-      />
-      <TabButton
-        active={mode === "paste"}
-        onClick={() => onChange("paste")}
-        icon={<ClipboardIcon active={mode === "paste"} />}
-        label="Paste JSON"
-      />
-      <TabButton
-        active={mode === "enhance"}
-        onClick={() => onChange("enhance")}
-        icon={<SparkleIcon active={mode === "enhance"} />}
-        label="Prompt AI"
-      />
+    <div className="space-y-3">
+      {/* Recommended badge */}
+      <div className="flex items-center gap-2 text-sm text-emerald-600">
+        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+        </svg>
+        <span className="font-medium">Pilih cara download:</span>
+      </div>
+      
+      <div className="grid gap-2 sm:grid-cols-2">
+        <TabButton
+          active={mode === "bookmarklet"}
+          onClick={() => onChange("bookmarklet")}
+          icon={<BoltIcon active={mode === "bookmarklet"} />}
+          label="1 Klik Otomatis"
+          badge="TERMUDAH"
+          badgeColor="emerald"
+          description="Drag tombol ke bookmark (hanya sekali)"
+        />
+        <TabButton
+          active={mode === "token"}
+          onClick={() => onChange("token")}
+          icon={<KeyIcon active={mode === "token"} />}
+          label="Login Manual"
+          badge="MUDAH"
+          badgeColor="blue"
+          description="Copy data login dari browser"
+        />
+        <TabButton
+          active={mode === "paste"}
+          onClick={() => onChange("paste")}
+          icon={<ClipboardIcon active={mode === "paste"} />}
+          label="Paste JSON"
+          badge="LANJUTAN"
+          badgeColor="slate"
+          description="Untuk pengguna teknis"
+        />
+        <TabButton
+          active={mode === "enhance"}
+          onClick={() => onChange("enhance")}
+          icon={<SparkleIcon active={mode === "enhance"} />}
+          label="Prompt AI"
+          badge="BONUS"
+          badgeColor="purple"
+          description="Percantik foto dengan AI"
+        />
+      </div>
     </div>
   );
 }
@@ -37,28 +65,73 @@ function TabButton({
   onClick,
   icon,
   label,
+  badge,
+  badgeColor,
+  description,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
+  badge?: string;
+  badgeColor?: "emerald" | "blue" | "slate" | "purple";
+  description?: string;
 }) {
+  const badgeColors = {
+    emerald: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    blue: "bg-blue-100 text-blue-700 border-blue-200",
+    slate: "bg-slate-100 text-slate-600 border-slate-200",
+    purple: "bg-purple-100 text-purple-700 border-purple-200",
+  };
+
   return (
     <button
       type="button"
       onClick={onClick}
       className={[
-        "flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-all",
+        "relative flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all",
         active
-          ? "bg-white text-slate-900 shadow-sm"
-          : "text-slate-600 hover:text-slate-900",
+          ? "border-indigo-500 bg-indigo-50 shadow-md"
+          : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm",
       ].join(" ")}
     >
-      <span className="inline-flex items-center gap-2">
-        {icon}
-        {label}
-      </span>
+      <div className="flex w-full items-start justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {icon}
+          <span className={[
+            "text-sm font-semibold",
+            active ? "text-indigo-900" : "text-slate-900"
+          ].join(" ")}>
+            {label}
+          </span>
+        </div>
+        {badge && (
+          <span className={[
+            "rounded-full border px-2 py-0.5 text-[10px] font-bold",
+            badgeColors[badgeColor || "slate"]
+          ].join(" ")}>
+            {badge}
+          </span>
+        )}
+      </div>
+      {description && (
+        <p className="text-xs text-slate-600 leading-relaxed">
+          {description}
+        </p>
+      )}
     </button>
+  );
+}
+
+function BoltIcon({ active }: { active: boolean }) {
+  return (
+    <svg
+      className={["h-5 w-5", active ? "text-indigo-600" : "text-emerald-600"].join(" ")}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+    </svg>
   );
 }
 

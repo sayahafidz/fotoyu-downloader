@@ -63,110 +63,106 @@ export default function BookmarkletSection({
   };
 
   return (
-    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-          <BoltIcon />
-        </span>
-        <div className="flex-1 space-y-3">
-          <div>
-            <h3 className="text-sm font-semibold text-emerald-900">
-              Cara cepat: pakai bookmarklet (1 klik)
-            </h3>
-            <p className="mt-0.5 text-xs leading-relaxed text-emerald-800">
-              Drag tombol di bawah ke bookmark bar browser kamu. Setelah login
-              di fotoyu.com, cukup klik bookmark tersebut — fotonya akan otomatis
-              muncul di web app ini tanpa perlu paste token.
+    <div className="rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 shadow-sm">
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md">
+            <BoltIcon />
+          </span>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-lg font-bold text-emerald-900">
+                ⚡ Cara Termudah - 1 Klik Otomatis
+              </h3>
+              <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                RECOMMENDED
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-emerald-800">
+              Cuma perlu setup <strong>1 kali</strong> (drag tombol ke bookmark), terus setiap kali mau download tinggal <strong>klik bookmark</strong> aja — langsung muncul fotonya! 🎉
             </p>
           </div>
+        </div>
 
-          {/* Drag-to-bookmarkbar link */}
-          <div className="flex flex-wrap items-center gap-2">
+        {/* Drag Button - Make it prominent */}
+        <div className="rounded-xl bg-white p-4 shadow-sm border border-emerald-200">
+          <p className="text-sm font-semibold text-slate-700 mb-3">
+            👇 Drag tombol ini ke bookmark bar browser:
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
             <a
               href={BOOKMARKLET_CODE}
               onClick={(e) => {
-                // Klik biasa tidak akan jalan di browser modern (security).
-                // Tampilkan instruksi copy sebagai gantinya.
                 e.preventDefault();
                 handleCopy();
               }}
               draggable
-              onDragStart={(e) => {
-                // Saat drag, browser akan pakai href sebagai data.
-                // Ini cara utama untuk "install" bookmarklet.
-              }}
-              className="inline-flex cursor-grab items-center gap-2 rounded-xl border-2 border-dashed border-emerald-400 bg-white px-4 py-2.5 text-sm font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 active:cursor-grabbing"
+              className="inline-flex cursor-grab items-center gap-2 rounded-xl border-2 border-dashed border-emerald-500 bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-3 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl active:cursor-grabbing active:scale-95"
               title="Drag ini ke bookmark bar browser kamu"
             >
               <DragIcon />
-              Ambil cart fotoyu
+              🚀 Ambil cart fotoyu
             </a>
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-100"
+              className="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
             >
               {copied ? <CheckIcon /> : <CopyIcon />}
-              {copied ? "Tersalin!" : "Copy kode"}
+              {copied ? "✓ Tersalin!" : "Copy kode"}
             </button>
           </div>
+          <p className="mt-3 text-xs text-slate-500">
+            💡 Tip: Kalau drag tidak bisa, klik "Copy kode" lalu buat bookmark manual dan paste kode-nya.
+          </p>
+        </div>
 
-          {/* Step-by-step */}
-          <ol className="space-y-1.5 text-xs text-emerald-800">
-            <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-[10px] font-bold text-emerald-800">
+        {/* Simple Steps */}
+        <div className="rounded-xl bg-white/70 p-4">
+          <p className="text-sm font-semibold text-slate-700 mb-3">
+            Langkah mudah:
+          </p>
+          <ol className="space-y-2.5 text-sm text-slate-700">
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
                 1
               </span>
               <span className="leading-relaxed">
-                Pastikan <strong>bookmark bar</strong> browser terlihat
-                (Ctrl+Shift+B di Chrome/Edge).
+                Pastikan <strong>bookmark bar</strong> terlihat <span className="text-xs text-slate-500">(tekan Ctrl+Shift+B)</span>
               </span>
             </li>
-            <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-[10px] font-bold text-emerald-800">
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
                 2
               </span>
               <span className="leading-relaxed">
-                <strong>Drag</strong> tombol{" "}
-                <code className="rounded bg-white px-1 py-0.5 font-mono text-[10px]">
-                  Ambil cart fotoyu
-                </code>{" "}
-                di atas ke bookmark bar.
+                <strong>Drag</strong> tombol hijau di atas ke bookmark bar
               </span>
             </li>
-            <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-[10px] font-bold text-emerald-800">
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
                 3
               </span>
               <span className="leading-relaxed">
-                Buka{" "}
-                <a
-                  href="https://fotoyu.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="font-semibold underline hover:text-emerald-900"
-                >
-                  fotoyu.com
-                </a>{" "}
-                dan login.
+                Buka <a href="https://fotoyu.com" target="_blank" rel="noreferrer" className="font-semibold text-emerald-700 underline hover:text-emerald-900">fotoyu.com</a> dan login
               </span>
             </li>
-            <li className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-200 text-[10px] font-bold text-emerald-800">
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
                 4
               </span>
               <span className="leading-relaxed">
-                Klik bookmark <strong>Ambil cart fotoyu</strong> di bookmark bar.
-                Kamu otomatis kembali ke sini dengan data login terisi.
+                Klik bookmark yang tadi disimpan → <strong>Selesai!</strong> 🎉
               </span>
             </li>
           </ol>
+        </div>
 
-          <p className="rounded-lg bg-white/60 p-2.5 text-[11px] leading-relaxed text-emerald-700">
-            <strong>Privasi:</strong> bookmarklet memanggil API fotoyu.com
-            langsung dari browser kamu, lalu membawa hasilnya ke web app ini via
-            URL hash (<code className="font-mono">#cart=...</code>). Hash tidak
-            dikirim ke server, jadi data tetap di browser kamu.
+        {/* Privacy note - simplified */}
+        <div className="rounded-lg bg-emerald-100/50 p-3 border border-emerald-200">
+          <p className="text-xs leading-relaxed text-emerald-800">
+            🔒 <strong>Aman &amp; Privat:</strong> Data tidak dikirim ke server lain, langsung dari fotoyu.com ke browser kamu.
           </p>
         </div>
       </div>

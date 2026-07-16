@@ -1,10 +1,9 @@
-// Browser-side helpers for triggering downloads. The "download all" flow uses
-// individual <a download> clicks (staggered) instead of building a ZIP in
-// JS, because the upstream CDN blocks server-side fetches (datacenter IP →
-// 403) and direct browser fetch() calls (no CORS headers). The <a download>
-// attribute tells the browser to fetch the image via its own network stack
-// (user IP, no CORS restriction) and save it to disk.
+// Browser-side helpers for triggering downloads. Individual downloads use
+// <a download> for simplicity. The "download all" flow creates a ZIP archive
+// by fetching images through the proxy (which has CORS headers and retry logic)
+// and bundling them using JSZip.
 
+import JSZip from "jszip";
 import type { Photo } from "./parse";
 import { removeWatermark, type WatermarkRemovalSettings } from "./watermark-removal";
 
@@ -89,26 +88,92 @@ export interface DownloadAllProgress {
   watermarkFailed?: number;
 }
 
-// Download every photo by triggering a staggered series of <a download>
-// clicks. Staggering avoids the browser treating rapid clicks as popup
-// spam and blocking them. Each download uses the user's IP (no CORS, no
-// datacenter IP block), so this works reliably in production on Vercel.
+// Download all photos as a single ZIP file. Fetches images through the proxy
+// (which has CORS headers and retry logic), bundles them using JSZip, and
+// triggers a single download of the ZIP archive.
 export async function downloadAllDirect(
   photos: Photo[],
   onProgress: (p: DownloadAllProgress) => void,
-  delayMs = 250
+  delayMs = 500
 ): Promise<void> {
+  const zip = new JSZip();
   const total = photos.length;
   let done = 0;
-  for (const p of photos) {
-    onProgress({ done, total, current: p.filename });
-    downloadPhotoDirect(p);
+  let failed = 0;
+
+  // Fetch and add each photo to the ZIP
+  for (const photo of photos) {
+    onProgress({ 
+      done, 
+      total, 
+      current: `Mengunduh ${photo.filename}...` 
+    });
+
+    try {
+      // Fetch through proxy which has CORS headers
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
+      const response = await fetch(proxyUrl);
+      
+      if (!response.ok) {
+        // If proxy fails, try direct URL as fallback
+        const directResponse = await fetch(photo.url, { mode: 'no-cors' });
+        if (directResponse.type === 'opaque') {
+          // no-cors gives opaque response, can't read it for ZIP
+          console.warn(`Gagal mengunduh ${photo.filename}, skip.`);
+          failed += 1;
+          done += 1;
+          continue;
+        }
+        const blob = await directResponse.blob();
+        zip.file(photo.filename, blob);
+      } else {
+        const blob = await response.blob();
+        zip.file(photo.filename, blob);
+      }
+    } catch (error) {
+      console.error(`Error downloading ${photo.filename}:`, error);
+      failed += 1;
+    }
+
     done += 1;
-    onProgress({ done, total, current: p.filename });
-    // Stagger clicks so the browser doesn't treat them as popup spam.
+    onProgress({ 
+      done, 
+      total, 
+      current: `${done}/${total} selesai${failed > 0 ? ` (${failed} gagal)` : ''}` 
+    });
+
+    // Small delay to avoid overwhelming the server
     if (done < total) {
       await new Promise((r) => setTimeout(r, delayMs));
     }
+  }
+
+  // Generate and download the ZIP
+  if (done > failed) {
+    onProgress({ 
+      done, 
+      total, 
+      current: 'Membuat file ZIP...' 
+    });
+
+    const zipBlob = await zip.generateAsync({ 
+      type: "blob",
+      compression: "DEFLATE",
+      compressionOptions: { level: 6 }
+    });
+
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '').replace('T', '_');
+    const filename = `fotoyu_photos_${timestamp}.zip`;
+    
+    downloadBlob(zipBlob, filename);
+
+    onProgress({ 
+      done, 
+      total, 
+      current: `Selesai! ${done - failed} foto diunduh${failed > 0 ? `, ${failed} gagal` : ''}` 
+    });
+  } else {
+    throw new Error(`Semua download gagal (${failed}/${total})`);
   }
 }
 
