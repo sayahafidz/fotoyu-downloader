@@ -20,21 +20,71 @@ export function downloadBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Download a single photo. The proxy is blocked by the upstream CDN
-// (datacenter IP → 403), and the direct URL is blocked by CORS when
-// fetched with fetch(). So we use an invisible <a download> element
-// which tells the browser to fetch the image via its own network stack
-// (user IP, no CORS restriction) and save it to disk.
-export function downloadPhotoDirect(photo: Photo): void {
-  const a = document.createElement("a");
-  a.href = photo.url;
-  a.download = photo.filename;
-  a.style.display = "none";
-  a.rel = "noopener noreferrer";
-  document.body.appendChild(a);
-  a.click();
-  // Remove after a short delay so the download has time to start.
-  setTimeout(() => a.remove(), 1000);
+// Fallback: load a cross-origin image into <img>, draw it to a canvas,
+// and export as a JPEG blob. This bypasses CORS because browsers allow
+// <img> to load any image URL for display; canvas.toBlob() then gives
+// us a real Blob we can save with <a download>.
+function fetchViaCanvas(url: string): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(null);
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob(
+          (blob) => resolve(blob),
+          "image/jpeg",
+          0.95
+        );
+      } catch {
+        // Canvas tainted by cross-origin image — cannot export.
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+// Download a single photo automatically to the user's downloads folder.
+// Strategy: fetch the image as a Blob (through the server proxy which has
+// CORS headers), then use <a download> on a blob URL so the browser saves
+// it directly with the correct filename — no "Save As" dialog needed.
+export async function downloadPhotoDirect(photo: Photo): Promise<void> {
+  // Try fetching through the proxy first (server-side, has CORS headers).
+  try {
+    const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
+    const response = await fetch(proxyUrl);
+    if (response.ok) {
+      const blob = await response.blob();
+      downloadBlob(blob, photo.filename);
+      return;
+    }
+  } catch {
+    // Proxy fetch failed, fall through to canvas fallback.
+  }
+
+  // Fallback: draw the image on a canvas element and export as blob.
+  // The <img> element loads cross-origin images fine (no CORS for display),
+  // and canvas.toBlob() gives us a Blob we can save with <a download>.
+  try {
+    const blob = await fetchViaCanvas(photo.url);
+    if (blob) {
+      downloadBlob(blob, photo.filename);
+      return;
+    }
+  } catch {
+    // Canvas fallback also failed.
+  }
+
+  // Last resort: open image in a new tab so user can save manually.
+  // (cross-origin <a download> is ignored by browsers — they navigate instead.)
+  window.open(photo.url, "_blank");
 }
 
 // Download a single photo with optional watermark removal
@@ -47,7 +97,7 @@ export async function downloadPhotoWithOptions(
 ): Promise<{ success: boolean; error?: string }> {
   if (!options?.removeWatermark || !options?.watermarkSettings) {
     // No watermark removal, use direct download
-    downloadPhotoDirect(photo);
+    await downloadPhotoDirect(photo);
     return { success: true };
   }
 
@@ -67,12 +117,12 @@ export async function downloadPhotoWithOptions(
       return { success: true };
     } else {
       // Fallback to original on failure
-      downloadPhotoDirect(photo);
+      await downloadPhotoDirect(photo);
       return { success: false, error: result.error || "Watermark removal failed" };
     }
   } catch (error) {
     // Fallback to original on error
-    downloadPhotoDirect(photo);
+    await downloadPhotoDirect(photo);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : "Unknown error" 
@@ -113,19 +163,22 @@ export async function downloadAllDirect(
       // Fetch through proxy which has CORS headers
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
       const response = await fetch(proxyUrl);
-      
+
       if (!response.ok) {
-        // If proxy fails, try direct URL as fallback
-        const directResponse = await fetch(photo.url, { mode: 'no-cors' });
-        if (directResponse.type === 'opaque') {
-          // no-cors gives opaque response, can't read it for ZIP
+        // If proxy fails, try direct URL as fallback (without no-cors)
+        try {
+          const directResponse = await fetch(photo.url);
+          if (directResponse.ok) {
+            const blob = await directResponse.blob();
+            zip.file(photo.filename, blob);
+          } else {
+            console.warn(`Gagal mengunduh ${photo.filename}, skip.`);
+            failed += 1;
+          }
+        } catch {
           console.warn(`Gagal mengunduh ${photo.filename}, skip.`);
           failed += 1;
-          done += 1;
-          continue;
         }
-        const blob = await directResponse.blob();
-        zip.file(photo.filename, blob);
       } else {
         const blob = await response.blob();
         zip.file(photo.filename, blob);

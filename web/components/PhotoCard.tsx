@@ -44,14 +44,14 @@ export default function PhotoCard({
   const [showDropdown, setShowDropdown] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleDownload = (e: React.MouseEvent) => {
+  const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
     setDownloading(true);
     setErrorMessage(null);
     try {
-      downloadPhotoDirect(photo);
+      await downloadPhotoDirect(photo);
     } finally {
-      setTimeout(() => setDownloading(false), 800);
+      setDownloading(false);
     }
   };
 
@@ -82,11 +82,11 @@ export default function PhotoCard({
       } else {
         // Fallback to original if watermark removal failed
         setErrorMessage(result.error || "Gagal menghapus watermark");
-        downloadPhotoDirect(photo);
+        await downloadPhotoDirect(photo);
       }
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Terjadi kesalahan");
-      downloadPhotoDirect(photo);
+      await downloadPhotoDirect(photo);
     } finally {
       setRemovingWatermark(false);
     }
