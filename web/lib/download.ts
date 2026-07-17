@@ -20,45 +20,17 @@ export function downloadBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Fallback: load a cross-origin image into <img>, draw it to a canvas,
-// and export as a JPEG blob. This bypasses CORS because browsers allow
-// <img> to load any image URL for display; canvas.toBlob() then gives
-// us a real Blob we can save with <a download>.
-function fetchViaCanvas(url: string): Promise<Blob | null> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => {
-      try {
-        const canvas = document.createElement("canvas");
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) return resolve(null);
-        ctx.drawImage(img, 0, 0);
-        canvas.toBlob(
-          (blob) => resolve(blob),
-          "image/jpeg",
-          0.95
-        );
-      } catch {
-        // Canvas tainted by cross-origin image — cannot export.
-        resolve(null);
-      }
-    };
-    img.onerror = () => resolve(null);
-    img.src = url;
-  });
-}
-
 // Download a single photo automatically to the user's downloads folder.
-// Strategy: fetch the image as a Blob (through the server proxy which has
-// CORS headers), then use <a download> on a blob URL so the browser saves
-// it directly with the correct filename — no "Save As" dialog needed.
+// Multi-layer strategy chain, each layer tries a different proxy until
+// the image is fetched as a Blob, then saved via <a download> on a blob URL.
 export async function downloadPhotoDirect(photo: Photo): Promise<void> {
-  // Try fetching through the proxy first (server-side, has CORS headers).
+  const encoded = encodeURIComponent(photo.url);
+
+  // Strategy 1: Our own Vercel proxy (may be blocked by CDN datacenter IP filter).
+  // The proxy now has its own public-proxy fallback built in, so it succeeds
+  // even when Vercel IPs are blocked.
   try {
-    const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
+    const proxyUrl = `/api/proxy?url=${encoded}&mode=download&filename=${encodeURIComponent(photo.filename)}`;
     const response = await fetch(proxyUrl);
     if (response.ok) {
       const blob = await response.blob();
@@ -66,24 +38,36 @@ export async function downloadPhotoDirect(photo: Photo): Promise<void> {
       return;
     }
   } catch {
-    // Proxy fetch failed, fall through to canvas fallback.
+    // Will try next strategy.
   }
 
-  // Fallback: draw the image on a canvas element and export as blob.
-  // The <img> element loads cross-origin images fine (no CORS for display),
-  // and canvas.toBlob() gives us a Blob we can save with <a download>.
+  // Strategy 2: wsrv.nl public image proxy (non-Vercel IP, supports CORS).
   try {
-    const blob = await fetchViaCanvas(photo.url);
-    if (blob) {
+    const wsrvUrl = `https://wsrv.nl/?url=${encoded}&output=auto`;
+    const response = await fetch(wsrvUrl);
+    if (response.ok) {
+      const blob = await response.blob();
       downloadBlob(blob, photo.filename);
       return;
     }
   } catch {
-    // Canvas fallback also failed.
+    // Will try next strategy.
+  }
+
+  // Strategy 3: imgproxy.gamma.app (Cloudflare-based, supports CORS).
+  try {
+    const gammaUrl = `https://imgproxy.gamma.app/${encoded}`;
+    const response = await fetch(gammaUrl);
+    if (response.ok) {
+      const blob = await response.blob();
+      downloadBlob(blob, photo.filename);
+      return;
+    }
+  } catch {
+    // Will try last resort.
   }
 
   // Last resort: open image in a new tab so user can save manually.
-  // (cross-origin <a download> is ignored by browsers — they navigate instead.)
   window.open(photo.url, "_blank");
 }
 
@@ -165,11 +149,12 @@ export async function downloadAllDirect(
       const response = await fetch(proxyUrl);
 
       if (!response.ok) {
-        // If proxy fails, try direct URL as fallback (without no-cors)
+        // If proxy fails, try wsrv.nl public proxy (different IP range)
         try {
-          const directResponse = await fetch(photo.url);
-          if (directResponse.ok) {
-            const blob = await directResponse.blob();
+          const wsrvUrl = `https://wsrv.nl/?url=${encodeURIComponent(photo.url)}&output=auto`;
+          const wsrvResponse = await fetch(wsrvUrl);
+          if (wsrvResponse.ok) {
+            const blob = await wsrvResponse.blob();
             zip.file(photo.filename, blob);
           } else {
             console.warn(`Gagal mengunduh ${photo.filename}, skip.`);

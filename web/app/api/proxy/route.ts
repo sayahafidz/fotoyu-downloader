@@ -68,9 +68,48 @@ async function fetchUpstream(target: string): Promise<Response> {
   throw lastErr ?? new Error("Gagal menghubungi upstream setelah 3 percobaan.");
 }
 
+// Public CORS/image proxies that operate from non-Vercel IP ranges.
+// When our own proxy is blocked by the CDN (Vercel datacenter IP), these
+// public services can often fetch successfully since they use residential
+// or diverse IP pools.
+const PUBLIC_PROXIES = [
+  // wsrv.nl - open-source image proxy with CORS support
+  "https://wsrv.nl/?url=${URL}&output=auto",
+  // Cloudflare-based open image proxy
+  "https://imgproxy.gamma.app/${URL}",
+];
+
+async function fetchViaPublicProxy(target: string): Promise<Response | null> {
+  for (const tmpl of PUBLIC_PROXIES) {
+    try {
+      const url = tmpl.replace("${URL}", encodeURIComponent(target));
+      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (res.ok && res.body) return res;
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
+
+// Streams a Response body back to the client with CORS and cache headers.
+function streamProxyResponse(upstream: Response, opts?: { downloadFilename?: string }): Response {
+  const headers = new Headers();
+  const ct = upstream.headers.get("content-type");
+  headers.set("Content-Type", ct && ct.startsWith("image/") ? ct : "image/jpeg");
+  headers.set("Cache-Control", "public, max-age=86400, immutable");
+  headers.set("Access-Control-Allow-Origin", "*");
+  if (opts?.downloadFilename) {
+    headers.set("Content-Disposition", `attachment; filename="${opts.downloadFilename}"`);
+  }
+  return new Response(upstream.body, { status: 200, headers });
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const target = searchParams.get("url");
+  const mode = searchParams.get("mode") || "display";
+  const filename = searchParams.get("filename") || undefined;
 
   if (!target) {
     return NextResponse.json(
@@ -86,40 +125,33 @@ export async function GET(req: Request) {
     );
   }
 
-  let upstream: Response;
+  let upstream: Response | null = null;
+
+  // Strategy 1: Direct upstream fetch (fails on Vercel due to datacenter IP block)
   try {
     upstream = await fetchUpstream(target);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Gagal menghubungi upstream.";
-    return NextResponse.json({ error: msg }, { status: 502 });
+  } catch {
+    // Will try public proxy below
   }
 
-  if (!upstream.ok || !upstream.body) {
-    const status = upstream.status;
+  // Strategy 2: Public CORS proxy fallback (different IP ranges)
+  if (!upstream || !upstream.ok || !upstream.body) {
+    const pub = await fetchViaPublicProxy(target);
+    if (pub) upstream = pub;
+  }
+
+  if (!upstream || !upstream.ok || !upstream.body) {
+    const status = upstream?.status || 502;
     return NextResponse.json(
       {
         error: `Upstream mengembalikan HTTP ${status}.`,
-        // Hint the client to try the direct URL (browsers fetch from the
-        // user's IP, which usually bypasses the datacenter IP block).
         fallback: "direct",
       },
       { status: 502 }
     );
   }
 
-  const headers = new Headers();
-  const ct = upstream.headers.get("content-type");
-  headers.set(
-    "Content-Type",
-    ct && ct.startsWith("image/") ? ct : "image/jpeg"
-  );
-  headers.set("Cache-Control", "public, max-age=86400, immutable");
-  headers.set("Access-Control-Allow-Origin", "*");
-
-  // Stream the upstream body straight back to the client without buffering,
-  // so we stay well under Vercel's 4.5MB response body limit.
-  return new Response(upstream.body, {
-    status: 200,
-    headers,
+  return streamProxyResponse(upstream, {
+    downloadFilename: mode === "download" ? filename : undefined,
   });
 }
