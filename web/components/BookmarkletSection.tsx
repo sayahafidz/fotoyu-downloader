@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 
 // Domain this app is served from. Configurable via NEXT_PUBLIC_APP_URL so the
 // same image works for Vercel deploys (fakyu.sayahafidz.my.id) and self-hosted
@@ -25,11 +25,33 @@ const BOOKMARKLET_CODE = `javascript:(function(){
       if (!v) { alert('persist:root tidak ditemukan. Pastikan kamu sudah login di fotoyu.com.'); return; }
       location.href = APP_URL + '/#t=' + encodeURIComponent(v);
     }
+    
+    // Extract access_token from persist:root
+    var root = localStorage.getItem('persist:root');
+    var token = null;
+    if (root) {
+      try {
+        var parsed = JSON.parse(root);
+        var userStr = parsed.user;
+        if (typeof userStr === 'string') {
+          var user = JSON.parse(userStr);
+          if (user && user.access_token) {
+            token = user.access_token;
+          }
+        }
+      } catch(e) {}
+    }
+    
+    if (!token) { fallback(); return; }
+    
     fetch('https://api.fotoyu.com/gs/v1/carts/preview', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json, text/plain, */*' },
-      body: JSON.stringify({page:1,limit:100,selected_products:[]}),
-      credentials: 'include'
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json, text/plain, */*',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({page:1,limit:100,selected_products:[]})
     })
     .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,json:j}; }); })
     .then(function(o){
@@ -51,6 +73,14 @@ export default function BookmarkletSection({
   onTokenReceived,
 }: BookmarkletSectionProps) {
   const [copied, setCopied] = useState(false);
+  const dragRef = React.useRef<HTMLAnchorElement>(null);
+
+  // Set javascript: href via DOM API to bypass React's URL sanitization.
+  React.useEffect(() => {
+    if (dragRef.current) {
+      dragRef.current.setAttribute("href", BOOKMARKLET_CODE);
+    }
+  }, []);
 
   const handleCopy = async () => {
     try {
@@ -92,7 +122,8 @@ export default function BookmarkletSection({
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <a
-              href={BOOKMARKLET_CODE}
+              ref={dragRef}
+              href="#"
               onClick={(e) => {
                 e.preventDefault();
                 handleCopy();
