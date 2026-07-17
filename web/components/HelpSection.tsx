@@ -4,24 +4,24 @@ import { useState } from "react";
 
 const BOOKMARKLET_STEPS: Array<{ title: string; body: string }> = [
   {
-    title: "Tampilkan bookmark bar browser",
+    title: "Buka fotoyu.com dengan Mobile Display",
     body:
-      "Tekan Ctrl+Shift+B (Windows) atau Cmd+Shift+B (Mac) untuk menampilkan bookmark bar di bagian atas browser. Jika sudah terlihat, skip langkah ini.",
+      "Buka fotoyu.com di browser. Tekan Ctrl+Shift+M (atau Cmd+Opt+M di Mac) untuk mengaktifkan mode tampilan HP. Login dengan akun fotoyu kamu.",
   },
   {
-    title: "Drag tombol ke bookmark bar",
+    title: "Buka DevTools Console",
     body:
-      "Lihat tombol hijau 'Ambil cart fotoyu' di bawah. Klik tahan tombol tersebut, lalu drag (geser) ke bookmark bar browser kamu. Lepaskan mouse untuk menyimpannya sebagai bookmark.",
+      "Tekan F12 untuk membuka DevTools, atau klik kanan dan pilih 'Inspect'. Klik tab 'Console' di panel DevTools.",
   },
   {
-    title: "Login ke fotoyu.com",
+    title: "Copy dan Paste kode",
     body:
-      "Buka tab baru, kunjungi fotoyu.com dan login dengan akunmu. Pastikan foto-foto yang ingin di-download sudah ada di cart (keranjang).",
+      "Kembali ke web app ini, klik tombol 'Copy Code' di bagian Console. Lalu paste kode tersebut ke Console DevTools fotoyu.com dan tekan Enter.",
   },
   {
-    title: "Klik bookmark yang tadi disimpan",
+    title: "Tunggu redirect otomatis",
     body:
-      "Klik bookmark 'Ambil cart fotoyu' yang tadi kamu simpan. Halaman akan otomatis kembali ke web app ini dengan data cart terisi. Foto-foto siap di-download!",
+      "Kode akan otomatis mengambil data cart kamu dan redirect kembali ke web app ini. Setelah redirect, semua foto di cart akan muncul dan siap didownload!",
   },
 ];
 
@@ -109,7 +109,7 @@ export default function HelpSection({ mode = "bookmarklet" }: HelpSectionProps) 
     
   const label =
     mode === "bookmarklet"
-      ? "📚 Panduan: Cara pakai bookmark 1-klik"
+      ? "📚 Panduan: Cara pakai Console (Mobile Display)"
       : mode === "token"
       ? "📚 Panduan: Cara mendapatkan data login"
       : mode === "paste"

@@ -23,10 +23,10 @@ export default function ModeTabs({ mode, onChange }: ModeTabsProps) {
           active={mode === "bookmarklet"}
           onClick={() => onChange("bookmarklet")}
           icon={<BoltIcon active={mode === "bookmarklet"} />}
-          label="1 Klik Otomatis"
+          label="Console (Mobile)"
           badge="TERMUDAH"
           badgeColor="emerald"
-          description="Drag tombol ke bookmark (hanya sekali)"
+          description="Copy-paste kode ke Console fotoyu.com"
         />
         <TabButton
           active={mode === "token"}

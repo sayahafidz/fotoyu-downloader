@@ -1,68 +1,47 @@
-"use client";
+﻿"use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 
-// Domain this app is served from. Configurable via NEXT_PUBLIC_APP_URL so the
-// same image works for Vercel deploys (fakyu.sayahafidz.my.id) and self-hosted
-// Docker deployments (fotoyu.example.com). Falls back to the current origin
-// if the env var is not set (e.g. during local dev).
 const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
   (typeof window !== "undefined" ? window.location.origin : "");
 
-// Bookmarklet yang jalan di fotoyu.com.
-// Langkah 1: coba fetch cart preview LANGSUNG dari origin fotoyu.com
-//            (same-site, jadi browser otomatis mengirim cookie + fingerprint).
-// Langkah 2: kalau berhasil, redirect ke web app dengan data cart di hash.
-// Langkah 3: kalau gagal, fallback ke cara lama (kirim persist:root via hash).
-//
-// Hash (#fragment) TIDAK dikirim ke server, jadi data tetap client-side.
-const BOOKMARKLET_CODE = `javascript:(function(){
-  try {
-    var APP_URL = '${APP_URL}';
-    function fallback() {
-      var v = localStorage.getItem('persist:root');
-      if (!v) { alert('persist:root tidak ditemukan. Pastikan kamu sudah login di fotoyu.com.'); return; }
-      location.href = APP_URL + '/#t=' + encodeURIComponent(v);
-    }
-    
-    // Extract access_token from persist:root
-    var root = localStorage.getItem('persist:root');
-    var token = null;
-    if (root) {
-      try {
-        var parsed = JSON.parse(root);
-        var userStr = parsed.user;
-        if (typeof userStr === 'string') {
-          var user = JSON.parse(userStr);
-          if (user && user.access_token) {
-            token = user.access_token;
-          }
-        }
-      } catch(e) {}
-    }
-    
-    if (!token) { fallback(); return; }
-    
-    fetch('https://api.fotoyu.com/gs/v1/carts/preview', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json, text/plain, */*',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify({page:1,limit:100,selected_products:[]})
-    })
-    .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,json:j}; }); })
-    .then(function(o){
-      if (o.ok && o.json && o.json.result && Array.isArray(o.json.result.data)) {
-        location.href = APP_URL + '/#cart=' + encodeURIComponent(JSON.stringify(o.json));
-      } else {
-        fallback();
+const CONSOLE_CODE = `(function(){
+  var APP_URL = "${APP_URL}";
+  function fallback() {
+    var v = localStorage.getItem("persist:root");
+    if (!v) { alert("persist:root tidak ditemukan."); return; }
+    location.href = APP_URL + "/#t=" + encodeURIComponent(v);
+  }
+  var root = localStorage.getItem("persist:root");
+  var token = null;
+  if (root) {
+    try {
+      var parsed = JSON.parse(root);
+      var userStr = parsed.user;
+      if (typeof userStr === "string") {
+        var user = JSON.parse(userStr);
+        if (user && user.access_token) { token = user.access_token; }
       }
-    })
-    .catch(function(){ fallback(); });
-  } catch (e) { alert('Error: ' + e.message); }
+    } catch(e) {}
+  }
+  if (!token) { fallback(); return; }
+  fetch("https://api.fotoyu.com/gs/v1/carts/preview", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Accept": "application/json, text/plain, */*",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({page:1,limit:100,selected_products:[]})
+  })
+  .then(function(r){ return r.json().then(function(j){ return {ok:r.ok,json:j}; }); })
+  .then(function(o){
+    if (o.ok && o.json && o.json.result && Array.isArray(o.json.result.data)) {
+      location.href = APP_URL + "/#cart=" + encodeURIComponent(JSON.stringify(o.json));
+    } else { fallback(); }
+  })
+  .catch(function(){ fallback(); });
 })();`;
 
 interface BookmarkletSectionProps {
@@ -73,127 +52,71 @@ export default function BookmarkletSection({
   onTokenReceived,
 }: BookmarkletSectionProps) {
   const [copied, setCopied] = useState(false);
-  const dragRef = React.useRef<HTMLAnchorElement>(null);
-
-  // Set javascript: href via DOM API to bypass React's URL sanitization.
-  React.useEffect(() => {
-    if (dragRef.current) {
-      dragRef.current.setAttribute("href", BOOKMARKLET_CODE);
-    }
-  }, []);
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(BOOKMARKLET_CODE);
+      await navigator.clipboard.writeText(CONSOLE_CODE);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // ignore
-    }
+    } catch {}
   };
 
   return (
-    <div className="rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 to-teal-50 p-6 shadow-sm">
+    <div className="rounded-2xl border-2 border-indigo-300 bg-gradient-to-br from-indigo-50 to-blue-50 p-6 shadow-sm">
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white shadow-md">
             <BoltIcon />
           </span>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-lg font-bold text-emerald-900">
-                ⚡ Cara Termudah - 1 Klik Otomatis
+              <h3 className="text-lg font-bold text-indigo-900">
+                Console Copy-Paste di fotoyu.com
               </h3>
-              <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 text-[10px] font-bold text-white">
+              <span className="rounded-full bg-indigo-600 px-2.5 py-0.5 text-[10px] font-bold text-white">
                 RECOMMENDED
               </span>
             </div>
-            <p className="text-sm leading-relaxed text-emerald-800">
-              Cuma perlu setup <strong>1 kali</strong> (drag tombol ke bookmark), terus setiap kali mau download tinggal <strong>klik bookmark</strong> aja — langsung muncul fotonya! 🎉
+            <p className="text-sm leading-relaxed text-indigo-800">
+              Copy kode di bawah, paste ke <strong>Console</strong> browser saat buka fotoyu.com dalam mode mobile display.
             </p>
           </div>
         </div>
 
-        {/* Drag Button - Make it prominent */}
-        <div className="rounded-xl bg-white p-4 shadow-sm border border-emerald-200">
-          <p className="text-sm font-semibold text-slate-700 mb-3">
-            👇 Drag tombol ini ke bookmark bar browser:
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
-            <a
-              ref={dragRef}
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleCopy();
-              }}
-              draggable
-              className="inline-flex cursor-grab items-center gap-2 rounded-xl border-2 border-dashed border-emerald-500 bg-gradient-to-r from-emerald-500 to-teal-500 px-6 py-3 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl active:cursor-grabbing active:scale-95"
-              title="Drag ini ke bookmark bar browser kamu"
-            >
-              <DragIcon />
-              🚀 Ambil cart fotoyu
-            </a>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
-            >
-              {copied ? <CheckIcon /> : <CopyIcon />}
-              {copied ? "✓ Tersalin!" : "Copy kode"}
-            </button>
+        {/* Code box */}
+        <div className="relative">
+          <div className="rounded-lg bg-slate-900 p-4 overflow-x-auto">
+            <pre className="text-xs text-slate-100 font-mono whitespace-pre-wrap break-all">
+              {CONSOLE_CODE}
+            </pre>
           </div>
-          <p className="mt-3 text-xs text-slate-500">
-            💡 Tip: Kalau drag tidak bisa, klik "Copy kode" lalu buat bookmark manual dan paste kode-nya.
-          </p>
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="absolute top-2 right-2 rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-600 transition-colors"
+          >
+            {copied ? "Tersalin!" : "Copy"}
+          </button>
         </div>
 
-        {/* Simple Steps */}
-        <div className="rounded-xl bg-white/70 p-4">
-          <p className="text-sm font-semibold text-slate-700 mb-3">
-            Langkah mudah:
-          </p>
-          <ol className="space-y-2.5 text-sm text-slate-700">
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
-                1
-              </span>
-              <span className="leading-relaxed">
-                Pastikan <strong>bookmark bar</strong> terlihat <span className="text-xs text-slate-500">(tekan Ctrl+Shift+B)</span>
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
-                2
-              </span>
-              <span className="leading-relaxed">
-                <strong>Drag</strong> tombol hijau di atas ke bookmark bar
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
-                3
-              </span>
-              <span className="leading-relaxed">
-                Buka <a href="https://fotoyu.com" target="_blank" rel="noreferrer" className="font-semibold text-emerald-700 underline hover:text-emerald-900">fotoyu.com</a> dan login
-              </span>
-            </li>
-            <li className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-xs font-bold text-white">
-                4
-              </span>
-              <span className="leading-relaxed">
-                Klik bookmark yang tadi disimpan → <strong>Selesai!</strong> 🎉
-              </span>
-            </li>
+        {/* Instructions */}
+        <div className="space-y-2 text-sm text-slate-700">
+          <p className="font-semibold text-slate-900">Cara pakai:</p>
+          <ol className="list-decimal list-inside space-y-1 text-slate-600">
+            <li>Buka fotoyu.com di browser laptop/desktop</li>
+            <li>Tekan <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-xs font-mono">F12</kbd> untuk buka DevTools</li>
+            <li>Klik ikon device toolbar (atau tekan <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-xs font-mono">Ctrl+Shift+M</kbd>) untuk mode mobile</li>
+            <li>Pilih tab <strong>Console</strong></li>
+            <li>Copy kode di atas dan paste ke Console, tekan Enter</li>
+            <li>Halaman akan otomatis redirect ke web app ini dengan cart kamu</li>
           </ol>
         </div>
 
-        {/* Privacy note - simplified */}
-        <div className="rounded-lg bg-emerald-100/50 p-3 border border-emerald-200">
-          <p className="text-xs leading-relaxed text-emerald-800">
-            🔒 <strong>Aman &amp; Privat:</strong> Data tidak dikirim ke server lain, langsung dari fotoyu.com ke browser kamu.
+        {/* Note */}
+        <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
+          <p className="text-xs text-blue-900">
+            <strong>Catatan:</strong> Pastikan sudah login di fotoyu.com sebelum menjalankan kode. Kode ini akan otomatis mengambil token dari localStorage dan fetch data cart kamu.
           </p>
         </div>
       </div>
@@ -204,32 +127,12 @@ export default function BookmarkletSection({
 function BoltIcon() {
   return (
     <svg
-      className="h-4 w-4"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-    >
-      <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
-    </svg>
-  );
-}
-
-function DragIcon() {
-  return (
-    <svg
-      className="h-4 w-4"
-      viewBox="0 0 24 24"
+      className="h-5 w-5"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 24 24"
     >
-      <circle cx="9" cy="5" r="1" />
-      <circle cx="9" cy="12" r="1" />
-      <circle cx="9" cy="19" r="1" />
-      <circle cx="15" cy="5" r="1" />
-      <circle cx="15" cy="12" r="1" />
-      <circle cx="15" cy="19" r="1" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
     </svg>
   );
 }
@@ -237,32 +140,13 @@ function DragIcon() {
 function CopyIcon() {
   return (
     <svg
-      className="h-3.5 w-3.5"
-      viewBox="0 0 24 24"
+      className="h-4 w-4"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 24 24"
     >
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
     </svg>
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg
-      className="h-3.5 w-3.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
