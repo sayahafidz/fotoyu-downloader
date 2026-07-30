@@ -175,7 +175,7 @@ export default function HomePage() {
       setSelectedIds(new Set());
       if (res.failed > 0) {
         addToast({
-          type: "warning",
+          type: "info",
           message: `${res.succeeded} foto berhasil diunduh ke ZIP (${res.failed} foto gagal).`,
         });
       } else {
