@@ -17,7 +17,8 @@ const BROWSER_HEADERS: HeadersInit = {
   Accept:
     "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.9",
-  "Accept-Encoding": "gzip, deflate, br",
+  // Removed "Accept-Encoding": "gzip, deflate, br" 
+  // because node fetch doesn't always automatically decompress br, which corrupts the image.
   Referer: "https://fotoyu.com/",
   Origin: "https://fotoyu.com",
   "Sec-Fetch-Dest": "image",
@@ -80,12 +81,15 @@ const PUBLIC_PROXIES = [
 ];
 
 async function fetchViaPublicProxy(target: string): Promise<Response | null> {
+  // Public proxies don't support our full headers usually, but we can pass basic ones
   for (const tmpl of PUBLIC_PROXIES) {
     try {
-      const url = tmpl.replace("${URL}", encodeURIComponent(target));
+      const isGamma = tmpl.includes("gamma.app");
+      // gamma expects url directly (not encoded fully, but let's see), wsrv.nl handles encoded
+      const url = tmpl.replace("${URL}", isGamma ? target : encodeURIComponent(target));
       const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
       if (res.ok && res.body) return res;
-    } catch {
+    } catch (e) {
       continue;
     }
   }
@@ -127,17 +131,24 @@ export async function GET(req: Request) {
 
   let upstream: Response | null = null;
 
+  let upstreamErr: any = null;
+
   // Strategy 1: Direct upstream fetch (fails on Vercel due to datacenter IP block)
   try {
     upstream = await fetchUpstream(target);
-  } catch {
-    // Will try public proxy below
+  } catch (e) {
+    upstreamErr = e instanceof Error ? e.message : String(e);
   }
 
   // Strategy 2: Public CORS proxy fallback (different IP ranges)
+  let pubErr: any = null;
   if (!upstream || !upstream.ok || !upstream.body) {
-    const pub = await fetchViaPublicProxy(target);
-    if (pub) upstream = pub;
+    try {
+      const pub = await fetchViaPublicProxy(target);
+      if (pub) upstream = pub;
+    } catch (e) {
+      pubErr = e instanceof Error ? e.message : String(e);
+    }
   }
 
   if (!upstream || !upstream.ok || !upstream.body) {
@@ -145,6 +156,7 @@ export async function GET(req: Request) {
     return NextResponse.json(
       {
         error: `Upstream mengembalikan HTTP ${status}.`,
+        details: { upstreamErr, pubErr, status },
         fallback: "direct",
       },
       { status: 502 }
