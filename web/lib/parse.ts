@@ -40,13 +40,25 @@ interface FotoyuResponse {
 export const ALLOWED_HOSTS = new Set<string>([
   "cfsimgproxy.fototree.com",
   "cfwimgproxy.fototree.com",
+  "img.fototree.com",
+  "cdn.fototree.com",
+  "imgproxy.fototree.com",
   "cdn.fotoyu.com",
+  "img.fotoyu.com",
+  "media.fotoyu.com",
+  "api.fotoyu.com",
+  "www.fotoyu.com",
+  "fotoyu.com",
+  "storage.googleapis.com",
 ]);
 
 export function isAllowedHost(url: string): boolean {
   try {
     const u = new URL(url);
-    return ALLOWED_HOSTS.has(u.hostname);
+    const host = u.hostname.toLowerCase();
+    if (ALLOWED_HOSTS.has(host)) return true;
+    if (host.endsWith(".fototree.com") || host.endsWith(".fotoyu.com")) return true;
+    return false;
   } catch {
     return false;
   }

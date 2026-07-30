@@ -5,11 +5,15 @@ import type { DownloadAllProgress } from "@/lib/download";
 interface ProgressOverlayProps {
   progress: DownloadAllProgress | null;
   error: string | null;
+  onClose?: () => void;
+  onCancel?: () => void;
 }
 
 export default function ProgressOverlay({
   progress,
   error,
+  onClose,
+  onCancel,
 }: ProgressOverlayProps) {
   if (!progress && !error) return null;
 
@@ -43,6 +47,17 @@ export default function ProgressOverlay({
             <p className="mt-2 break-words text-center text-sm text-slate-500 dark:text-slate-400">
               {error}
             </p>
+            {onClose && (
+              <div className="mt-5 flex justify-center">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-xl bg-slate-900 px-5 py-2 text-xs font-medium text-white transition-colors hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600"
+                >
+                  Tutup
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <>
@@ -71,6 +86,23 @@ export default function ProgressOverlay({
             <p className="mt-2 text-center text-xs font-medium text-slate-600 dark:text-slate-300">
               {progress?.done} / {progress?.total} foto · {pct}%
             </p>
+            {progress?.watermarkSuccess !== undefined && (
+              <p className="mt-1 text-center text-xs text-slate-500 dark:text-slate-400">
+                Watermark dihapus: {progress.watermarkSuccess} berhasil
+                {progress.watermarkFailed ? `, ${progress.watermarkFailed} gagal` : ""}
+              </p>
+            )}
+            {onCancel && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                >
+                  Batalkan download
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>

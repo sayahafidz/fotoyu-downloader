@@ -46,6 +46,9 @@ export default function PhotoCard({
 
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (watermarkSettings?.enabled) {
+      return handleDownloadWithWatermarkRemoval(e);
+    }
     setDownloading(true);
     setErrorMessage(null);
     try {

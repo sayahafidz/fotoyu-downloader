@@ -98,7 +98,7 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
       <div className="flex max-h-[90vh] max-w-[90vw] flex-col items-center gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={photo.url}
+          src={`/api/proxy?url=${encodeURIComponent(photo.url)}`}
           alt={photo.title}
           className="max-h-[75vh] max-w-[90vw] rounded-lg object-contain animate-scale-in"
         />

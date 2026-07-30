@@ -128,8 +128,9 @@ export interface DownloadAllProgress {
 export async function downloadAllDirect(
   photos: Photo[],
   onProgress: (p: DownloadAllProgress) => void,
-  delayMs = 500
-): Promise<void> {
+  delayMs = 500,
+  signal?: AbortSignal
+): Promise<{ succeeded: number; failed: number }> {
   const zip = new JSZip();
   const total = photos.length;
   let done = 0;
@@ -137,6 +138,8 @@ export async function downloadAllDirect(
 
   // Fetch and add each photo to the ZIP
   for (const photo of photos) {
+    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+
     onProgress({ 
       done, 
       total, 
@@ -146,13 +149,13 @@ export async function downloadAllDirect(
     try {
       // Fetch through proxy which has CORS headers
       const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
-      const response = await fetch(proxyUrl);
+      const response = await fetch(proxyUrl, { signal });
 
       if (!response.ok) {
         // If proxy fails, try wsrv.nl public proxy (different IP range)
         try {
           const wsrvUrl = `https://wsrv.nl/?url=${encodeURIComponent(photo.url)}&output=auto`;
-          const wsrvResponse = await fetch(wsrvUrl);
+          const wsrvResponse = await fetch(wsrvUrl, { signal });
           if (wsrvResponse.ok) {
             const blob = await wsrvResponse.blob();
             zip.file(photo.filename, blob);
@@ -160,7 +163,8 @@ export async function downloadAllDirect(
             console.warn(`Gagal mengunduh ${photo.filename}, skip.`);
             failed += 1;
           }
-        } catch {
+        } catch (err) {
+          if (err instanceof DOMException && err.name === "AbortError") throw err;
           console.warn(`Gagal mengunduh ${photo.filename}, skip.`);
           failed += 1;
         }
@@ -169,6 +173,7 @@ export async function downloadAllDirect(
         zip.file(photo.filename, blob);
       }
     } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") throw error;
       console.error(`Error downloading ${photo.filename}:`, error);
       failed += 1;
     }
@@ -187,7 +192,8 @@ export async function downloadAllDirect(
   }
 
   // Generate and download the ZIP
-  if (done > failed) {
+  const succeeded = done - failed;
+  if (succeeded > 0) {
     onProgress({ 
       done, 
       total, 
@@ -208,15 +214,16 @@ export async function downloadAllDirect(
     onProgress({ 
       done, 
       total, 
-      current: `Selesai! ${done - failed} foto diunduh${failed > 0 ? `, ${failed} gagal` : ''}` 
+      current: `Selesai! ${succeeded} foto diunduh${failed > 0 ? `, ${failed} gagal` : ''}` 
     });
+    return { succeeded, failed };
   } else {
     throw new Error(`Semua download gagal (${failed}/${total})`);
   }
 }
 
-// Download all photos with optional watermark removal
-// This handles watermark removal with proper progress tracking
+// Download all photos with optional watermark removal as a single ZIP file.
+// This handles watermark removal with proper progress tracking and ZIP bundling.
 export async function downloadAllWithOptions(
   photos: Photo[],
   onProgress: (p: DownloadAllProgress) => void,
@@ -224,51 +231,104 @@ export async function downloadAllWithOptions(
     removeWatermark?: boolean;
     watermarkSettings?: WatermarkRemovalSettings;
   },
-  delayMs = 250
-): Promise<void> {
+  delayMs = 500,
+  signal?: AbortSignal
+): Promise<{ succeeded: number; failed: number }> {
+  if (!options?.removeWatermark || !options?.watermarkSettings) {
+    // No watermark removal, use direct ZIP download
+    return downloadAllDirect(photos, onProgress, delayMs, signal);
+  }
+
+  const zip = new JSZip();
   const total = photos.length;
   let done = 0;
+  let failed = 0;
   let watermarkSuccess = 0;
   let watermarkFailed = 0;
 
-  if (!options?.removeWatermark || !options?.watermarkSettings) {
-    // No watermark removal, use simple direct download
-    return downloadAllDirect(photos, onProgress, delayMs);
-  }
-
-  // Process with watermark removal
-  // Use sequential processing to avoid overwhelming the API
   for (const photo of photos) {
-    onProgress({ 
-      done, 
-      total, 
-      current: photo.filename,
+    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+
+    onProgress({
+      done,
+      total,
+      current: `Mengunduh ${photo.filename}...`,
       watermarkSuccess,
       watermarkFailed,
     });
 
-    const result = await downloadPhotoWithOptions(photo, options);
+    try {
+      // 1. Fetch original via proxy
+      const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
+      let blob: Blob | null = null;
+      const response = await fetch(proxyUrl, { signal });
+      if (response.ok) {
+        blob = await response.blob();
+      } else {
+        // fallback wsrv.nl
+        const wsrvUrl = `https://wsrv.nl/?url=${encodeURIComponent(photo.url)}&output=auto`;
+        const wsrv = await fetch(wsrvUrl, { signal });
+        if (wsrv.ok) {
+          blob = await wsrv.blob();
+        }
+      }
 
-    if (result.success) {
-      watermarkSuccess += 1;
-    } else {
-      watermarkFailed += 1;
+      if (!blob) {
+        failed++;
+        done++;
+        continue;
+      }
+
+      // 2. Try watermark removal
+      try {
+        const result = await removeWatermark(photo, options.watermarkSettings);
+        if (result.success && result.processedImageBlob) {
+          blob = result.processedImageBlob;
+          watermarkSuccess++;
+        } else {
+          watermarkFailed++;
+        }
+      } catch {
+        watermarkFailed++;
+      }
+
+      zip.file(photo.filename, blob);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") throw error;
+      failed++;
     }
 
-    done += 1;
-
-    onProgress({ 
-      done, 
-      total, 
-      current: photo.filename,
+    done++;
+    onProgress({
+      done,
+      total,
+      current: `${done}/${total} selesai`,
       watermarkSuccess,
       watermarkFailed,
     });
 
-    // Add delay between downloads (longer for watermark removal to account for API processing)
     if (done < total) {
-      const delay = options.removeWatermark ? 1000 : delayMs;
-      await new Promise((r) => setTimeout(r, delay));
+      await new Promise((r) => setTimeout(r, options.removeWatermark ? 1000 : delayMs));
     }
   }
+
+  const succeeded = done - failed;
+  if (succeeded > 0) {
+    onProgress({
+      done,
+      total,
+      current: "Membuat file ZIP...",
+      watermarkSuccess,
+      watermarkFailed,
+    });
+    const zipBlob = await zip.generateAsync({
+      type: "blob",
+      compression: "DEFLATE",
+      compressionOptions: { level: 6 },
+    });
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, "").replace("T", "_");
+    downloadBlob(zipBlob, `fotoyu_photos_${timestamp}.zip`);
+    return { succeeded, failed };
+  }
+  throw new Error(`Semua download gagal (${failed}/${total})`);
 }

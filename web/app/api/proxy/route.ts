@@ -37,7 +37,7 @@ async function fetchUpstream(target: string): Promise<Response> {
     try {
       const res = await fetch(target, {
         headers: BROWSER_HEADERS,
-        cache: "force-cache",
+        cache: "no-store",
         // AbortController gives us a hard timeout per attempt so a hung
         // upstream does not eat the whole 60s serverless budget.
         signal: AbortSignal.timeout(15000),

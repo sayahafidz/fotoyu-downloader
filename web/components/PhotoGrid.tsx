@@ -12,7 +12,7 @@ import { DEFAULT_WATERMARK_SETTINGS, type WatermarkRemovalSettings } from "@/lib
 interface PhotoGridProps {
   photos: Photo[];
   allPhotos: Photo[];
-  onDownloadAll: () => void;
+  onDownloadAll: (settings: WatermarkRemovalSettings) => void;
   zipping: boolean;
   searchQuery: string;
   onSearchChange: (q: string) => void;
@@ -93,7 +93,7 @@ export default function PhotoGrid({
           </div>
           <button
             type="button"
-            onClick={onDownloadAll}
+            onClick={() => onDownloadAll(watermarkSettings)}
             disabled={zipping}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-60"
           >

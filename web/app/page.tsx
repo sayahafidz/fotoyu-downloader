@@ -11,7 +11,8 @@ import ProgressOverlay from "@/components/ProgressOverlay";
 import HelpSection from "@/components/HelpSection";
 import DarkModeToggle from "@/components/DarkModeToggle";
 import { ToastContainer, useToast, type ToastItem } from "@/components/Toast";
-import { downloadAllDirect, type DownloadAllProgress } from "@/lib/download";
+import { downloadAllDirect, downloadAllWithOptions, type DownloadAllProgress } from "@/lib/download";
+import type { WatermarkRemovalSettings } from "@/lib/watermark-removal";
 import {
   fetchCartViaToken,
   loadToken,
@@ -33,6 +34,7 @@ export default function HomePage() {
   const [pendingToken, setPendingToken] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
   const { toasts, addToast, removeToast } = useToast();
 
   const filteredPhotos = useMemo(() => {
@@ -62,8 +64,7 @@ export default function HomePage() {
     if (cartMatch) {
       try {
         const decoded = decodeURIComponent(cartMatch[1]);
-        const cartJson = JSON.parse(decoded);
-        const photos = extractPhotos(JSON.stringify(cartJson));
+        const photos = extractPhotos(decoded);
         if (photos.length > 0) {
           setPhotos(photos);
           setPhase("preview");
@@ -71,8 +72,8 @@ export default function HomePage() {
           setError("Cart kosong atau tidak ada foto.");
           setPhase("error");
         }
-      } catch {
-        setError("Data cart dari bookmarklet tidak valid.");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Data cart dari bookmarklet tidak valid.");
         setPhase("error");
       } finally {
         window.history.replaceState(null, "", window.location.pathname);
@@ -152,20 +153,41 @@ export default function HomePage() {
     }
   }, []);
 
-  const handleDownloadAll = useCallback(async () => {
+  const handleDownloadAll = useCallback(async (settings: WatermarkRemovalSettings) => {
     const toDownload = selectedIds.size > 0
       ? photos.filter((p) => selectedIds.has(p.product_id))
       : photos;
     setPhase("zipping");
     setError(null);
     setProgress({ done: 0, total: toDownload.length, current: "Memulai..." });
+    const controller = new AbortController();
+    setAbortController(controller);
     try {
-      await downloadAllDirect(toDownload, (p) => setProgress(p));
+      const res = await downloadAllWithOptions(
+        toDownload, 
+        (p) => setProgress(p),
+        { removeWatermark: settings.enabled, watermarkSettings: settings },
+        500,
+        controller.signal
+      );
       setPhase("preview");
       setProgress(null);
       setSelectedIds(new Set());
-      addToast({ type: "success", message: `${toDownload.length} foto berhasil diunduh.` });
+      if (res.failed > 0) {
+        addToast({
+          type: "warning",
+          message: `${res.succeeded} foto berhasil diunduh ke ZIP (${res.failed} foto gagal).`,
+        });
+      } else {
+        addToast({ type: "success", message: `${toDownload.length} foto berhasil diunduh.` });
+      }
     } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") {
+        addToast({ type: "info", message: "Download dibatalkan." });
+        setPhase("preview");
+        setProgress(null);
+        return;
+      }
       const msg = e instanceof Error ? e.message : "Gagal mengunduh.";
       setError(msg);
       setPhase("preview");
@@ -175,8 +197,14 @@ export default function HomePage() {
         setProgress(null);
         setError(null);
       }, 4000);
+    } finally {
+      setAbortController(null);
     }
   }, [photos, selectedIds, addToast]);
+
+  const handleCancelDownload = useCallback(() => {
+    abortController?.abort();
+  }, [abortController]);
 
   const handleReset = useCallback(() => {
     setPhotos([]);
@@ -324,6 +352,11 @@ export default function HomePage() {
       <ProgressOverlay
         progress={progress}
         error={phase === "zipping" ? null : error && progress ? error : null}
+        onClose={() => {
+          setProgress(null);
+          setError(null);
+        }}
+        onCancel={phase === "zipping" ? handleCancelDownload : undefined}
       />
 
       {/* Toast container */}
