@@ -10,25 +10,23 @@ export const dynamic = "force-dynamic";
 // Headers mimic a real browser request to fotoyu.com. cfsimgproxy.fototree.com
 // rejects requests that look like bots/server-side fetches (Vercel IPs get 403),
 // so we send a complete, realistic browser fingerprint.
-const BROWSER_HEADERS: HeadersInit = {
-  "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " +
-    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-  Accept:
-    "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-  "Accept-Language": "en-US,en;q=0.9",
-  // Removed "Accept-Encoding": "gzip, deflate, br" 
-  // because node fetch doesn't always automatically decompress br, which corrupts the image.
-  Referer: "https://fotoyu.com/",
-  Origin: "https://fotoyu.com",
-  "Sec-Fetch-Dest": "image",
-  "Sec-Fetch-Mode": "no-cors",
-  "Sec-Fetch-Site": "cross-site",
-  "Sec-Ch-Ua":
-    '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
-  "Sec-Ch-Ua-Mobile": "?0",
-  "Sec-Ch-Ua-Platform": '"Windows"',
-};
+  const BROWSER_HEADERS: HeadersInit = {
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9,id;q=0.8",
+    Referer: "https://fotoyu.com/",
+    Origin: "https://fotoyu.com",
+    "Sec-Fetch-Dest": "image",
+    "Sec-Fetch-Mode": "no-cors",
+    "Sec-Fetch-Site": "cross-site",
+    "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+    "Sec-Ch-Ua-Mobile": "?0",
+    "Sec-Ch-Ua-Platform": '"Windows"',
+    "Cache-Control": "no-cache",
+    Pragma: "no-cache",
+    DNT: "1",
+  };
 
 async function fetchUpstream(target: string): Promise<Response> {
   // Try up to 3 times. Upstream CDN sometimes returns transient 403/hang
@@ -53,7 +51,8 @@ async function fetchUpstream(target: string): Promise<Response> {
           // ignore
         }
         if (attempt < 3) {
-          await new Promise((r) => setTimeout(r, 500 * attempt));
+          // longer delay for cloudflare
+          await new Promise((r) => setTimeout(r, 1000 * attempt));
           continue;
         }
       }
@@ -61,7 +60,7 @@ async function fetchUpstream(target: string): Promise<Response> {
     } catch (e) {
       lastErr = e;
       if (attempt < 3) {
-        await new Promise((r) => setTimeout(r, 500 * attempt));
+        await new Promise((r) => setTimeout(r, 1000 * attempt));
         continue;
       }
     }
@@ -87,7 +86,12 @@ async function fetchViaPublicProxy(target: string): Promise<Response | null> {
       const isGamma = tmpl.includes("gamma.app");
       // gamma expects url directly (not encoded fully, but let's see), wsrv.nl handles encoded
       const url = tmpl.replace("${URL}", isGamma ? target : encodeURIComponent(target));
-      const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      const res = await fetch(url, { 
+        signal: AbortSignal.timeout(15000),
+        headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        } 
+      });
       if (res.ok && res.body) return res;
     } catch (e) {
       continue;
@@ -103,6 +107,10 @@ function streamProxyResponse(upstream: Response, opts?: { downloadFilename?: str
   headers.set("Content-Type", ct && ct.startsWith("image/") ? ct : "image/jpeg");
   headers.set("Cache-Control", "public, max-age=86400, immutable");
   headers.set("Access-Control-Allow-Origin", "*");
+  // Copy over the length if available so the browser knows the download size
+  const cl = upstream.headers.get("content-length");
+  if (cl) headers.set("Content-Length", cl);
+  
   if (opts?.downloadFilename) {
     headers.set("Content-Disposition", `attachment; filename="${opts.downloadFilename}"`);
   }
