@@ -26,7 +26,10 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: DARK_MODE_SCRIPT }} />
+        <script
+          dangerouslySetInnerHTML={{ __html: DARK_MODE_SCRIPT }}
+          suppressHydrationWarning
+        />
       </head>
       <body>
         {children}

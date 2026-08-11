@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { WatermarkRemovalSettings, WatermarkRegion } from "@/lib/watermark-removal";
-import { estimateCost, formatCost, getRegionDisplayName } from "@/lib/watermark-removal";
+import { estimateCost, formatCost } from "@/lib/watermark-removal";
 
 interface WatermarkRemovalSettingsProps {
   settings: WatermarkRemovalSettings;
@@ -16,11 +16,42 @@ export default function WatermarkRemovalSettingsPanel({
   onChange,
 }: WatermarkRemovalSettingsProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [geminiKeyInput, setGeminiKeyInput] = useState("");
+  const [geminiBaseUrlInput, setGeminiBaseUrlInput] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedKey = localStorage.getItem("fotoyu_gemini_key") || "";
+      const storedBaseUrl = localStorage.getItem("fotoyu_gemini_base_url") || "";
+      setGeminiKeyInput(storedKey);
+      setGeminiBaseUrlInput(storedBaseUrl);
+    }
+  }, []);
 
   const cost = estimateCost(photoCount);
 
   const toggleEnabled = () => {
     onChange({ ...settings, enabled: !settings.enabled });
+  };
+
+  const handleProviderChange = (provider: "gemini" | "openai" | "dewatermark") => {
+    onChange({ ...settings, provider });
+  };
+
+  const handleSaveGeminiKey = (key: string) => {
+    setGeminiKeyInput(key);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("fotoyu_gemini_key", key);
+    }
+    onChange({ ...settings, geminiKey: key });
+  };
+
+  const handleSaveGeminiBaseUrl = (url: string) => {
+    setGeminiBaseUrlInput(url);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("fotoyu_gemini_base_url", url);
+    }
+    onChange({ ...settings, geminiBaseUrl: url });
   };
 
   const setRegionPosition = (position: WatermarkRegion["position"]) => {
@@ -47,19 +78,19 @@ export default function WatermarkRemovalSettingsPanel({
     { id: "BR", label: "Kanan Bawah" },
   ];
 
+  const currentProvider = settings.provider || "gemini";
+
   return (
     <div className="w-full space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
       {/* Header with toggle */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={toggleEnabled}
             className={[
               "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
-              settings.enabled
-                ? "bg-indigo-600"
-                : "bg-slate-300 dark:bg-slate-600",
+              settings.enabled ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600",
             ].join(" ")}
           >
             <span
@@ -70,20 +101,21 @@ export default function WatermarkRemovalSettingsPanel({
             />
           </button>
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-              Hapus Watermark dengan AI
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>Hapus Watermark Langsung (AI)</span>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                GEMINI 2.0 FLASH FREE
+              </span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Menggunakan Dewatermark.ai (server-side processing)
+              Otomatis hilangkan watermark saat download tanpa re-upload ke ChatGPT/Gemini
             </p>
           </div>
         </div>
-        
-        {settings.enabled && (
+
+        {settings.enabled && currentProvider === "dewatermark" && (
           <div className="text-right">
-            <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
-              Estimasi biaya
-            </p>
+            <p className="text-xs font-medium text-slate-600 dark:text-slate-300">Estimasi biaya</p>
             <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
               {formatCost(cost.costUSD, cost.costIDR)}
             </p>
@@ -97,6 +129,100 @@ export default function WatermarkRemovalSettingsPanel({
       {/* Settings panel (shown when enabled) */}
       {settings.enabled && (
         <div className="space-y-4 border-t border-slate-200 pt-4 dark:border-slate-700">
+          {/* Provider Selector */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Pilih AI Provider:
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => handleProviderChange("gemini")}
+                className={[
+                  "flex flex-col items-start rounded-xl border p-3 text-left transition-all",
+                  currentProvider === "gemini"
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                ].join(" ")}
+              >
+                <span className="font-bold text-xs">Google Gemini Flash</span>
+                <span className="text-[10px] opacity-80">Gratis 1,500 req/hari (AI Studio)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleProviderChange("dewatermark")}
+                className={[
+                  "flex flex-col items-start rounded-xl border p-3 text-left transition-all",
+                  currentProvider === "dewatermark"
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                ].join(" ")}
+              >
+                <span className="font-bold text-xs">Dewatermark.ai</span>
+                <span className="text-[10px] opacity-80">Memerlukan API Key Server</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleProviderChange("openai")}
+                className={[
+                  "flex flex-col items-start rounded-xl border p-3 text-left transition-all",
+                  currentProvider === "openai"
+                    ? "border-purple-500 bg-purple-50 text-purple-900 dark:bg-purple-950/40 dark:text-purple-200 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                ].join(" ")}
+              >
+                <span className="font-bold text-xs">OpenAI GPT-4o</span>
+                <span className="text-[10px] opacity-80">Vision model API</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Gemini Key & Custom Base URL Inputs */}
+          {currentProvider === "gemini" && (
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5 space-y-3 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-300">
+                    Google Gemini Secret Key / API Key:
+                  </label>
+                  <a
+                    href="https://aistudio.google.com/app/apikey"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+                  >
+                    Dapatkan Key Gratis →
+                  </a>
+                </div>
+                <input
+                  type="password"
+                  placeholder="Paste AIzaSy... (tersimpan aman di localStorage browser)"
+                  value={geminiKeyInput}
+                  onChange={(e) => handleSaveGeminiKey(e.target.value)}
+                  className="w-full rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-emerald-800 dark:bg-slate-900 dark:text-slate-100"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-300">
+                  Custom API Base URL (Opsional / Custom Proxy):
+                </label>
+                <input
+                  type="text"
+                  placeholder="Opsional: https://generativelanguage.googleapis.com atau proxy custom Anda"
+                  value={geminiBaseUrlInput}
+                  onChange={(e) => handleSaveGeminiBaseUrl(e.target.value)}
+                  className="w-full rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-emerald-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                />
+                <p className="text-[10px] text-emerald-800/80 dark:text-emerald-400/80">
+                  Kosongkan jika menggunakan endpoint resmi Google AI Studio. Isi jika Anda memakai Cloudflare AI Gateway atau reverse proxy custom.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Auto-detect toggle */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
@@ -107,13 +233,8 @@ export default function WatermarkRemovalSettingsPanel({
                 className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-slate-600"
               />
               <span className="font-medium">Auto-detect watermark</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">
-                (AI deteksi otomatis)
-              </span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">(AI deteksi otomatis)</span>
             </label>
-            <p className="text-xs text-slate-500 dark:text-slate-400 ml-6">
-              AI akan otomatis mendeteksi dan menghapus teks watermark. Paling akurat untuk text watermark.
-            </p>
           </div>
 
           {/* Manual region selection */}
@@ -139,9 +260,6 @@ export default function WatermarkRemovalSettingsPanel({
                   </button>
                 ))}
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Pilih area dimana watermark biasanya berada. AI akan fokus menghapus pada area tersebut.
-              </p>
             </div>
           )}
 
@@ -156,7 +274,6 @@ export default function WatermarkRemovalSettingsPanel({
 
           {showAdvanced && (
             <div className="space-y-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-900/50">
-              {/* Remove text option */}
               <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
                 <input
                   type="checkbox"
@@ -167,61 +284,18 @@ export default function WatermarkRemovalSettingsPanel({
                 <span>Remove text watermarks</span>
               </label>
 
-              {/* Info panel */}
               <div className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-600 dark:bg-slate-800">
                 <h4 className="mb-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  ℹ️ Informasi
+                  ℹ️ Informasi Fitur AI
                 </h4>
                 <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                  <li>• Processing time: 2-5 detik per foto</li>
-                  <li>• Quality: 9/10 (AI-powered inpainting)</li>
-                  <li>• Tidak membebani laptop client (server-side)</li>
-                  <li>• Credits tidak expired (one-time purchase)</li>
-                  <li>
-                    • <a
-                      href="https://platform.dewatermark.ai/dashboard"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 hover:underline dark:text-indigo-400"
-                    >
-                      Dashboard Dewatermark.ai →
-                    </a>
-                  </li>
+                  <li>• Gemini 2.0 Flash: Sangat cepat & gratis via Google AI Studio Key</li>
+                  <li>• Processing time: 2-4 detik per foto</li>
+                  <li>• Langsung mengunduh foto bersih tanpa perlu manual ke ChatGPT/Gemini lagi</li>
                 </ul>
-              </div>
-
-              {/* Pricing tiers */}
-              <div className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-600 dark:bg-slate-800">
-                <h4 className="mb-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  💰 Pricing Tiers
-                </h4>
-                <div className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                  <div className="flex justify-between">
-                    <span>100 foto:</span>
-                    <span className="font-medium">$7 ($0.07/foto)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>1,000 foto:</span>
-                    <span className="font-medium">$25 ($0.025/foto)</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>10,000 foto:</span>
-                    <span className="font-medium">$100 ($0.01/foto)</span>
-                  </div>
-                </div>
               </div>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Warning if not configured */}
-      {settings.enabled && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/50 dark:bg-amber-900/20">
-          <p className="text-xs text-amber-800 dark:text-amber-200">
-            ⚠️ <strong>Catatan:</strong> Fitur ini memerlukan Dewatermark.ai API key.
-            Pastikan <code className="rounded bg-amber-100 px-1 py-0.5 dark:bg-amber-900/50">DEWATERMARK_API_KEY</code> sudah dikonfigurasi di environment variables.
-          </p>
         </div>
       )}
     </div>

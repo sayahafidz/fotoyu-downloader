@@ -20,55 +20,95 @@ export function downloadBlob(blob: Blob, filename: string): void {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-// Download a single photo automatically to the user's downloads folder.
-// Multi-layer strategy chain, each layer tries a different proxy until
-// the image is fetched as a Blob, then saved via <a download> on a blob URL.
+/**
+ * Fallback to fetch image blob via HTML5 Canvas DOM rendering.
+ * Runs directly inside user browser context where IP blocking is avoided.
+ */
+export async function fetchImageBlobViaCanvas(url: string): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return resolve(null);
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, "image/jpeg", 0.95);
+      } catch {
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+/**
+ * Robust multi-layer fetcher for image blobs:
+ * 1. Next.js /api/proxy
+ * 2. wsrv.nl public proxy
+ * 3. corsproxy.io public proxy
+ * 4. Client-side HTML5 Canvas draw fallback
+ */
+export async function fetchImageBlobWithFallbacks(
+  url: string,
+  signal?: AbortSignal
+): Promise<Blob> {
+  const encoded = encodeURIComponent(url);
+
+  // Layer 1: Next.js API Proxy
+  try {
+    const res = await fetch(`/api/proxy?url=${encoded}`, { signal });
+    if (res.ok) {
+      const blob = await res.blob();
+      if (blob && blob.size > 0) return blob;
+    }
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
+  }
+
+  // Layer 2: wsrv.nl public CORS proxy
+  try {
+    const res = await fetch(`https://wsrv.nl/?url=${encoded}&output=auto`, { signal });
+    if (res.ok) {
+      const blob = await res.blob();
+      if (blob && blob.size > 0) return blob;
+    }
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
+  }
+
+  // Layer 3: corsproxy.io public CORS proxy
+  try {
+    const res = await fetch(`https://corsproxy.io/?${encoded}`, { signal });
+    if (res.ok) {
+      const blob = await res.blob();
+      if (blob && blob.size > 0) return blob;
+    }
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
+  }
+
+  // Layer 4: Client-side HTML5 Canvas fallback (bypasses CORS restrictions if image cached)
+  try {
+    const canvasBlob = await fetchImageBlobViaCanvas(url);
+    if (canvasBlob && canvasBlob.size > 0) return canvasBlob;
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") throw e;
+  }
+
+  throw new Error("Gagal mengunduh foto dari server proxy maupun canvas fallback.");
+}
+
+// Download a single photo automatically to the user's downloads folder without redirecting or opening tabs.
 export async function downloadPhotoDirect(photo: Photo): Promise<void> {
-  const encoded = encodeURIComponent(photo.url);
-
-  // Strategy 1: Our own Vercel proxy (may be blocked by CDN datacenter IP filter).
-  // The proxy now has its own public-proxy fallback built in, so it succeeds
-  // even when Vercel IPs are blocked.
-  try {
-    const proxyUrl = `/api/proxy?url=${encoded}&mode=download&filename=${encodeURIComponent(photo.filename)}`;
-    const response = await fetch(proxyUrl);
-    if (response.ok) {
-      const blob = await response.blob();
-      downloadBlob(blob, photo.filename);
-      return;
-    }
-  } catch {
-    // Will try next strategy.
-  }
-
-  // Strategy 2: wsrv.nl public image proxy (non-Vercel IP, supports CORS).
-  try {
-    const wsrvUrl = `https://wsrv.nl/?url=${encoded}&output=auto`;
-    const response = await fetch(wsrvUrl);
-    if (response.ok) {
-      const blob = await response.blob();
-      downloadBlob(blob, photo.filename);
-      return;
-    }
-  } catch {
-    // Will try next strategy.
-  }
-
-  // Strategy 3: imgproxy.gamma.app (Cloudflare-based, supports CORS).
-  try {
-    const gammaUrl = `https://imgproxy.gamma.app/${encoded}`;
-    const response = await fetch(gammaUrl);
-    if (response.ok) {
-      const blob = await response.blob();
-      downloadBlob(blob, photo.filename);
-      return;
-    }
-  } catch {
-    // Will try last resort.
-  }
-
-  // Last resort: open image in a new tab so user can save manually.
-  window.open(photo.url, "_blank");
+  const blob = await fetchImageBlobWithFallbacks(photo.url);
+  downloadBlob(blob, photo.filename);
 }
 
 // Download a single photo with optional watermark removal
@@ -122,9 +162,8 @@ export interface DownloadAllProgress {
   watermarkFailed?: number;
 }
 
-// Download all photos as a single ZIP file. Fetches images through the proxy
-// (which has CORS headers and retry logic), bundles them using JSZip, and
-// triggers a single download of the ZIP archive.
+// Download all photos as a single ZIP file. Fetches images using robust fallbacks,
+// bundles them using JSZip, and triggers a single download of the ZIP archive.
 export async function downloadAllDirect(
   photos: Photo[],
   onProgress: (p: DownloadAllProgress) => void,
@@ -147,31 +186,8 @@ export async function downloadAllDirect(
     });
 
     try {
-      // Fetch through proxy which has CORS headers
-      const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
-      const response = await fetch(proxyUrl, { signal });
-
-      if (!response.ok) {
-        // If proxy fails, try wsrv.nl public proxy (different IP range)
-        try {
-          const wsrvUrl = `https://wsrv.nl/?url=${encodeURIComponent(photo.url)}&output=auto`;
-          const wsrvResponse = await fetch(wsrvUrl, { signal });
-          if (wsrvResponse.ok) {
-            const blob = await wsrvResponse.blob();
-            zip.file(photo.filename, blob);
-          } else {
-            console.warn(`Gagal mengunduh ${photo.filename}, skip.`);
-            failed += 1;
-          }
-        } catch (err) {
-          if (err instanceof DOMException && err.name === "AbortError") throw err;
-          console.warn(`Gagal mengunduh ${photo.filename}, skip.`);
-          failed += 1;
-        }
-      } else {
-        const blob = await response.blob();
-        zip.file(photo.filename, blob);
-      }
+      const blob = await fetchImageBlobWithFallbacks(photo.url, signal);
+      zip.file(photo.filename, blob);
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") throw error;
       console.error(`Error downloading ${photo.filename}:`, error);
@@ -258,19 +274,12 @@ export async function downloadAllWithOptions(
     });
 
     try {
-      // 1. Fetch original via proxy
-      const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
       let blob: Blob | null = null;
-      const response = await fetch(proxyUrl, { signal });
-      if (response.ok) {
-        blob = await response.blob();
-      } else {
-        // fallback wsrv.nl
-        const wsrvUrl = `https://wsrv.nl/?url=${encodeURIComponent(photo.url)}&output=auto`;
-        const wsrv = await fetch(wsrvUrl, { signal });
-        if (wsrv.ok) {
-          blob = await wsrv.blob();
-        }
+      // 1. Fetch original via multi-layer fallback fetcher
+      try {
+        blob = await fetchImageBlobWithFallbacks(photo.url, signal);
+      } catch {
+        blob = null;
       }
 
       if (!blob) {

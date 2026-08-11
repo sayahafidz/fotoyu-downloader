@@ -10,6 +10,10 @@ export interface WatermarkRegion {
 
 export interface WatermarkRemovalSettings {
   enabled: boolean;
+  provider?: "gemini" | "openai" | "dewatermark";
+  geminiKey?: string;
+  geminiBaseUrl?: string;
+  openaiKey?: string;
   region?: WatermarkRegion;
   removeText: boolean;
   autoDetect: boolean;
@@ -32,13 +36,30 @@ export async function removeWatermark(
   settings: WatermarkRemovalSettings
 ): Promise<WatermarkRemovalResult> {
   try {
+    const savedGeminiKey =
+      settings.geminiKey ||
+      (typeof window !== "undefined" ? localStorage.getItem("fotoyu_gemini_key") || "" : "");
+    const savedGeminiBaseUrl =
+      settings.geminiBaseUrl ||
+      (typeof window !== "undefined" ? localStorage.getItem("fotoyu_gemini_base_url") || "" : "");
+    const savedOpenAIKey =
+      settings.openaiKey ||
+      (typeof window !== "undefined" ? localStorage.getItem("fotoyu_openai_key") || "" : "");
+
     const response = await fetch("/api/remove-watermark", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(savedGeminiKey ? { "X-Gemini-Key": savedGeminiKey } : {}),
+        ...(savedGeminiBaseUrl ? { "X-Gemini-Base-Url": savedGeminiBaseUrl } : {}),
+        ...(savedOpenAIKey ? { "X-OpenAI-Key": savedOpenAIKey } : {}),
       },
       body: JSON.stringify({
         imageUrl: photo.url,
+        provider: settings.provider || "gemini",
+        geminiKey: savedGeminiKey,
+        geminiBaseUrl: savedGeminiBaseUrl,
+        openaiKey: savedOpenAIKey,
         region: settings.region,
         removeText: settings.removeText || settings.autoDetect,
       }),
@@ -221,6 +242,10 @@ export function getRegionDisplayName(position?: string): string {
  */
 export const DEFAULT_WATERMARK_SETTINGS: WatermarkRemovalSettings = {
   enabled: false,
+  provider: "gemini",
+  geminiKey: "",
+  geminiBaseUrl: "",
+  openaiKey: "",
   removeText: true,
   autoDetect: true,
   region: undefined,

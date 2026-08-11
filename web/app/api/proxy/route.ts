@@ -75,6 +75,8 @@ async function fetchUpstream(target: string): Promise<Response> {
 const PUBLIC_PROXIES = [
   // wsrv.nl - open-source image proxy with CORS support
   "https://wsrv.nl/?url=${URL}&output=auto",
+  // corsproxy.io - high performance CORS proxy
+  "https://corsproxy.io/?${URL}",
   // Cloudflare-based open image proxy
   "https://imgproxy.gamma.app/${URL}",
 ];
