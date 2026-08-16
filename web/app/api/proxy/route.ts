@@ -28,44 +28,46 @@ export const dynamic = "force-dynamic";
     DNT: "1",
   };
 
+  const MINIMAL_HEADERS: HeadersInit = {
+    "User-Agent":
+      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9,id;q=0.8",
+  };
+
 async function fetchUpstream(target: string): Promise<Response> {
-  // Try up to 3 times. Upstream CDN sometimes returns transient 403/hang
-  // when hit from datacenter IPs; a retry often succeeds.
+  // Try with browser headers, and if 403 or failure, retry with minimal headers.
   let lastErr: unknown = null;
+  const headerVariants = [BROWSER_HEADERS, MINIMAL_HEADERS];
+
   for (let attempt = 1; attempt <= 3; attempt += 1) {
-    try {
-      const res = await fetch(target, {
-        headers: BROWSER_HEADERS,
-        cache: "no-store",
-        // AbortController gives us a hard timeout per attempt so a hung
-        // upstream does not eat the whole 60s serverless budget.
-        signal: AbortSignal.timeout(15000),
-      });
-      // Retry on 403/5xx; return immediately on success or 4xx (non-403).
-      if (res.status === 403 || res.status >= 500) {
-        lastErr = new Error(`HTTP ${res.status}`);
-        // Drain & free the body before retrying.
-        try {
-          await res.arrayBuffer();
-        } catch {
-          // ignore
+    for (const headers of headerVariants) {
+      try {
+        const res = await fetch(target, {
+          headers,
+          cache: "no-store",
+          signal: AbortSignal.timeout(15000),
+        });
+        if (res.ok && res.body) {
+          return res;
         }
-        if (attempt < 3) {
-          // longer delay for cloudflare
-          await new Promise((r) => setTimeout(r, 1000 * attempt));
-          continue;
+        if (res.status === 403 || res.status >= 500) {
+          lastErr = new Error(`HTTP ${res.status}`);
+          try {
+            await res.arrayBuffer();
+          } catch {
+            // ignore
+          }
         }
-      }
-      return res;
-    } catch (e) {
-      lastErr = e;
-      if (attempt < 3) {
-        await new Promise((r) => setTimeout(r, 1000 * attempt));
-        continue;
+      } catch (e) {
+        lastErr = e;
       }
     }
+    if (attempt < 3) {
+      await new Promise((r) => setTimeout(r, 1000 * attempt));
+    }
   }
-  throw lastErr ?? new Error("Gagal menghubungi upstream setelah 3 percobaan.");
+  throw lastErr ?? new Error("Gagal menghubungi upstream setelah beberapa percobaan.");
 }
 
 // Public CORS/image proxies that operate from non-Vercel IP ranges.
@@ -73,11 +75,11 @@ async function fetchUpstream(target: string): Promise<Response> {
 // public services can often fetch successfully since they use residential
 // or diverse IP pools.
 const PUBLIC_PROXIES = [
-  // wsrv.nl - open-source image proxy with CORS support
-  "https://wsrv.nl/?url=${URL}&output=auto",
-  // corsproxy.io - high performance CORS proxy
-  "https://corsproxy.io/?${URL}",
-  // Cloudflare-based open image proxy
+  // allorigins raw CORS proxy
+  "https://api.allorigins.win/raw?url=${URL}",
+  // codetabs CORS proxy
+  "https://api.codetabs.com/v1/proxy?quest=${URL}",
+  // open image proxy
   "https://imgproxy.gamma.app/${URL}",
 ];
 

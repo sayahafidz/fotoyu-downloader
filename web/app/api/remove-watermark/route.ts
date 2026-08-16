@@ -43,14 +43,25 @@ async function fetchImage(url: string): Promise<{ buffer: Buffer; contentType: s
     // try fallback public proxy
   }
 
-  const publicUrl = `https://wsrv.nl/?url=${encodeURIComponent(url)}&output=auto`;
-  const response = await fetch(publicUrl, { signal: AbortSignal.timeout(15000) });
-  if (!response.ok) {
-    throw new Error(`Gagal mengambil foto dari URL: HTTP ${response.status}`);
+  const fallbackProxies = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  ];
+
+  for (const proxyUrl of fallbackProxies) {
+    try {
+      const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(15000) });
+      if (response.ok) {
+        const buffer = Buffer.from(await response.arrayBuffer());
+        const contentType = response.headers.get("content-type") || "image/jpeg";
+        return { buffer, contentType };
+      }
+    } catch {
+      // try next
+    }
   }
-  const buffer = Buffer.from(await response.arrayBuffer());
-  const contentType = response.headers.get("content-type") || "image/jpeg";
-  return { buffer, contentType };
+
+  throw new Error("Gagal mengambil foto dari URL.");
 }
 
 /**

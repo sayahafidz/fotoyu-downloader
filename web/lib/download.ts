@@ -51,9 +51,8 @@ export async function fetchImageBlobViaCanvas(url: string): Promise<Blob | null>
 /**
  * Robust multi-layer fetcher for image blobs:
  * 1. Next.js /api/proxy
- * 2. wsrv.nl public proxy
- * 3. corsproxy.io public proxy
- * 4. Client-side HTML5 Canvas draw fallback
+ * 2. Public open CORS/image proxies (allorigins, bypass cors, etc.)
+ * 3. Client-side HTML5 Canvas draw fallback
  */
 export async function fetchImageBlobWithFallbacks(
   url: string,
@@ -72,9 +71,9 @@ export async function fetchImageBlobWithFallbacks(
     if (e instanceof DOMException && e.name === "AbortError") throw e;
   }
 
-  // Layer 2: wsrv.nl public CORS proxy
+  // Layer 2: allorigins public CORS proxy
   try {
-    const res = await fetch(`https://wsrv.nl/?url=${encoded}&output=auto`, { signal });
+    const res = await fetch(`https://api.allorigins.win/raw?url=${encoded}`, { signal });
     if (res.ok) {
       const blob = await res.blob();
       if (blob && blob.size > 0) return blob;
@@ -83,9 +82,9 @@ export async function fetchImageBlobWithFallbacks(
     if (e instanceof DOMException && e.name === "AbortError") throw e;
   }
 
-  // Layer 3: corsproxy.io public CORS proxy
+  // Layer 3: Codeet / open CORS proxy fallback
   try {
-    const res = await fetch(`https://corsproxy.io/?${encoded}`, { signal });
+    const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encoded}`, { signal });
     if (res.ok) {
       const blob = await res.blob();
       if (blob && blob.size > 0) return blob;
@@ -102,7 +101,7 @@ export async function fetchImageBlobWithFallbacks(
     if (e instanceof DOMException && e.name === "AbortError") throw e;
   }
 
-  throw new Error("Gagal mengunduh foto dari server proxy maupun canvas fallback.");
+  throw new Error("Gagal mengunduh foto dari server proxy maupun fallback.");
 }
 
 // Download a single photo automatically to the user's downloads folder without redirecting or opening tabs.
