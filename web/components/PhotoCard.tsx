@@ -101,10 +101,17 @@ export default function PhotoCard({
       style={{ animationDelay: `${Math.min(index, 20) * 30}ms` }}
     >
       {/* Image area — click opens lightbox */}
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onImageClick}
-        className="relative aspect-[2/3] w-full overflow-hidden bg-slate-100 dark:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onImageClick();
+          }
+        }}
+        className="relative aspect-[2/3] w-full cursor-pointer overflow-hidden bg-slate-100 dark:bg-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
       >
         {!errored ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -172,7 +179,7 @@ export default function PhotoCard({
             </svg>
           )}
         </button>
-      </button>
+      </div>
 
       {/* Info section */}
       <div className="flex flex-1 flex-col gap-2 p-3">

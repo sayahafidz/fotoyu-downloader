@@ -109,7 +109,7 @@ async function callGeminiAPI(
           content: [
             {
               type: "text",
-              text: "Detect and completely remove all text watermarks, logos, grid lines, and overlay stamps from this photo. Seamlessly reconstruct and restore the original background textures and colors under the watermarked areas.",
+              text: "Remove all text, watermarks, captions, and any faint color artifacts such as rainbow-colored streaks, light leaks, lens flare lines, or color banding from this photo, then fill the cleared areas with natural textures that blend seamlessly with the surroundings, leaving no trace or artifacts. Professionally enhance the photo quality by improving sharpness and detail, correcting color balance for a natural look, adjusting lighting subtly, and reducing noise or grain where present. Perform natural retouching on minor skin blemishes, with strict constraints: do not alter facial structure including the nose, eyes, lips, or jaw; do not change body proportions such as posture, size, or shape; do not modify identifying features so the person remains recognizable; and preserve the original facial expression. Maintain the original background composition and elements, only subtly improving clarity without adding or removing anything except the unwanted artifacts mentioned above. The final result must be photorealistic, appearing like a professional photograph rather than an edited image, with the original composition and framing fully intact — with no visible trace of the removed rainbow line or any other artifact. Return ONLY the clean output image without any surrounding text or markdown explanations.",
             },
             {
               type: "image_url",
@@ -167,7 +167,7 @@ async function callGeminiAPI(
       {
         parts: [
           {
-            text: "Detect and completely remove all text watermarks, logos, grid lines, and overlay stamps from this photo. Seamlessly reconstruct and restore the original background textures and colors under the watermarked areas. Return ONLY the clean output image without any surrounding text or markdown explanations.",
+            text: "Remove all text, watermarks, captions, and any faint color artifacts such as rainbow-colored streaks, light leaks, lens flare lines, or color banding from this photo, then fill the cleared areas with natural textures that blend seamlessly with the surroundings, leaving no trace or artifacts. Professionally enhance the photo quality by improving sharpness and detail, correcting color balance for a natural look, adjusting lighting subtly, and reducing noise or grain where present. Perform natural retouching on minor skin blemishes, with strict constraints: do not alter facial structure including the nose, eyes, lips, or jaw; do not change body proportions such as posture, size, or shape; do not modify identifying features so the person remains recognizable; and preserve the original facial expression. Maintain the original background composition and elements, only subtly improving clarity without adding or removing anything except the unwanted artifacts mentioned above. The final result must be photorealistic, appearing like a professional photograph rather than an edited image, with the original composition and framing fully intact — with no visible trace of the removed rainbow line or any other artifact. Return ONLY the clean output image without any surrounding text or markdown explanations.",
           },
           {
             inline_data: {
