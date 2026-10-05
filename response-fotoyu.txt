@@ -1,0 +1,2068 @@
+{
+    "result": {
+        "data": [
+            {
+                "product_id": "zgM1YO8Lo3nVGbWBD02Xwx50lbAdXQRv",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "zNRq71Qovb0eAkNap9Pwjp2WdDBym9OZ",
+                "member_id": "1xqPW7AgNKav4wWYYJNEX2mndozRe93l",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/uUyvrRLzXLkmzwW4ftHdobIyIQSnXTVwiqBhS5ElLbs/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy8xeHFQVzdBZ05L/YXY0d1dZWUpORVgy/bW5kb3pSZTkzbC9w/cm9maWxlLzZhNDQ4/NTQ0YTQyNThkMDAw/MWE1ZWQxYS5qcGVn.jpeg",
+                "creator_name": "talihitam",
+                "title": "ANN_7577.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/T77GNVFg3OvMgtZv6x4fuDyVqetQhiIjYt0D41vQOO8/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy8xeHFQVzdBZ05LYXY0d1dZWUpORVgybW5kb3pSZTkzbC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTVhZGUzZDhiZmYwMDAxZjBhYmExLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Gbk01",
+                    "latitude": -6.216933,
+                    "longitude": 106.81157
+                },
+                "price": 88888,
+                "initial_price": 88888,
+                "original_price": 88888,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 156957,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "VmrPbMo71avnYwMOgYEeOALWNqRQd30x",
+                        "tree_id": "VLXOlBnJYA0dKEnl9dwmaZ34pz1PxMDv",
+                        "host_id": "",
+                        "name": "Gbk01",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Gbk01",
+                            "latitude": -6.216933,
+                            "longitude": 106.81157
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:28:00Z",
+                "created_at": "2026-06-16T14:17:05Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "XJZ0AjWQoxgbOExQWKGmzpV8qeY6lPB5",
+                    "tree_id": "VLXOlBnJYA0dKEnl9dwmaZ34pz1PxMDv",
+                    "tag_id": "VmrPbMo71avnYwMOgYEeOALWNqRQd30x",
+                    "tree_name": "Gbk01",
+                    "price": 300000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "RaBgl14JvxKOw06bJjznEyPZeYjN7bp0",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "zNRq71Qovb0eAkNap9Pwjp2WdDBym9OZ",
+                "member_id": "1xqPW7AgNKav4wWYYJNEX2mndozRe93l",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/uUyvrRLzXLkmzwW4ftHdobIyIQSnXTVwiqBhS5ElLbs/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy8xeHFQVzdBZ05L/YXY0d1dZWUpORVgy/bW5kb3pSZTkzbC9w/cm9maWxlLzZhNDQ4/NTQ0YTQyNThkMDAw/MWE1ZWQxYS5qcGVn.jpeg",
+                "creator_name": "talihitam",
+                "title": "ANN_7583.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/N7FO2goVQWp9k51Q2z5ZEqnHy1Hd36L-DK6J8oZLPtA/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy8xeHFQVzdBZ05LYXY0d1dZWUpORVgybW5kb3pSZTkzbC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTVhZGUzZDhiZmYwMDAxZjBhYmE0LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Gbk01",
+                    "latitude": -6.216933,
+                    "longitude": 106.81157
+                },
+                "price": 88888,
+                "initial_price": 88888,
+                "original_price": 88888,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 168473,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "VmrPbMo71avnYwMOgYEeOALWNqRQd30x",
+                        "tree_id": "VLXOlBnJYA0dKEnl9dwmaZ34pz1PxMDv",
+                        "host_id": "",
+                        "name": "Gbk01",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Gbk01",
+                            "latitude": -6.216933,
+                            "longitude": 106.81157
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:28:00Z",
+                "created_at": "2026-06-16T14:17:05Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "XJZ0AjWQoxgbOExQWKGmzpV8qeY6lPB5",
+                    "tree_id": "VLXOlBnJYA0dKEnl9dwmaZ34pz1PxMDv",
+                    "tag_id": "VmrPbMo71avnYwMOgYEeOALWNqRQd30x",
+                    "tree_name": "Gbk01",
+                    "price": 300000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "xqPW7AgNKav4wWx3BLYNkX2mndozRe93",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "1xqPW7AgNKav4wWJ9VKGX2mndozRe93l",
+                "member_id": "BlOd4xMa526o0Gg57yRkDy9mQjWZ8YeP",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/_fiaG1IXlXMkKG4V44MpgtrYRXwQoruP6bFCIbPy8hc/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9CbE9kNHhNYTUy/Nm8wR2c1N3lSa0R5/OW1RaldaOFllUC9w/cm9maWxlLzY5MmZj/ZjM0YWVmOGRkMDAw/MTY5NTc5Yi5qcGVn.jpeg",
+                "creator_name": "a_frame",
+                "title": "AFR_7096.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/J95xtqxG6O1PjDh_4dPy5pPX_1qo1naL4V-cD0nPhZ4/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9CbE9kNHhNYTUyNm8wR2c1N3lSa0R5OW1RaldaOFllUC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTRlYTExZjI2YmQwMDAxMWNjM2MyLmpwZWc.jpeg",
+                "description": "semua foto belum di edit, akan di edit setelah di tebus. req DM",
+                "content_type": "photo",
+                "location": {
+                    "name": "Madya area GBK",
+                    "latitude": -6.217172,
+                    "longitude": 106.79876
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 129703,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "XmjbxQ2Pa4pJWEjLg2wor3B89ROy1Y7A",
+                        "tree_id": "72blZMQPLq4mnkdK7vwjrzK5Nx3BA10v",
+                        "host_id": "",
+                        "name": "Madya area GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Madya area GBK",
+                            "latitude": -6.217172,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T13:24:50.687Z",
+                "created_at": "2026-06-16T13:24:50Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "XmjbxQ2Pa4pJWEjyOLkor3B89ROy1Y7A",
+                    "tree_id": "72blZMQPLq4mnkdK7vwjrzK5Nx3BA10v",
+                    "tag_id": "XmjbxQ2Pa4pJWEjLg2wor3B89ROy1Y7A",
+                    "tree_name": "Madya area GBK",
+                    "price": 200000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "gxa0V4y19jnKwK9ZOy0VE5dXDbZWo7lY",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "QYrBWA0axgVzPkYp75VwqZ9NMOb8DovX",
+                "member_id": "baonVBMrDJ9XQw53z0bEpj6d7ZgWP20v",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/UPOCEh0B269QNKAb6rAIetxM4eiOG3JOJS1I0VJ0tWU/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9iYW9uVkJNckRK/OVhRdzUzejBiRXBq/NmQ3WmdXUDIwdi9w/cm9maWxlLzY2ZmZm/NjgwNTRiMjJkMDAw/MTgyNjhjNi5qcGVn.jpeg",
+                "creator_name": "dull_munir",
+                "title": "MIN_3781.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/SPF6kPV1d444UU-MGRPFC46D2YmyLU8JiiDNYyt-MBE/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9iYW9uVkJNckRKOVhRdzUzejBiRXBqNmQ3WmdXUDIwdi9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTRhYTliOTIzNmEwMDAxNDI5ZGVmLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Menyapa Malam",
+                    "latitude": -6.218453,
+                    "longitude": 106.79876
+                },
+                "price": 89999,
+                "initial_price": 89999,
+                "original_price": 89999,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 122873,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "VLXOlBnJYA0dKEndvpwmaZ34pz1PxMDv",
+                        "tree_id": "jo6yZDMYRevzbE9V06G1W4x2gAqXO9p5",
+                        "host_id": "",
+                        "name": "Menyapa Malam",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Menyapa Malam",
+                            "latitude": -6.218453,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T13:01:28Z",
+                "created_at": "2026-06-16T13:07:53Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "2ra1vg0n4YxAKkP6orGRdBZeMNPQLJjz",
+                    "tree_id": "jo6yZDMYRevzbE9V06G1W4x2gAqXO9p5",
+                    "tag_id": "VLXOlBnJYA0dKEndvpwmaZ34pz1PxMDv",
+                    "tree_name": "Menyapa Malam",
+                    "price": 350000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "LXOlBnJYA0dKEna17zgxkmaZ34pz1PxM",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "QYrBWA0axgVzPkYp75VwqZ9NMOb8DovX",
+                "member_id": "baonVBMrDJ9XQw53z0bEpj6d7ZgWP20v",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/UPOCEh0B269QNKAb6rAIetxM4eiOG3JOJS1I0VJ0tWU/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9iYW9uVkJNckRK/OVhRdzUzejBiRXBq/NmQ3WmdXUDIwdi9w/cm9maWxlLzY2ZmZm/NjgwNTRiMjJkMDAw/MTgyNjhjNi5qcGVn.jpeg",
+                "creator_name": "dull_munir",
+                "title": "MIN_3771.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/AWJ7KJUcTowSTymTLvlO2qoqZAHDAhxy3DC8xSzvN3g/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9iYW9uVkJNckRKOVhRdzUzejBiRXBqNmQ3WmdXUDIwdi9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTRhNzA2ZmYyODEwMDAxOTVlYTNjLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Menyapa Malam",
+                    "latitude": -6.218453,
+                    "longitude": 106.79876
+                },
+                "price": 89999,
+                "initial_price": 89999,
+                "original_price": 89999,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 964,
+                    "height": 1440
+                },
+                "size": 175776,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "VLXOlBnJYA0dKEndvpwmaZ34pz1PxMDv",
+                        "tree_id": "jo6yZDMYRevzbE9V06G1W4x2gAqXO9p5",
+                        "host_id": "",
+                        "name": "Menyapa Malam",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Menyapa Malam",
+                            "latitude": -6.218453,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T13:01:28Z",
+                "created_at": "2026-06-16T13:06:57Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "2ra1vg0n4YxAKkP6orGRdBZeMNPQLJjz",
+                    "tree_id": "jo6yZDMYRevzbE9V06G1W4x2gAqXO9p5",
+                    "tag_id": "VLXOlBnJYA0dKEndvpwmaZ34pz1PxMDv",
+                    "tree_name": "Menyapa Malam",
+                    "price": 350000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "JZred57vjp8BGXN6PAv8kDNA29LM0xal",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "QYrBWA0axgVzPkYp75VwqZ9NMOb8DovX",
+                "member_id": "baonVBMrDJ9XQw53z0bEpj6d7ZgWP20v",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/UPOCEh0B269QNKAb6rAIetxM4eiOG3JOJS1I0VJ0tWU/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9iYW9uVkJNckRK/OVhRdzUzejBiRXBq/NmQ3WmdXUDIwdi9w/cm9maWxlLzY2ZmZm/NjgwNTRiMjJkMDAw/MTgyNjhjNi5qcGVn.jpeg",
+                "creator_name": "dull_munir",
+                "title": "MIN_3777.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/EjRBBC_I-2iHZ6LHNu0B3cu1g96KmB1gcep52fMgRDY/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9iYW9uVkJNckRKOVhRdzUzejBiRXBqNmQ3WmdXUDIwdi9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTRhNjUyMmQ1ODcwMDAxOTVjZDM4LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Menyapa Malam",
+                    "latitude": -6.218453,
+                    "longitude": 106.79876
+                },
+                "price": 89999,
+                "initial_price": 89999,
+                "original_price": 89999,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 127085,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "VLXOlBnJYA0dKEndvpwmaZ34pz1PxMDv",
+                        "tree_id": "jo6yZDMYRevzbE9V06G1W4x2gAqXO9p5",
+                        "host_id": "",
+                        "name": "Menyapa Malam",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Menyapa Malam",
+                            "latitude": -6.218453,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T13:01:28Z",
+                "created_at": "2026-06-16T13:06:45Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "2ra1vg0n4YxAKkP6orGRdBZeMNPQLJjz",
+                    "tree_id": "jo6yZDMYRevzbE9V06G1W4x2gAqXO9p5",
+                    "tag_id": "VLXOlBnJYA0dKEndvpwmaZ34pz1PxMDv",
+                    "tree_name": "Menyapa Malam",
+                    "price": 350000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "qR3pDjnZbyaPwrjzb5dRwW0NJ6Lr9lBo",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "jo6yZDMYRevzbE9BJy6G1W4x2gAqXO9p",
+                "member_id": "Ld3bJnYWrvK6OEJovaeGlmaVBxXZqjzg",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/DUhmrgrvNjUa8KK7pzT2srAyS4VDMUY2lrycXsM7uKk/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9MZDNiSm5ZV3J2/SzZPRUpvdmFlR2xt/YVZCeFhacWp6Zy9w/cm9maWxlLzY3M2Zm/YWVhOWIwMTg1MDAw/MWYyNDQzOS5qcGVn.jpeg",
+                "creator_name": "lensapemenang",
+                "title": "RAM_8189.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/1yLdW58SOKl5lKnVLoRc81gUHmYVxnQbTFdEDS1D_wM/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9MZDNiSm5ZV3J2SzZPRUpvdmFlR2xtYVZCeFhacWp6Zy9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTM3OWQyMmQ1ODcwMDAxOTFiYTJiLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Kawasan GBK (diluar area ring)",
+                    "latitude": -6.2184653,
+                    "longitude": 106.8023
+                },
+                "price": 80001,
+                "initial_price": 80001,
+                "original_price": 80001,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 140429,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                        "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                        "host_id": "",
+                        "name": "Kawasan GBK (diluar area ring)",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Kawasan GBK (diluar area ring)",
+                            "latitude": -6.2184653,
+                            "longitude": 106.8023
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:17:00Z",
+                "created_at": "2026-06-16T11:46:45Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "m9N4Oz2gq8LdxEVv42EPYBvXj1K3oVlQ",
+                    "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                    "tag_id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                    "tree_name": "Kawasan GBK (diluar area ring)",
+                    "price": 100000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "04zZoAOgp3YxwRdze7mVENyvDWKLVJ1R",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VdPJrOWmn72KqkZPBRGavbegDy6Ml89x",
+                "member_id": "72blZMQPLq4mnkdlgQJkjrzK5Nx3BA10",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/ek3TnFQgl5H6p-6RTIBcNSo1PsgUMmepdIfLoL9QxVg/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy83MmJsWk1RUExx/NG1ua2RsZ1FKa2py/eks1TngzQkExMC9w/cm9maWxlLzY0ZWMx/NDAxY2M3ZDkxMDAw/MTUxNzc5Zi5qcGc.jpeg",
+                "creator_name": "arxsportphoto",
+                "title": "ARX_9998.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/-Hrofhx3PgE18w-W9N28uWahsyI4ci04u6JMdAbhReI/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy83MmJsWk1RUExxNG1ua2RsZ1FKa2pyeks1TngzQkExMC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMyNGYxZjI2YmQwMDAxMTY3Y2MxLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Stadion Madya GBK",
+                    "latitude": -6.217176,
+                    "longitude": 106.79952
+                },
+                "price": 75000,
+                "initial_price": 75000,
+                "original_price": 75000,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 121052,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "dD7mnMVX8o2Aak4rqjG6p54ZY3zbQJxP",
+                        "tree_id": "2J4oAOZa086BWwo0b2kRydM7eD9grjLP",
+                        "host_id": "",
+                        "name": "Stadion Madya GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Stadion Madya GBK",
+                            "latitude": -6.217176,
+                            "longitude": 106.79952
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:01:00Z",
+                "created_at": "2026-06-16T11:23:59Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 20
+                    },
+                    {
+                        "tier": 3,
+                        "min_contents": 5,
+                        "discount": 25
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "rXoPyW87aOA1k26DVg2Ak4MLg36vQBJz",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VdPJrOWmn72KqkZPBRGavbegDy6Ml89x",
+                "member_id": "72blZMQPLq4mnkdlgQJkjrzK5Nx3BA10",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/ek3TnFQgl5H6p-6RTIBcNSo1PsgUMmepdIfLoL9QxVg/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy83MmJsWk1RUExx/NG1ua2RsZ1FKa2py/eks1TngzQkExMC9w/cm9maWxlLzY0ZWMx/NDAxY2M3ZDkxMDAw/MTUxNzc5Zi5qcGc.jpeg",
+                "creator_name": "arxsportphoto",
+                "title": "ARX_9983.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/uo42skoj_v5Fg3FH1Of9hm73V20L4odYsGE3uIfDx9Q/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy83MmJsWk1RUExxNG1ua2RsZ1FKa2pyeks1TngzQkExMC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMyNDdiOTIzNmEwMDAxM2M5NmM3LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Stadion Madya GBK",
+                    "latitude": -6.217176,
+                    "longitude": 106.79952
+                },
+                "price": 75000,
+                "initial_price": 75000,
+                "original_price": 75000,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 131487,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "dD7mnMVX8o2Aak4rqjG6p54ZY3zbQJxP",
+                        "tree_id": "2J4oAOZa086BWwo0b2kRydM7eD9grjLP",
+                        "host_id": "",
+                        "name": "Stadion Madya GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Stadion Madya GBK",
+                            "latitude": -6.217176,
+                            "longitude": 106.79952
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:01:00Z",
+                "created_at": "2026-06-16T11:23:57Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 20
+                    },
+                    {
+                        "tier": 3,
+                        "min_contents": 5,
+                        "discount": 25
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "vngZPDrmL1yVGOaXlryDkaqXAYQboOJp",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VdPJrOWmn72KqkZPBRGavbegDy6Ml89x",
+                "member_id": "72blZMQPLq4mnkdlgQJkjrzK5Nx3BA10",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/ek3TnFQgl5H6p-6RTIBcNSo1PsgUMmepdIfLoL9QxVg/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy83MmJsWk1RUExx/NG1ua2RsZ1FKa2py/eks1TngzQkExMC9w/cm9maWxlLzY0ZWMx/NDAxY2M3ZDkxMDAw/MTUxNzc5Zi5qcGc.jpeg",
+                "creator_name": "arxsportphoto",
+                "title": "ARX_9988.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/sRMoJvTCpzvuo-kJqC1COIyJHAzARdee-HEbhbtkoRw/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy83MmJsWk1RUExxNG1ua2RsZ1FKa2pyeks1TngzQkExMC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMyNDdiOTIzNmEwMDAxM2M5NmQ0LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Stadion Madya GBK",
+                    "latitude": -6.217176,
+                    "longitude": 106.79952
+                },
+                "price": 75000,
+                "initial_price": 75000,
+                "original_price": 75000,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 132691,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "dD7mnMVX8o2Aak4rqjG6p54ZY3zbQJxP",
+                        "tree_id": "2J4oAOZa086BWwo0b2kRydM7eD9grjLP",
+                        "host_id": "",
+                        "name": "Stadion Madya GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Stadion Madya GBK",
+                            "latitude": -6.217176,
+                            "longitude": 106.79952
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:01:00Z",
+                "created_at": "2026-06-16T11:23:57Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 20
+                    },
+                    {
+                        "tier": 3,
+                        "min_contents": 5,
+                        "discount": 25
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "rRyWeJMQlqOdkDyvdoNnE4m2n5xB806N",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VdPJrOWmn72KqkZPBRGavbegDy6Ml89x",
+                "member_id": "72blZMQPLq4mnkdlgQJkjrzK5Nx3BA10",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/ek3TnFQgl5H6p-6RTIBcNSo1PsgUMmepdIfLoL9QxVg/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy83MmJsWk1RUExx/NG1ua2RsZ1FKa2py/eks1TngzQkExMC9w/cm9maWxlLzY0ZWMx/NDAxY2M3ZDkxMDAw/MTUxNzc5Zi5qcGc.jpeg",
+                "creator_name": "arxsportphoto",
+                "title": "ARX_9981.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/-YZNzN0S30zfojEAtsVbTzMlSylSBbCsJ_pa6N2cJZA/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy83MmJsWk1RUExxNG1ua2RsZ1FKa2pyeks1TngzQkExMC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMyNDdiOTIzNmEwMDAxM2M5NmQzLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Stadion Madya GBK",
+                    "latitude": -6.217176,
+                    "longitude": 106.79952
+                },
+                "price": 75000,
+                "initial_price": 75000,
+                "original_price": 75000,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 126818,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "dD7mnMVX8o2Aak4rqjG6p54ZY3zbQJxP",
+                        "tree_id": "2J4oAOZa086BWwo0b2kRydM7eD9grjLP",
+                        "host_id": "",
+                        "name": "Stadion Madya GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Stadion Madya GBK",
+                            "latitude": -6.217176,
+                            "longitude": 106.79952
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:01:00Z",
+                "created_at": "2026-06-16T11:23:57Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 20
+                    },
+                    {
+                        "tier": 3,
+                        "min_contents": 5,
+                        "discount": 25
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "ra1vg0n4YxAKkPLnnJ7dkRdBZeMNPQLJ",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VdPJrOWmn72KqkZPBRGavbegDy6Ml89x",
+                "member_id": "72blZMQPLq4mnkdlgQJkjrzK5Nx3BA10",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/ek3TnFQgl5H6p-6RTIBcNSo1PsgUMmepdIfLoL9QxVg/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy83MmJsWk1RUExx/NG1ua2RsZ1FKa2py/eks1TngzQkExMC9w/cm9maWxlLzY0ZWMx/NDAxY2M3ZDkxMDAw/MTUxNzc5Zi5qcGc.jpeg",
+                "creator_name": "arxsportphoto",
+                "title": "ARX_9971.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/81qeJ8x4-fssqXwfLrmaZ_11Pr3dJkgLbBa6LriLWsM/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy83MmJsWk1RUExxNG1ua2RsZ1FKa2pyeks1TngzQkExMC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMyNDMzZDhiZmYwMDAxZThlMDEyLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Stadion Madya GBK",
+                    "latitude": -6.217176,
+                    "longitude": 106.79952
+                },
+                "price": 75000,
+                "initial_price": 75000,
+                "original_price": 75000,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 140420,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "dD7mnMVX8o2Aak4rqjG6p54ZY3zbQJxP",
+                        "tree_id": "2J4oAOZa086BWwo0b2kRydM7eD9grjLP",
+                        "host_id": "",
+                        "name": "Stadion Madya GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Stadion Madya GBK",
+                            "latitude": -6.217176,
+                            "longitude": 106.79952
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:01:00Z",
+                "created_at": "2026-06-16T11:23:49Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 20
+                    },
+                    {
+                        "tier": 3,
+                        "min_contents": 5,
+                        "discount": 25
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "ra1vg0n4YxAKkPLnAJBPkRdBZeMNPQLJ",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "XJZ0AjWQoxgbOExn2KKwmzpV8qeY6lPB",
+                "member_id": "ezgM1YO8Lo3nVGbpgR2kx50lbAdXQRvN",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/L4n3A4ay9-FS8WbLsOZwPd8GHBfQtn2KR-meWYlVHFE/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9lemdNMVlPOExv/M25WR2JwZ1Iya3g1/MGxiQWRYUVJ2Ti9w/cm9maWxlLzY5Yjk3/NDAzMjYxOTczMDAw/MTA5MGZlNi5qcGVn.jpeg",
+                "creator_name": "autoshot",
+                "title": "IMG_8775.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/PDu-GKt3R1I76cv2cqbfAXcJjZS4QBKd28rKB329qDA/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9lemdNMVlPOExvM25WR2JwZ1Iya3g1MGxiQWRYUVJ2Ti9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMwNjMzZDhiZmYwMDAxZTg0MGU2LmpwZWc.jpeg",
+                "description": "req 081268177458",
+                "content_type": "photo",
+                "location": {
+                    "name": "Kawasan GBK (diluar area ring)",
+                    "latitude": -6.2184653,
+                    "longitude": 106.8023
+                },
+                "price": 83500,
+                "initial_price": 83500,
+                "original_price": 83500,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 198931,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                        "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                        "host_id": "",
+                        "name": "Kawasan GBK (diluar area ring)",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Kawasan GBK (diluar area ring)",
+                            "latitude": -6.2184653,
+                            "longitude": 106.8023
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:27:00Z",
+                "created_at": "2026-06-16T11:15:57Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 15
+                    }
+                ],
+                "package": {
+                    "id": "PgqAlL0yW384VEaYmVEYZB5dKRz6e12D",
+                    "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                    "tag_id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                    "tree_name": "Kawasan GBK (diluar area ring)",
+                    "price": 200000,
+                    "currency_name": "IDR",
+                    "duration": 120
+                }
+            },
+            {
+                "product_id": "Mr6v4DPWYO5gkA34OqPlGa7mx9KoZpbe",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "XJZ0AjWQoxgbOExn2KKwmzpV8qeY6lPB",
+                "member_id": "ezgM1YO8Lo3nVGbpgR2kx50lbAdXQRvN",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/L4n3A4ay9-FS8WbLsOZwPd8GHBfQtn2KR-meWYlVHFE/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9lemdNMVlPOExv/M25WR2JwZ1Iya3g1/MGxiQWRYUVJ2Ti9w/cm9maWxlLzY5Yjk3/NDAzMjYxOTczMDAw/MTA5MGZlNi5qcGVn.jpeg",
+                "creator_name": "autoshot",
+                "title": "IMG_8774.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/xF_VQySkZe-ZHNJGSxtQc7Qrbi8nDmEPghjykFVYVeI/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9lemdNMVlPOExvM25WR2JwZ1Iya3g1MGxiQWRYUVJ2Ti9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMwNjMzZDhiZmYwMDAxZTg0MGUzLmpwZWc.jpeg",
+                "description": "req 081268177458",
+                "content_type": "photo",
+                "location": {
+                    "name": "Kawasan GBK (diluar area ring)",
+                    "latitude": -6.2184653,
+                    "longitude": 106.8023
+                },
+                "price": 83500,
+                "initial_price": 83500,
+                "original_price": 83500,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 203273,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                        "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                        "host_id": "",
+                        "name": "Kawasan GBK (diluar area ring)",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Kawasan GBK (diluar area ring)",
+                            "latitude": -6.2184653,
+                            "longitude": 106.8023
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:27:00Z",
+                "created_at": "2026-06-16T11:15:57Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 15
+                    }
+                ],
+                "package": {
+                    "id": "PgqAlL0yW384VEaYmVEYZB5dKRz6e12D",
+                    "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                    "tag_id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                    "tree_name": "Kawasan GBK (diluar area ring)",
+                    "price": 200000,
+                    "currency_name": "IDR",
+                    "duration": 120
+                }
+            },
+            {
+                "product_id": "d3bJnYWrvK6OEJB8QxybElmaVBxXZqjz",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "XJZ0AjWQoxgbOExn2KKwmzpV8qeY6lPB",
+                "member_id": "ezgM1YO8Lo3nVGbpgR2kx50lbAdXQRvN",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/L4n3A4ay9-FS8WbLsOZwPd8GHBfQtn2KR-meWYlVHFE/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9lemdNMVlPOExv/M25WR2JwZ1Iya3g1/MGxiQWRYUVJ2Ti9w/cm9maWxlLzY5Yjk3/NDAzMjYxOTczMDAw/MTA5MGZlNi5qcGVn.jpeg",
+                "creator_name": "autoshot",
+                "title": "IMG_8778.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/W-r3awvCH2qCQCOzDI9Rua5FtSrGPnXKP6NdXUjcfXk/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9lemdNMVlPOExvM25WR2JwZ1Iya3g1MGxiQWRYUVJ2Ti9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMwNjMzZDhiZmYwMDAxZTg0MGVjLmpwZWc.jpeg",
+                "description": "req 081268177458",
+                "content_type": "photo",
+                "location": {
+                    "name": "Kawasan GBK (diluar area ring)",
+                    "latitude": -6.2184653,
+                    "longitude": 106.8023
+                },
+                "price": 83500,
+                "initial_price": 83500,
+                "original_price": 83500,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 181133,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                        "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                        "host_id": "",
+                        "name": "Kawasan GBK (diluar area ring)",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Kawasan GBK (diluar area ring)",
+                            "latitude": -6.2184653,
+                            "longitude": 106.8023
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:27:00Z",
+                "created_at": "2026-06-16T11:15:57Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 15
+                    }
+                ],
+                "package": {
+                    "id": "PgqAlL0yW384VEaYmVEYZB5dKRz6e12D",
+                    "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                    "tag_id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                    "tree_name": "Kawasan GBK (diluar area ring)",
+                    "price": 200000,
+                    "currency_name": "IDR",
+                    "duration": 120
+                }
+            },
+            {
+                "product_id": "9Xdjv70WpeODE8x8vL1YEPLAyb8xVBQz",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "XJZ0AjWQoxgbOExn2KKwmzpV8qeY6lPB",
+                "member_id": "ezgM1YO8Lo3nVGbpgR2kx50lbAdXQRvN",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/L4n3A4ay9-FS8WbLsOZwPd8GHBfQtn2KR-meWYlVHFE/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9lemdNMVlPOExv/M25WR2JwZ1Iya3g1/MGxiQWRYUVJ2Ti9w/cm9maWxlLzY5Yjk3/NDAzMjYxOTczMDAw/MTA5MGZlNi5qcGVn.jpeg",
+                "creator_name": "autoshot",
+                "title": "IMG_8780.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/OqIk8IfnmAADYEaxSkwL0zJIC3iGzfaMw4Hsc_X819U/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9lemdNMVlPOExvM25WR2JwZ1Iya3g1MGxiQWRYUVJ2Ti9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMwNjMzZDhiZmYwMDAxZTg0MGYwLmpwZWc.jpeg",
+                "description": "req 081268177458",
+                "content_type": "photo",
+                "location": {
+                    "name": "Kawasan GBK (diluar area ring)",
+                    "latitude": -6.2184653,
+                    "longitude": 106.8023
+                },
+                "price": 83500,
+                "initial_price": 83500,
+                "original_price": 83500,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 166088,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                        "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                        "host_id": "",
+                        "name": "Kawasan GBK (diluar area ring)",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Kawasan GBK (diluar area ring)",
+                            "latitude": -6.2184653,
+                            "longitude": 106.8023
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:27:00Z",
+                "created_at": "2026-06-16T11:15:57Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 15
+                    }
+                ],
+                "package": {
+                    "id": "PgqAlL0yW384VEaYmVEYZB5dKRz6e12D",
+                    "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                    "tag_id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                    "tree_name": "Kawasan GBK (diluar area ring)",
+                    "price": 200000,
+                    "currency_name": "IDR",
+                    "duration": 120
+                }
+            },
+            {
+                "product_id": "LlWp53ja72QZkvjQWxBAk9KoM1PXyNAg",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "XJZ0AjWQoxgbOExn2KKwmzpV8qeY6lPB",
+                "member_id": "ezgM1YO8Lo3nVGbpgR2kx50lbAdXQRvN",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/L4n3A4ay9-FS8WbLsOZwPd8GHBfQtn2KR-meWYlVHFE/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9lemdNMVlPOExv/M25WR2JwZ1Iya3g1/MGxiQWRYUVJ2Ti9w/cm9maWxlLzY5Yjk3/NDAzMjYxOTczMDAw/MTA5MGZlNi5qcGVn.jpeg",
+                "creator_name": "autoshot",
+                "title": "IMG_8773.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/OgngCULc2ycHNSA3yQzKAMn2Xe0c329tEL6_jVfqy-M/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9lemdNMVlPOExvM25WR2JwZ1Iya3g1MGxiQWRYUVJ2Ti9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTMwNWFiOTIzNmEwMDAxM2JkYmMyLmpwZWc.jpeg",
+                "description": "req 081268177458",
+                "content_type": "photo",
+                "location": {
+                    "name": "Kawasan GBK (diluar area ring)",
+                    "latitude": -6.2184653,
+                    "longitude": 106.8023
+                },
+                "price": 83500,
+                "initial_price": 83500,
+                "original_price": 83500,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 219455,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                        "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                        "host_id": "",
+                        "name": "Kawasan GBK (diluar area ring)",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Kawasan GBK (diluar area ring)",
+                            "latitude": -6.2184653,
+                            "longitude": 106.8023
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:27:00Z",
+                "created_at": "2026-06-16T11:15:47Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 15
+                    }
+                ],
+                "package": {
+                    "id": "PgqAlL0yW384VEaYmVEYZB5dKRz6e12D",
+                    "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                    "tag_id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                    "tree_name": "Kawasan GBK (diluar area ring)",
+                    "price": 200000,
+                    "currency_name": "IDR",
+                    "duration": 120
+                }
+            },
+            {
+                "product_id": "JZred57vjp8BGXN6gXOQkDNA29LM0xal",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VLXOlBnJYA0dKEnWDaaGmaZ34pz1PxMD",
+                "member_id": "MRaBgl14JvxKOw0vQn6EyPZeYjN7bp0n",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/hxdeLYyDWXvNzJYm_JeqD6JHprfjjMn6G6obQwUgXl8/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9NUmFCZ2wxNEp2/eEtPdzB2UW42RXlQ/WmVZak43YnAwbi9w/cm9maWxlLzZhNDBm/ZWQxYWZjMzhkMDAw/MWMzYWQwMy5qcGVn.jpeg",
+                "creator_name": "ombobsss",
+                "title": "BOB_2799.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/vHtOgLv50vmxS1iT4xTgaVItq3bugGQK0saJhc1v3Cw/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9NUmFCZ2wxNEp2eEtPdzB2UW42RXlQWmVZak43YnAwbi9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJmMGJiOTIzNmEwMDAxM2I1YjY1LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Madya area GBK",
+                    "latitude": -6.217172,
+                    "longitude": 106.79876
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 117415,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "XmjbxQ2Pa4pJWEjLg2wor3B89ROy1Y7A",
+                        "tree_id": "72blZMQPLq4mnkdK7vwjrzK5Nx3BA10v",
+                        "host_id": "",
+                        "name": "Madya area GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Madya area GBK",
+                            "latitude": -6.217172,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:10:03.369495Z",
+                "created_at": "2026-06-16T11:10:03Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "9N4Oz2gq8LdxEVKXZ1qdGPYBvXj1K3oV",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VLXOlBnJYA0dKEnWDaaGmaZ34pz1PxMD",
+                "member_id": "MRaBgl14JvxKOw0vQn6EyPZeYjN7bp0n",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/hxdeLYyDWXvNzJYm_JeqD6JHprfjjMn6G6obQwUgXl8/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9NUmFCZ2wxNEp2/eEtPdzB2UW42RXlQ/WmVZak43YnAwbi9w/cm9maWxlLzZhNDBm/ZWQxYWZjMzhkMDAw/MWMzYWQwMy5qcGVn.jpeg",
+                "creator_name": "ombobsss",
+                "title": "BOB_2736.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/nSEaC7-6mla4OG5771ptV9JN4VpMDrPTRKKBk7ubWqg/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9NUmFCZ2wxNEp2eEtPdzB2UW42RXlQWmVZak43YnAwbi9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJmMDdiOTIzNmEwMDAxM2I1YTk5LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Madya area GBK",
+                    "latitude": -6.217172,
+                    "longitude": 106.79876
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 964,
+                    "height": 1440
+                },
+                "size": 114811,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "XmjbxQ2Pa4pJWEjLg2wor3B89ROy1Y7A",
+                        "tree_id": "72blZMQPLq4mnkdK7vwjrzK5Nx3BA10v",
+                        "host_id": "",
+                        "name": "Madya area GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Madya area GBK",
+                            "latitude": -6.217172,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:09:59.894454Z",
+                "created_at": "2026-06-16T11:09:59Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "rRyWeJMQlqOdkDyvjLpqE4m2n5xB806N",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VLXOlBnJYA0dKEnWDaaGmaZ34pz1PxMD",
+                "member_id": "MRaBgl14JvxKOw0vQn6EyPZeYjN7bp0n",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/hxdeLYyDWXvNzJYm_JeqD6JHprfjjMn6G6obQwUgXl8/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9NUmFCZ2wxNEp2/eEtPdzB2UW42RXlQ/WmVZak43YnAwbi9w/cm9maWxlLzZhNDBm/ZWQxYWZjMzhkMDAw/MWMzYWQwMy5qcGVn.jpeg",
+                "creator_name": "ombobsss",
+                "title": "BOB_2743.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/NvaxzjZnXz_Pw5eYiuJOS56rkNucwHvfg55mikO8plk/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9NUmFCZ2wxNEp2eEtPdzB2UW42RXlQWmVZak43YnAwbi9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJmMDcyMmQ1ODcwMDAxOGVjM2VlLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Madya area GBK",
+                    "latitude": -6.217172,
+                    "longitude": 106.79876
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 964,
+                    "height": 1440
+                },
+                "size": 110807,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "XmjbxQ2Pa4pJWEjLg2wor3B89ROy1Y7A",
+                        "tree_id": "72blZMQPLq4mnkdK7vwjrzK5Nx3BA10v",
+                        "host_id": "",
+                        "name": "Madya area GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Madya area GBK",
+                            "latitude": -6.217172,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:10:00.599595Z",
+                "created_at": "2026-06-16T11:10:00Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "JZ0AjWQoxgbOExj5Zr4bwmzpV8qeY6lP",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VLXOlBnJYA0dKEnWDaaGmaZ34pz1PxMD",
+                "member_id": "MRaBgl14JvxKOw0vQn6EyPZeYjN7bp0n",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/hxdeLYyDWXvNzJYm_JeqD6JHprfjjMn6G6obQwUgXl8/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9NUmFCZ2wxNEp2/eEtPdzB2UW42RXlQ/WmVZak43YnAwbi9w/cm9maWxlLzZhNDBm/ZWQxYWZjMzhkMDAw/MWMzYWQwMy5qcGVn.jpeg",
+                "creator_name": "ombobsss",
+                "title": "BOB_2690.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/dIAte2si0IvcDIGhGp-wdJqapiYFBXFWnVE5G8Pay1s/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9NUmFCZ2wxNEp2eEtPdzB2UW42RXlQWmVZak43YnAwbi9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJmMDUzZDhiZmYwMDAxZTdhYzY4LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Madya area GBK",
+                    "latitude": -6.217172,
+                    "longitude": 106.79876
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 964,
+                    "height": 1440
+                },
+                "size": 115363,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "XmjbxQ2Pa4pJWEjLg2wor3B89ROy1Y7A",
+                        "tree_id": "72blZMQPLq4mnkdK7vwjrzK5Nx3BA10v",
+                        "host_id": "",
+                        "name": "Madya area GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Madya area GBK",
+                            "latitude": -6.217172,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:09:57.553691Z",
+                "created_at": "2026-06-16T11:09:57Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "jQyPgMRXZq6NwzjoOyPOw59K7zWYan2V",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "VLXOlBnJYA0dKEnWDaaGmaZ34pz1PxMD",
+                "member_id": "MRaBgl14JvxKOw0vQn6EyPZeYjN7bp0n",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/hxdeLYyDWXvNzJYm_JeqD6JHprfjjMn6G6obQwUgXl8/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9NUmFCZ2wxNEp2/eEtPdzB2UW42RXlQ/WmVZak43YnAwbi9w/cm9maWxlLzZhNDBm/ZWQxYWZjMzhkMDAw/MWMzYWQwMy5qcGVn.jpeg",
+                "creator_name": "ombobsss",
+                "title": "BOB_2717.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/bLA50e-oKhfRYkaDj2mbcWRcnVl54W-Ze80otbKdm9k/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9NUmFCZ2wxNEp2eEtPdzB2UW42RXlQWmVZak43YnAwbi9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJmMDZiOTIzNmEwMDAxM2I1YTFjLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Madya area GBK",
+                    "latitude": -6.217172,
+                    "longitude": 106.79876
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 964,
+                    "height": 1440
+                },
+                "size": 116071,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "XmjbxQ2Pa4pJWEjLg2wor3B89ROy1Y7A",
+                        "tree_id": "72blZMQPLq4mnkdK7vwjrzK5Nx3BA10v",
+                        "host_id": "",
+                        "name": "Madya area GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Madya area GBK",
+                            "latitude": -6.217172,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:09:59.09222Z",
+                "created_at": "2026-06-16T11:09:59Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "9Xdjv70WpeODE8x8De2pEPLAyb8xVBQz",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "R9Xdjv70WpeODE879ZJkPLAyb8xVBQzq",
+                "member_id": "VLXOlBnJYA0dKEnLJa5wmaZ34pz1PxMD",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/rK9Iw8OPaioDHApyuKwsu-DaHzit0DMev4Jv8WX4z6o/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9WTFhPbEJuSllB/MGRLRW5MSmE1d21h/WjM0cHoxUHhNRC9w/cm9maWxlLzZhMDRh/NDU1ZjIwYjkzMDAw/MTE4Mjc5NC5qcGVn.jpeg",
+                "creator_name": "gara_sport",
+                "title": "GAR_2325.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/JXuyimmXO7E6PflQfTWvoKma3-cJDV-sqAiU2Kw6VrM/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9WTFhPbEJuSllBMGRLRW5MSmE1d21hWjM0cHoxUHhNRC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJlZmUxZjI2YmQwMDAxMTUxOWI4LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "GBK selasa juni 2026",
+                    "latitude": -6.218797,
+                    "longitude": 106.79864
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": true,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 962,
+                    "height": 1440
+                },
+                "size": 147761,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "Ybe3Rpm1927rawqlXqGzdWKDAByN8jq6",
+                        "tree_id": "LX4yMZBN7lojWke13OkzrR3mbgAQ5O2J",
+                        "host_id": "",
+                        "name": "GBK selasa juni 2026",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "GBK selasa juni 2026",
+                            "latitude": -6.218797,
+                            "longitude": 106.79864
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:23:00Z",
+                "created_at": "2026-06-16T11:09:51Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    },
+                    {
+                        "tier": 2,
+                        "min_contents": 2,
+                        "discount": 10
+                    },
+                    {
+                        "tier": 3,
+                        "min_contents": 3,
+                        "discount": 15
+                    },
+                    {
+                        "tier": 4,
+                        "min_contents": 4,
+                        "discount": 20
+                    },
+                    {
+                        "tier": 5,
+                        "min_contents": 5,
+                        "discount": 25
+                    }
+                ],
+                "package": {
+                    "id": "BlOd4xMa526o0Gg0lKwDy9mQjWZ8YeP3",
+                    "tree_id": "LX4yMZBN7lojWke13OkzrR3mbgAQ5O2J",
+                    "tag_id": "Ybe3Rpm1927rawqlXqGzdWKDAByN8jq6",
+                    "tree_name": "GBK selasa juni 2026",
+                    "price": 238000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "LXOlBnJYA0dKEnaLmbQxkmaZ34pz1PxM",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "1xqPW7AgNKav4wWJ9VKGX2mndozRe93l",
+                "member_id": "BlOd4xMa526o0Gg57yRkDy9mQjWZ8YeP",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/_fiaG1IXlXMkKG4V44MpgtrYRXwQoruP6bFCIbPy8hc/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9CbE9kNHhNYTUy/Nm8wR2c1N3lSa0R5/OW1RaldaOFllUC9w/cm9maWxlLzY5MmZj/ZjM0YWVmOGRkMDAw/MTY5NTc5Yi5qcGVn.jpeg",
+                "creator_name": "a_frame",
+                "title": "AFR_3202.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/zCylK96xPevpNXpHa_idnx3_ZZ_pa4D1GV5JsEbJZWs/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9CbE9kNHhNYTUyNm8wR2c1N3lSa0R5OW1RaldaOFllUC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJiMjM2ZmYyODEwMDAxOGQ2YTk2LmpwZWc.jpeg",
+                "description": "semua foto belum di edit, akan di edit setelah di tebus. req DM",
+                "content_type": "photo",
+                "location": {
+                    "name": "Madya area GBK",
+                    "latitude": -6.217172,
+                    "longitude": 106.79876
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 119422,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "XmjbxQ2Pa4pJWEjLg2wor3B89ROy1Y7A",
+                        "tree_id": "72blZMQPLq4mnkdK7vwjrzK5Nx3BA10v",
+                        "host_id": "",
+                        "name": "Madya area GBK",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Madya area GBK",
+                            "latitude": -6.217172,
+                            "longitude": 106.79876
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:53:28.511Z",
+                "created_at": "2026-06-16T10:53:28Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "XmjbxQ2Pa4pJWEjyOLkor3B89ROy1Y7A",
+                    "tree_id": "72blZMQPLq4mnkdK7vwjrzK5Nx3BA10v",
+                    "tag_id": "XmjbxQ2Pa4pJWEjLg2wor3B89ROy1Y7A",
+                    "tree_name": "Madya area GBK",
+                    "price": 200000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "9Xdjv70WpeODE8xQrzq3EPLAyb8xVBQz",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "1xqPW7AgNKav4wW4oYvkX2mndozRe93l",
+                "member_id": "b04zZoAOgp3YxwRxmbDENyvDWKLVJ1Re",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/3GTRs_EwG8CHt3OnX-JXGBP-rFR6or9yg7XGfjj8s8s/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9iMDR6Wm9BT2dw/M1l4d1J4bWJERU55/dkRXS0xWSjFSZS9w/cm9maWxlLzY5Nzcw/YzViZGI4MjljMDAw/MTIxMjdmMi5qcGVn.jpeg",
+                "creator_name": "zara_photo",
+                "title": "YAN_8917.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/g4TlcVIiz3FWTc1Nrdob9fYBCWzNI_B0NvVfsOmgkuQ/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9iMDR6Wm9BT2dwM1l4d1J4bWJERU55dkRXS0xWSjFSZS9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJhYWYyMmQ1ODcwMDAxOGNmY2I4LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Kawasan GBK (diluar area ring)",
+                    "latitude": -6.2184653,
+                    "longitude": 106.8023
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 149532,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                        "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                        "host_id": "",
+                        "name": "Kawasan GBK (diluar area ring)",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Kawasan GBK (diluar area ring)",
+                            "latitude": -6.2184653,
+                            "longitude": 106.8023
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:13:00Z",
+                "created_at": "2026-06-16T10:51:39Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "m9N4Oz2gq8LdxEV6rOEPYBvXj1K3oVlQ",
+                    "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                    "tag_id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                    "tree_name": "Kawasan GBK (diluar area ring)",
+                    "price": 238000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "JZ0AjWQoxgbOExj5lAaywmzpV8qeY6lP",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "zNRq71Qovb0eAkNap9Pwjp2WdDBym9OZ",
+                "member_id": "1xqPW7AgNKav4wWYYJNEX2mndozRe93l",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/uUyvrRLzXLkmzwW4ftHdobIyIQSnXTVwiqBhS5ElLbs/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy8xeHFQVzdBZ05L/YXY0d1dZWUpORVgy/bW5kb3pSZTkzbC9w/cm9maWxlLzZhNDQ4/NTQ0YTQyNThkMDAw/MWE1ZWQxYS5qcGVn.jpeg",
+                "creator_name": "talihitam",
+                "title": "ANN_7578.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/97i7tLPXRSG0FzPBkmrCe_hpOkO8DbUbf7AOyRSMC9I/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy8xeHFQVzdBZ05LYXY0d1dZWUpORVgybW5kb3pSZTkzbC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTY1MzRiOTIzNmEwMDAxNDUwZDNmLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "Gbk01",
+                    "latitude": -6.216933,
+                    "longitude": 106.81157
+                },
+                "price": 88888,
+                "initial_price": 88888,
+                "original_price": 88888,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 157283,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "VmrPbMo71avnYwMOgYEeOALWNqRQd30x",
+                        "tree_id": "VLXOlBnJYA0dKEnl9dwmaZ34pz1PxMDv",
+                        "host_id": "",
+                        "name": "Gbk01",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Gbk01",
+                            "latitude": -6.216933,
+                            "longitude": 106.81157
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T11:28:00Z",
+                "created_at": "2026-06-16T15:01:10Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "XJZ0AjWQoxgbOExQWKGmzpV8qeY6lPB5",
+                    "tree_id": "VLXOlBnJYA0dKEnl9dwmaZ34pz1PxMDv",
+                    "tag_id": "VmrPbMo71avnYwMOgYEeOALWNqRQd30x",
+                    "tree_name": "Gbk01",
+                    "price": 300000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "4oVK7jM90WPxG6V7NbBxGXrmJdYvg23y",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "04zZoAOgp3YxwRDgy3WENyvDWKLVJ1Re",
+                "member_id": "D7mnMVX8o2Aak4QW9npE6p54ZY3zbQJx",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/RHv-HUwsKn9-c0X4KFz-rNZjHm433yOX6ogdpAYnbKc/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9EN21uTVZYOG8y/QWFrNFFXOW5wRTZw/NTRaWTN6YlFKeC9w/cm9maWxlLzZhMmVk/ZGVkMTZkN2U4MDAw/MTkwNGY5MC5wbmc.jpeg",
+                "creator_name": "anjasdwisetyoprabowo1998",
+                "title": "DSC_0778.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/RagG60iljWQXqJhY_bVpLNbFlyNom8efZG2JNoBuwb0/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9EN21uTVZYOG8yQWFrNFFXOW5wRTZwNTRaWTN6YlFKeC9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTI4ODZiNjc1Y2YwMDAxZDllMjJjLmpwZWc.jpeg",
+                "description": "Foto belum di edit",
+                "content_type": "photo",
+                "location": {
+                    "name": "Kawasan GBK (diluar area ring)",
+                    "latitude": -6.2184653,
+                    "longitude": 106.8023
+                },
+                "price": 40000,
+                "initial_price": 40000,
+                "original_price": 40000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 147337,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                        "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                        "host_id": "",
+                        "name": "Kawasan GBK (diluar area ring)",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "Kawasan GBK (diluar area ring)",
+                            "latitude": -6.2184653,
+                            "longitude": 106.8023
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:02:00Z",
+                "created_at": "2026-06-16T10:42:16Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "72blZMQPLq4mnkdJ6BGjrzK5Nx3BA10v",
+                    "tree_id": "2y3XbPKvmL0Nx4GpW5E679WVrMaRBD1O",
+                    "tag_id": "rpl5xLOdKvo49aEBOnG0n6BJVQjqWYzZ",
+                    "tree_name": "Kawasan GBK (diluar area ring)",
+                    "price": 120000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "dPJrOWmn72KqkZgdb81nEavbegDy6Ml8",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "5ZLJjYmA6odDbElrRpXwpRvxzK8OPgQ3",
+                "member_id": "zNRq71Qovb0eAkNy38awjp2WdDBym9OZ",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/_Qz0Karx1IyjTX0LiiLq6dPYEcCG_pXXBnxt6ikOKx8/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy96TlJxNzFRb3Zi/MGVBa055Mzhhd2pw/MldkREJ5bTlPWi9w/cm9maWxlLzY3NjEw/NjQzYTE2Mjg4MDAw/MWU5MDQ1MS5qcGVn.jpeg",
+                "creator_name": "motoaye",
+                "title": "RAM_4390.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/Ry0DQReEHkpI7t3ODIcZne8YroNpHc-obCgMKHtba6k/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy96TlJxNzFRb3ZiMGVBa055Mzhhd2pwMldkREJ5bTlPWi9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJjZWY2ZmYyODEwMDAxOGUxZTI2LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "motoaye1",
+                    "latitude": -6.2182736,
+                    "longitude": 106.80345
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 960,
+                    "height": 1440
+                },
+                "size": 170071,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "tags": [
+                    {
+                        "id": "xXVbJK6MPQD4eG1nyAwdj9mlOR3yoL0a",
+                        "tree_id": "rLlWp53ja72QZkvmzyw9KoM1PXyNAgvx",
+                        "host_id": "",
+                        "name": "motoaye1",
+                        "type": "tree",
+                        "content_creator_type": "independent",
+                        "is_bib": false,
+                        "location": {
+                            "name": "motoaye1",
+                            "latitude": -6.2182736,
+                            "longitude": 106.80345
+                        }
+                    }
+                ],
+                "original_at": "2026-06-16T10:14:00Z",
+                "created_at": "2026-06-16T11:01:17Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {
+                    "id": "pl5xLOdKvo49aEBK0KG0n6BJVQjqWYzZ",
+                    "tree_id": "rLlWp53ja72QZkvmzyw9KoM1PXyNAgvx",
+                    "tag_id": "xXVbJK6MPQD4eG1nyAwdj9mlOR3yoL0a",
+                    "tree_name": "motoaye1",
+                    "price": 238000,
+                    "currency_name": "IDR",
+                    "duration": 24
+                }
+            },
+            {
+                "product_id": "NRq71Qovb0eAkNg5Kx9QEjp2WdDBym9O",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "rLlWp53ja72QZkv3rBE9KoM1PXyNAgvx",
+                "member_id": "QYrBWA0axgVzPkYBamEqZ9NMOb8DovXj",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/wPvyUUbOpHvYzUmKx-vqzUlDD-Fu9oX5kX5QIBaLgbw/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9RWXJCV0EwYXhn/VnpQa1lCYW1FcVo5/Tk1PYjhEb3ZYai9w/cm9maWxlLzY1MTI1/M2FiNzkwMzM2MDAw/MWE5NDY2OS5qcGc.jpeg",
+                "creator_name": "shotbyical",
+                "title": "OKS_9787.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/l2GOC-eAVjxKmfgU_Rv2_3bC99KIoGDb7V1WuEi0Q1Y/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9RWXJCV0EwYXhnVnpQa1lCYW1FcVo5Tk1PYjhEb3ZYai9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJiYmYxZjI2YmQwMDAxMTM5NjU5LmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "lat: -6.217662 lng: 106.807055",
+                    "latitude": -6.2176618576049805,
+                    "longitude": 106.80705261230469
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 959,
+                    "height": 1440
+                },
+                "size": 129471,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "original_at": "2026-06-16T10:05:00Z",
+                "created_at": "2026-06-16T10:56:02Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "jQyPgMRXZq6NwzjMzo1nw59K7zWYan2V",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "rLlWp53ja72QZkv3rBE9KoM1PXyNAgvx",
+                "member_id": "QYrBWA0axgVzPkYBamEqZ9NMOb8DovXj",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/wPvyUUbOpHvYzUmKx-vqzUlDD-Fu9oX5kX5QIBaLgbw/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9RWXJCV0EwYXhn/VnpQa1lCYW1FcVo5/Tk1PYjhEb3ZYai9w/cm9maWxlLzY1MTI1/M2FiNzkwMzM2MDAw/MWE5NDY2OS5qcGc.jpeg",
+                "creator_name": "shotbyical",
+                "title": "OKS_9790.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/f9cos04X92dsvBeStlSJ9__1RZT8ltrdYInIvzL3uPg/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9RWXJCV0EwYXhnVnpQa1lCYW1FcVo5Tk1PYjhEb3ZYai9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJiYmYxZjI2YmQwMDAxMTM5NjVjLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "lat: -6.217662 lng: 106.807055",
+                    "latitude": -6.2176618576049805,
+                    "longitude": 106.80705261230469
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 959,
+                    "height": 1440
+                },
+                "size": 125805,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "original_at": "2026-06-16T10:05:00Z",
+                "created_at": "2026-06-16T10:56:02Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "gxa0V4y19jnKwK9A8YNdE5dXDbZWo7lY",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "rLlWp53ja72QZkv3rBE9KoM1PXyNAgvx",
+                "member_id": "QYrBWA0axgVzPkYBamEqZ9NMOb8DovXj",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/wPvyUUbOpHvYzUmKx-vqzUlDD-Fu9oX5kX5QIBaLgbw/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9RWXJCV0EwYXhn/VnpQa1lCYW1FcVo5/Tk1PYjhEb3ZYai9w/cm9maWxlLzY1MTI1/M2FiNzkwMzM2MDAw/MWE5NDY2OS5qcGc.jpeg",
+                "creator_name": "shotbyical",
+                "title": "OKS_9781.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/wFp3_c2SYMdFRRJZ59T4cHaQmS5U5hUgXlBeqgBfn-0/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9RWXJCV0EwYXhnVnpQa1lCYW1FcVo5Tk1PYjhEb3ZYai9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJiYmJiNjc1Y2YwMDAxZGI0NTRjLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "lat: -6.217662 lng: 106.807055",
+                    "latitude": -6.2176618576049805,
+                    "longitude": 106.80705261230469
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 959,
+                    "height": 1440
+                },
+                "size": 128122,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "original_at": "2026-06-16T10:05:00Z",
+                "created_at": "2026-06-16T10:55:58Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "NRq71Qovb0eAkNg5K4zyEjp2WdDBym9O",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "rLlWp53ja72QZkv3rBE9KoM1PXyNAgvx",
+                "member_id": "QYrBWA0axgVzPkYBamEqZ9NMOb8DovXj",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/wPvyUUbOpHvYzUmKx-vqzUlDD-Fu9oX5kX5QIBaLgbw/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9RWXJCV0EwYXhn/VnpQa1lCYW1FcVo5/Tk1PYjhEb3ZYai9w/cm9maWxlLzY1MTI1/M2FiNzkwMzM2MDAw/MWE5NDY2OS5qcGc.jpeg",
+                "creator_name": "shotbyical",
+                "title": "OKS_9783.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/y6dRtLoSh32x16dbGz2DMrklYVDtYrEz54YE-ACfGkU/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9RWXJCV0EwYXhnVnpQa1lCYW1FcVo5Tk1PYjhEb3ZYai9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJiYmJiNjc1Y2YwMDAxZGI0NTUwLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "lat: -6.217662 lng: 106.807055",
+                    "latitude": -6.2176618576049805,
+                    "longitude": 106.80705261230469
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 959,
+                    "height": 1440
+                },
+                "size": 127943,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "original_at": "2026-06-16T10:05:00Z",
+                "created_at": "2026-06-16T10:55:58Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "ra1vg0n4YxAKkPLoNYJPkRdBZeMNPQLJ",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "rLlWp53ja72QZkv3rBE9KoM1PXyNAgvx",
+                "member_id": "QYrBWA0axgVzPkYBamEqZ9NMOb8DovXj",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/wPvyUUbOpHvYzUmKx-vqzUlDD-Fu9oX5kX5QIBaLgbw/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9RWXJCV0EwYXhn/VnpQa1lCYW1FcVo5/Tk1PYjhEb3ZYai9w/cm9maWxlLzY1MTI1/M2FiNzkwMzM2MDAw/MWE5NDY2OS5qcGc.jpeg",
+                "creator_name": "shotbyical",
+                "title": "OKS_9785.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/UMG7QGc88QQ65GXGlnY98x0LVp2vIgih0ZpnZjOcXeM/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9RWXJCV0EwYXhnVnpQa1lCYW1FcVo5Tk1PYjhEb3ZYai9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJiYmJiNjc1Y2YwMDAxZGI0NTUyLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "lat: -6.217662 lng: 106.807055",
+                    "latitude": -6.2176618576049805,
+                    "longitude": 106.80705261230469
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 959,
+                    "height": 1440
+                },
+                "size": 125736,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "original_at": "2026-06-16T10:05:00Z",
+                "created_at": "2026-06-16T10:55:58Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            },
+            {
+                "product_id": "Mr6v4DPWYO5gkA327eqlGa7mx9KoZpbe",
+                "product_type_id": "MR9Xdjv70WpeODE8DEPLAyb8xVBQzq31",
+                "product_type": "content",
+                "creator_id": "rLlWp53ja72QZkv3rBE9KoM1PXyNAgvx",
+                "member_id": "QYrBWA0axgVzPkYBamEqZ9NMOb8DovXj",
+                "profile_url": "https://cfwimgproxy.fototree.com/images/wPvyUUbOpHvYzUmKx-vqzUlDD-Fu9oX5kX5QIBaLgbw/fill/640/640/no/1/czM6Ly9jZG4uZm90/b3l1LmNvbS91c2Vy/cy9RWXJCV0EwYXhn/VnpQa1lCYW1FcVo5/Tk1PYjhEb3ZYai9w/cm9maWxlLzY1MTI1/M2FiNzkwMzM2MDAw/MWE5NDY2OS5qcGc.jpeg",
+                "creator_name": "shotbyical",
+                "title": "OKS_9784.JPG",
+                "url": "https://cfsimgproxy.fototree.com/images/4a9mXggiXEQAwTpveQp2RtfeeNEG649IBp7l36us7WA/watermark:1:ce:0:0:2/czM6Ly9jZG4uZm90b3l1LmNvbS91c2Vycy9RWXJCV0EwYXhnVnpQa1lCYW1FcVo5Tk1PYjhEb3ZYai9naWZ0LXNob3AvcGhvdG9zL2NvbXByZXNzZWQvNmEzMTJiYmJiNjc1Y2YwMDAxZGI0NTUxLmpwZWc.jpeg",
+                "content_type": "photo",
+                "location": {
+                    "name": "lat: -6.217662 lng: 106.807055",
+                    "latitude": -6.2176618576049805,
+                    "longitude": 106.80705261230469
+                },
+                "price": 85000,
+                "initial_price": 85000,
+                "original_price": 85000,
+                "is_wholesale_active": false,
+                "currency_code": "IDR",
+                "resolution": {
+                    "width": 959,
+                    "height": 1440
+                },
+                "size": 127036,
+                "quality": "low-res",
+                "upload_source": "sell",
+                "is_wishlist": true,
+                "original_at": "2026-06-16T10:05:00Z",
+                "created_at": "2026-06-16T10:55:58Z",
+                "wholesale_tier": [
+                    {
+                        "tier": 1,
+                        "min_contents": 1,
+                        "discount": 0
+                    }
+                ],
+                "package": {}
+            }
+        ],
+        "total_item": 0,
+        "total_price": 0,
+        "total_original_price": 0,
+        "service_fee": 0,
+        "final_price": 0,
+        "available_first_purchase": []
+    },
+    "message": "OK"
+}

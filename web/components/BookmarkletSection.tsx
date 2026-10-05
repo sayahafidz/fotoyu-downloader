@@ -4,7 +4,7 @@ import { useState } from "react";
 
 const APP_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
-  (typeof window !== "undefined" ? window.location.origin : "");
+  (typeof window !== "undefined" ? window.location.origin : "https://fakyu.sayahafidz.my.id");
 
 const CONSOLE_CODE = `(function(){
   var APP_URL = "${APP_URL}";
@@ -44,109 +44,182 @@ const CONSOLE_CODE = `(function(){
   .catch(function(){ fallback(); });
 })();`;
 
+const ANDROID_BOOKMARKLET = `javascript:(function(){var s=document.createElement('script');s.src='${APP_URL}/android-inject.js?t='+Date.now();document.body.appendChild(s);})();`;
+
 interface BookmarkletSectionProps {
   onTokenReceived?: (token: string) => void;
+  onOpenAndroidGuide?: () => void;
 }
 
 export default function BookmarkletSection({
   onTokenReceived,
+  onOpenAndroidGuide,
 }: BookmarkletSectionProps) {
-  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<"android" | "kiwi" | "pc">("android");
+  const [copiedAndroid, setCopiedAndroid] = useState(false);
+  const [copiedConsole, setCopiedConsole] = useState(false);
 
-  const handleCopy = async () => {
+  const handleCopyAndroid = async () => {
+    try {
+      await navigator.clipboard.writeText(ANDROID_BOOKMARKLET);
+      setCopiedAndroid(true);
+      setTimeout(() => setCopiedAndroid(false), 2000);
+    } catch {}
+  };
+
+  const handleCopyConsole = async () => {
     try {
       await navigator.clipboard.writeText(CONSOLE_CODE);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedConsole(true);
+      setTimeout(() => setCopiedConsole(false), 2000);
     } catch {}
   };
 
   return (
-    <div className="rounded-2xl border-2 border-indigo-300 bg-gradient-to-br from-indigo-50 to-blue-50 p-6 shadow-sm">
+    <div className="rounded-3xl border border-indigo-200 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 transition-colors">
       <div className="space-y-4">
-        {/* Header */}
-        <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 text-white shadow-md">
-            <BoltIcon />
-          </span>
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-lg font-bold text-indigo-900">
-                Console Copy-Paste di fotoyu.com
-              </h3>
-              <span className="rounded-full bg-indigo-600 px-2.5 py-0.5 text-[10px] font-bold text-white">
-                RECOMMENDED
-              </span>
-            </div>
-            <p className="text-sm leading-relaxed text-indigo-800">
-              Copy kode di bawah, paste ke <strong>Console</strong> browser saat buka fotoyu.com dalam mode mobile display.
-            </p>
-          </div>
-        </div>
-
-        {/* Code box */}
-        <div className="relative">
-          <div className="rounded-lg bg-slate-900 p-4 overflow-x-auto">
-            <pre className="text-xs text-slate-100 font-mono whitespace-pre-wrap break-all">
-              {CONSOLE_CODE}
-            </pre>
-          </div>
+        {/* Device Switcher Segmented Control */}
+        <div className="flex rounded-2xl bg-slate-100 p-1 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
           <button
             type="button"
-            onClick={handleCopy}
-            className="absolute top-2 right-2 rounded-lg bg-slate-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-600 transition-colors"
+            onClick={() => setActiveTab("android")}
+            className={[
+              "flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs sm:text-sm font-bold transition-all active:scale-95",
+              activeTab === "android"
+                ? "bg-white text-indigo-600 shadow-sm dark:bg-slate-800 dark:text-indigo-400"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200",
+            ].join(" ")}
           >
-            {copied ? "Tersalin!" : "Copy"}
+            <span>📱</span>
+            <span>Chrome Android</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("kiwi")}
+            className={[
+              "flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs sm:text-sm font-bold transition-all active:scale-95",
+              activeTab === "kiwi"
+                ? "bg-white text-emerald-600 shadow-sm dark:bg-slate-800 dark:text-emerald-400"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200",
+            ].join(" ")}
+          >
+            <span>⚡</span>
+            <span>Kiwi Browser</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("pc")}
+            className={[
+              "flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs sm:text-sm font-bold transition-all active:scale-95",
+              activeTab === "pc"
+                ? "bg-white text-blue-600 shadow-sm dark:bg-slate-800 dark:text-blue-400"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200",
+            ].join(" ")}
+          >
+            <span>💻</span>
+            <span>PC / Laptop</span>
           </button>
         </div>
 
-        {/* Instructions */}
-        <div className="space-y-2 text-sm text-slate-700">
-          <p className="font-semibold text-slate-900">Cara pakai:</p>
-          <ol className="list-decimal list-inside space-y-1 text-slate-600">
-            <li>Buka fotoyu.com di browser laptop/desktop</li>
-            <li>Tekan <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-xs font-mono">F12</kbd> untuk buka DevTools</li>
-            <li>Klik ikon device toolbar (atau tekan <kbd className="px-1.5 py-0.5 bg-slate-200 rounded text-xs font-mono">Ctrl+Shift+M</kbd>) untuk mode mobile</li>
-            <li>Pilih tab <strong>Console</strong></li>
-            <li>Copy kode di atas dan paste ke Console, tekan Enter</li>
-            <li>Halaman akan otomatis redirect ke web app ini dengan cart kamu</li>
-          </ol>
-        </div>
+        {/* Tab 1: Android Chrome & Samsung */}
+        {activeTab === "android" && (
+          <div className="space-y-3.5 animate-fade-in">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 rounded-2xl bg-indigo-50/70 p-3.5 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-bold text-indigo-950 dark:text-indigo-200">
+                  Bookmarklet 1-Klik Chrome HP
+                </p>
+                <p className="text-[11px] sm:text-xs text-indigo-900/80 dark:text-indigo-300">
+                  Salin URL di bawah, simpan sebagai Bookmark di Chrome dengan nama <code className="font-mono font-bold">fotoyu</code>.
+                </p>
+              </div>
 
-        {/* Note */}
-        <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
-          <p className="text-xs text-blue-900">
-            <strong>Catatan:</strong> Pastikan sudah login di fotoyu.com sebelum menjalankan kode. Kode ini akan otomatis mengambil token dari localStorage dan fetch data cart kamu.
-          </p>
-        </div>
+              <button
+                type="button"
+                onClick={handleCopyAndroid}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-indigo-500/25 hover:bg-indigo-700 active:scale-95 transition-all"
+              >
+                <CopyIcon />
+                <span>{copiedAndroid ? "✓ Tersalin!" : "Salin URL Bookmark"}</span>
+              </button>
+            </div>
+
+            <ol className="list-decimal list-inside space-y-1 text-xs text-slate-600 dark:text-slate-400 pl-1">
+              <li>Di Chrome HP: Bookmark sembarang web lalu Edit URL jadi kode yang kamu salin.</li>
+              <li>Buka <strong>fotoyu.com</strong>, login & isi keranjang foto.</li>
+              <li>Ketik <code className="font-mono font-bold text-slate-800 dark:text-slate-200">fotoyu</code> di Address Bar Chrome → Ketuk bookmark → Selesai!</li>
+            </ol>
+          </div>
+        )}
+
+        {/* Tab 2: Kiwi Browser Userscript */}
+        {activeTab === "kiwi" && (
+          <div className="space-y-3.5 animate-fade-in">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 rounded-2xl bg-emerald-50/70 p-3.5 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
+              <div className="flex-1">
+                <p className="text-xs sm:text-sm font-bold text-emerald-950 dark:text-emerald-200">
+                  Tombol Download Otomatis di Layar HP
+                </p>
+                <p className="text-[11px] sm:text-xs text-emerald-900/80 dark:text-emerald-300">
+                  Pasang ekstensi Tampermonkey di Kiwi Browser untuk memunculkan tombol download di fotoyu.com.
+                </p>
+              </div>
+
+              <a
+                href="/fotoyu-mobile-helper.user.js"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-500/25 hover:bg-emerald-700 active:scale-95 transition-all"
+              >
+                <span>⚡</span>
+                <span>Pasang Userscript</span>
+              </a>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-slate-400 pl-1">
+              Setelah terpasang, tombol mengambang <strong>"⚡ Download Foto"</strong> akan otomatis muncul di kanan bawah saat membuka fotoyu.com.
+            </p>
+          </div>
+        )}
+
+        {/* Tab 3: Desktop PC Console */}
+        {activeTab === "pc" && (
+          <div className="space-y-3.5 animate-fade-in">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 rounded-2xl bg-slate-50 p-3.5 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+              <div>
+                <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                  Console Snippet (DevTools PC)
+                </p>
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+                  Buka fotoyu.com di laptop → F12 → Tab Console → Paste kode ini → Enter.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCopyConsole}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-indigo-600 dark:bg-slate-800 dark:hover:bg-indigo-600 active:scale-95 transition-all"
+              >
+                <CopyIcon />
+                <span>{copiedConsole ? "✓ Tersalin!" : "Salin Kode Console"}</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-function BoltIcon() {
-  return (
-    <svg
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-    </svg>
-  );
-}
-
 function CopyIcon() {
   return (
-    <svg
-      className="h-4 w-4"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+      />
     </svg>
   );
 }
-

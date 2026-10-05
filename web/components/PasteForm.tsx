@@ -45,17 +45,14 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
       const text = await navigator.clipboard.readText();
       if (text) setValue(text);
     } catch {
-      // clipboard read may be blocked; ignore silently
+      // clipboard read blocked by browser permissions
     }
   };
 
   const charCount = value.length;
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full animate-fade-in space-y-4"
-    >
+    <form onSubmit={handleSubmit} className="w-full animate-fade-in space-y-4">
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -64,10 +61,10 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
         className={[
-          "relative rounded-2xl border-2 border-dashed transition-colors",
+          "relative rounded-3xl border-2 border-dashed transition-all",
           dragOver
-            ? "border-indigo-400 bg-indigo-50/60"
-            : "border-slate-300 bg-white hover:border-slate-400",
+            ? "border-indigo-500 bg-indigo-50/70 dark:border-indigo-400 dark:bg-indigo-950/40"
+            : "border-slate-300 bg-white hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700",
         ].join(" ")}
       >
         <textarea
@@ -75,32 +72,33 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
           onChange={(e) => setValue(e.target.value)}
           placeholder={
             "Tempelkan (paste) response JSON dari fotoyu di sini...\n\n" +
-            "Tip: klik kanan file response-fotoyu.txt → Open, copy semua, lalu paste ke sini.\n" +
-            "Atau drag & drop file .txt/.json langsung ke kotak ini."
+            "Tip: Salin isi response dari API carts/preview, lalu paste ke kotak ini.\n" +
+            "Atau drag & drop file .txt / .json langsung ke sini."
           }
           spellCheck={false}
-          className="block h-72 w-full resize-y rounded-2xl bg-transparent p-4 font-mono text-sm leading-relaxed text-slate-800 placeholder:text-slate-400 focus:outline-none"
+          className="block h-64 sm:h-72 w-full resize-y rounded-3xl bg-transparent p-4 sm:p-5 font-mono text-xs sm:text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
         />
-        <div className="pointer-events-none absolute bottom-3 right-4 select-none text-xs text-slate-400">
+        <div className="pointer-events-none absolute bottom-3 right-4 select-none text-xs font-mono text-slate-400 dark:text-slate-500">
           {charCount.toLocaleString("id-ID")} karakter
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
+      {/* Buttons */}
+      <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
         <button
           type="submit"
           disabled={loading || !value.trim()}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-indigo-500/40 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-indigo-500/40 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <>
               <SpinnerIcon />
-              Memproses...
+              Memproses data...
             </>
           ) : (
             <>
               <SparklesIcon />
-              Proses
+              Proses Response
             </>
           )}
         </button>
@@ -108,15 +106,15 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
         <button
           type="button"
           onClick={handlePaste}
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors active:scale-95"
         >
           <ClipboardIcon />
-          Paste dari clipboard
+          Paste Clipboard
         </button>
 
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50">
+        <label className="inline-flex flex-1 sm:flex-none cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors active:scale-95">
           <FileIcon />
-          Pilih file
+          Pilih File
           <input
             type="file"
             accept=".txt,.json,application/json,text/plain"
@@ -129,7 +127,7 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
           <button
             type="button"
             onClick={() => setValue("")}
-            className="ml-auto text-sm font-medium text-slate-500 hover:text-slate-700"
+            className="w-full sm:w-auto sm:ml-auto text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 text-center py-2 transition-colors"
           >
             Bersihkan
           </button>
@@ -137,62 +135,18 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
       </div>
 
       {/* Tutorial Section */}
-      <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+      <div className="rounded-2xl border border-blue-200 bg-blue-50/80 p-4 dark:border-blue-900/50 dark:bg-blue-950/30">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white">
-            <InfoIcon />
+          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500 text-white font-bold text-xs">
+            ℹ
           </span>
-          <div className="flex-1 space-y-2 text-sm">
-            <p className="font-semibold text-blue-900">
-              ⚠️ Penting: Gunakan tampilan mobile di DevTools
+          <div className="flex-1 space-y-2 text-xs sm:text-sm">
+            <p className="font-bold text-blue-950 dark:text-blue-200">
+              Tips: Gunakan Tampilan Mobile saat Menangkap Response
             </p>
-            <p className="text-blue-800 leading-relaxed">
-              Response JSON dari fotoyu.com <strong>hanya include field <code className="rounded bg-blue-100 px-1 py-0.5 font-mono text-xs">url:</code> (link foto)</strong> ketika diakses dari tampilan mobile. Ikuti langkah berikut:
+            <p className="text-blue-900/90 dark:text-blue-300 leading-relaxed text-xs">
+              Response JSON dari fotoyu.com menyertakan field <code className="rounded bg-blue-100 px-1 py-0.5 font-mono text-[11px] text-blue-900 dark:bg-blue-900/60 dark:text-blue-200">url</code> untuk link foto resolusi tinggi ketika diakses dalam mode mobile.
             </p>
-            <ol className="list-decimal list-inside space-y-1.5 text-blue-800 leading-relaxed">
-              <li>
-                Buka{" "}
-                <a
-                  href="https://fotoyu.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="underline hover:text-blue-900 font-medium"
-                >
-                  fotoyu.com
-                </a>{" "}
-                dan <strong>login</strong>
-              </li>
-              <li>
-                Tekan <kbd className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">F12</kbd> untuk buka <strong>Developer Tools</strong>
-              </li>
-              <li>
-                <strong className="text-blue-900">Aktifkan tampilan mobile:</strong> klik icon{" "}
-                <span className="inline-flex items-center gap-1 rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">
-                  <MobileIcon className="inline h-3 w-3" /> Toggle device toolbar
-                </span>{" "}
-                atau tekan <kbd className="rounded bg-blue-100 px-1.5 py-0.5 font-mono text-xs">Ctrl+Shift+M</kbd>
-              </li>
-              <li>
-                Buka tab <strong>Network</strong> di DevTools
-              </li>
-              <li>
-                Navigasi ke halaman cart atau refresh halaman
-              </li>
-              <li>
-                Cari request ke <code className="rounded bg-blue-100 px-1 py-0.5 font-mono text-xs">carts/preview</code> atau API endpoint yang berisi data foto
-              </li>
-              <li>
-                Klik request tersebut → tab <strong>Response</strong> → klik kanan → <strong>Copy response</strong>
-              </li>
-              <li>
-                Paste JSON response ke kotak di atas
-              </li>
-            </ol>
-            <div className="rounded-lg bg-blue-100/50 p-2.5 mt-3">
-              <p className="text-xs text-blue-900 leading-relaxed">
-                <strong>Kenapa harus mobile view?</strong> API fotoyu.com mengembalikan data yang berbeda untuk desktop vs mobile. Tampilan desktop tidak include field <code className="font-mono">url:</code> pada response JSON, sehingga downloader tidak bisa mendapatkan link foto. Tampilan mobile include semua field yang dibutuhkan termasuk <code className="font-mono">url:</code> untuk setiap foto.
-              </p>
-            </div>
           </div>
         </div>
       </div>
@@ -200,78 +154,18 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
   );
 }
 
-function InfoIcon() {
-  return (
-    <svg
-      className="h-3.5 w-3.5"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="16" x2="12" y2="12" />
-      <line x1="12" y1="8" x2="12.01" y2="8" />
-    </svg>
-  );
-}
-
-function MobileIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
-      <line x1="12" y1="18" x2="12.01" y2="18" />
-    </svg>
-  );
-}
-
 function SpinnerIcon() {
   return (
-    <svg
-      className="h-4 w-4 animate-spin"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="3"
-        opacity="0.25"
-      />
-      <path
-        d="M22 12a10 10 0 0 1-10 10"
-        stroke="currentColor"
-        strokeWidth="3"
-        strokeLinecap="round"
-      />
+    <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+      <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
 
 function SparklesIcon() {
   return (
-    <svg
-      className="h-4 w-4"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" />
       <path d="M5 17l.7 1.9L7.6 19.6 5.7 20.3 5 22.2 4.3 20.3 2.4 19.6 4.3 18.9 5 17z" />
     </svg>
@@ -280,15 +174,7 @@ function SparklesIcon() {
 
 function ClipboardIcon() {
   return (
-    <svg
-      className="h-4 w-4"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <rect x="8" y="2" width="8" height="4" rx="1" />
       <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
     </svg>
@@ -297,15 +183,7 @@ function ClipboardIcon() {
 
 function FileIcon() {
   return (
-    <svg
-      className="h-4 w-4"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
       <polyline points="14 2 14 8 20 8" />
     </svg>

@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Fotoyu Downloader
------------------
-Parse a fotoyu API JSON response file, extract every image "url" field
-from result.data[], and download all images concurrently into a `media/`
-folder with retries, resume support, and a progress bar.
+Fotoyu Downloader (CLI & Termux Android)
+---------------------------------------
+Parse a fotoyu API JSON response file OR fetch cart data directly using a Bearer token / persist:root,
+extract every image "url" field from result.data[], and download all images concurrently
+into a `media/` folder (or Android Downloads folder) with retries, resume support, and progress bar.
 """
 
 import argparse
@@ -24,25 +24,25 @@ DEFAULT_OUTPUT = "media"
 DEFAULT_CONCURRENCY = 10
 MAX_RETRIES = 3
 RETRY_BACKOFF_BASE = 1.5  # seconds
+FOTOYU_CART_API = "https://api.fotoyu.com/gs/v1/carts/preview"
 
-# Browser-like headers to avoid being blocked by the image proxy.
+# Browser-like headers to avoid being blocked by the image proxy and API.
 HEADERS = {
     "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
+        "Mozilla/5.0 (Linux; Android 15; Pixel 9) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
     ),
     "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Language": "en-US,en;q=0.9,id;q=0.8",
     "Referer": "https://fotoyu.com/",
+    "Origin": "https://fotoyu.com",
 }
 
 
 def sanitize_filename(name: str) -> str:
-    """Remove characters that are unsafe on Windows."""
+    """Remove characters that are unsafe on Windows and Unix."""
     if not name:
         return ""
-    # Strip path separators and other forbidden Windows chars.
     name = name.replace("/", "_").replace("\\", "_")
     name = re.sub(r'[<>:"/\\|?*\x00-\x1f]', "_", name)
     name = name.strip().rstrip(". ")
@@ -53,7 +53,6 @@ def extract_filename(title: str, product_id: str, url: str, used_names: set) -> 
     """Build a unique, safe filename for a download item."""
     base = sanitize_filename(title) or sanitize_filename(product_id) or "image"
 
-    # Ensure it has an extension. Infer from URL path if missing.
     if "." not in base:
         ext = ".jpg"
         url_path = url.split("?", 1)[0]
@@ -63,7 +62,6 @@ def extract_filename(title: str, product_id: str, url: str, used_names: set) -> 
             ext = "." + m.group(1).lower()
         base = base + ext
 
-    # Deduplicate: append _2, _3, ... if the name was already used.
     if base in used_names:
         stem, dot, ext = base.rpartition(".")
         if not dot:
@@ -81,8 +79,59 @@ def extract_filename(title: str, product_id: str, url: str, used_names: set) -> 
     return base
 
 
+def extract_token(raw_input: str) -> str:
+    """Extract Bearer token directly or from persist:root JSON."""
+    raw = raw_input.strip()
+    if re.match(r"^eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$", raw):
+        return raw
+
+    m = re.search(r'\\?"access_token\\?"\s*:\s*\\?"(eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+)\\?"', raw)
+    if m:
+        return m.group(1)
+
+    try:
+        data = json.loads(raw)
+        if isinstance(data, str):
+            data = json.loads(data)
+        if isinstance(data, dict):
+            user_val = data.get("user")
+            if isinstance(user_val, str):
+                user = json.loads(user_val)
+                token = user.get("access_token")
+                if token and isinstance(token, str):
+                    return token
+    except Exception:
+        pass
+
+    return raw
+
+
+async def fetch_cart_items_via_token(token: str) -> list[dict]:
+    """Fetch cart items directly from Fotoyu API using access token."""
+    clean_token = extract_token(token)
+    headers = {
+        **HEADERS,
+        "Authorization": f"Bearer {clean_token}",
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/plain, */*",
+    }
+    payload = {"page": 1, "limit": 100, "selected_products": []}
+
+    timeout = aiohttp.ClientTimeout(total=30)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with session.post(FOTOYU_CART_API, json=payload, headers=headers) as resp:
+            if resp.status == 401 or resp.status == 403:
+                raise RuntimeError("Token tidak valid atau sudah expired. Silakan ambil token baru.")
+            if resp.status != 200:
+                raise RuntimeError(f"API fotoyu mengembalikan HTTP {resp.status}")
+            data = await resp.json()
+            result = data.get("result", {}) if isinstance(data, dict) else {}
+            items = result.get("data", []) if isinstance(result, dict) else []
+            return items if isinstance(items, list) else []
+
+
 def load_items(input_path: Path) -> list[dict]:
-    """Load JSON response and return the list of data items."""
+    """Load JSON response from local file and return the list of data items."""
     with input_path.open("r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -102,7 +151,6 @@ def build_download_list(items: list[dict]) -> list[tuple[str, str]]:
     for item in items:
         if not isinstance(item, dict):
             continue
-        # Only download photo content (skip videos / other types if present).
         content_type = item.get("content_type")
         if content_type and content_type != "photo":
             continue
@@ -130,8 +178,7 @@ async def download_one(
     pbar: tqdm,
     stats: dict,
 ) -> None:
-    """Download a single file with retries and resume support."""
-    # Resume support: skip if the file already exists and is non-empty.
+    """Download a single file with retries, resume support, and atomicity."""
     if dest.exists() and dest.stat().st_size > 0:
         stats["skipped"] += 1
         pbar.update(1)
@@ -144,8 +191,6 @@ async def download_one(
                     if resp.status != 200:
                         raise RuntimeError(f"HTTP {resp.status}")
 
-                    # Stream to a temp file then atomically rename, so a
-                    # partial download never overwrites a good file.
                     tmp = dest.with_suffix(dest.suffix + ".part")
                     total = 0
                     with tmp.open("wb") as fh:
@@ -159,7 +204,6 @@ async def download_one(
                     pbar.update(1)
                     return
             except (aiohttp.ClientError, RuntimeError, asyncio.TimeoutError) as e:
-                # Clean up partial file before retry.
                 tmp = dest.with_suffix(dest.suffix + ".part")
                 try:
                     if tmp.exists():
@@ -173,7 +217,6 @@ async def download_one(
                     pbar.update(1)
                     print(f"\n[FAIL] {dest.name}: {e}", file=sys.stderr)
                     return
-                # Exponential backoff between retries.
                 await asyncio.sleep(RETRY_BACKOFF_BASE ** attempt)
 
 
@@ -196,7 +239,7 @@ async def run_downloads(
 
     async with aiohttp.ClientSession(connector=connector, timeout=timeout) as session:
         sem = asyncio.Semaphore(concurrency)
-        with tqdm(total=len(downloads), unit="file", desc="Downloading") as pbar:
+        with tqdm(total=len(downloads), unit="file", desc="Mengunduh foto") as pbar:
             tasks = [
                 download_one(
                     session,
@@ -223,25 +266,38 @@ def format_bytes(n: int) -> str:
     return f"{f:.2f} TB"
 
 
+def get_default_output() -> str:
+    """Auto-detect Termux storage path on Android if available, else ./media"""
+    termux_storage = Path.home() / "storage" / "downloads" / "Fotoyu"
+    if termux_storage.parent.exists():
+        return str(termux_storage)
+    return DEFAULT_OUTPUT
+
+
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        description="Download all photo URLs from a fotoyu API response JSON file.",
+        description="Fotoyu Concurrent Downloader - Download semua foto dari keranjang fotoyu.com (PC & Termux Android).",
+    )
+    p.add_argument(
+        "--token", "-t",
+        default=os.environ.get("FOTOYU_TOKEN", ""),
+        help="Bearer token atau persist:root fotoyu untuk mengambil cart langsung via API",
     )
     p.add_argument(
         "--input", "-i",
         default=DEFAULT_INPUT,
-        help=f"Path to the fotoyu response file (default: {DEFAULT_INPUT})",
+        help=f"File path JSON response fotoyu (default: {DEFAULT_INPUT})",
     )
     p.add_argument(
         "--output", "-o",
-        default=DEFAULT_OUTPUT,
-        help=f"Output folder (default: {DEFAULT_OUTPUT})",
+        default=get_default_output(),
+        help=f"Folder tujuan download foto (default: {get_default_output()})",
     )
     p.add_argument(
         "--concurrency", "-c",
         type=int,
         default=DEFAULT_CONCURRENCY,
-        help=f"Number of parallel downloads (default: {DEFAULT_CONCURRENCY})",
+        help=f"Jumlah download paralel bersamaan (default: {DEFAULT_CONCURRENCY})",
     )
     return p.parse_args()
 
@@ -249,43 +305,55 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
-    input_path = Path(args.input).resolve()
-    if not input_path.exists():
-        print(f"Error: input file not found: {input_path}", file=sys.stderr)
-        return 1
-
     output_dir = Path(args.output).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"Input:       {input_path}")
+    items: list[dict] = []
+
+    # Priority 1: Direct Token Fetch
+    if args.token:
+        print(f"Mengambil data keranjang via API fotoyu...")
+        try:
+            items = asyncio.run(fetch_cart_items_via_token(args.token))
+        except Exception as e:
+            print(f"Error mengambil cart via token: {e}", file=sys.stderr)
+            return 1
+    # Priority 2: JSON file input
+    else:
+        input_path = Path(args.input).resolve()
+        if not input_path.exists():
+            print(f"Error: input file tidak ditemukan: {input_path}", file=sys.stderr)
+            print("Gunakan --token \"<TOKEN_FOTOYU>\" untuk download langsung tanpa file JSON.", file=sys.stderr)
+            return 1
+        print(f"Input:       {input_path}")
+        try:
+            items = load_items(input_path)
+        except json.JSONDecodeError as e:
+            print(f"Error: gagal membaca JSON: {e}", file=sys.stderr)
+            return 1
+
     print(f"Output dir:  {output_dir}")
     print(f"Concurrency: {args.concurrency}")
 
-    try:
-        items = load_items(input_path)
-    except json.JSONDecodeError as e:
-        print(f"Error: failed to parse JSON: {e}", file=sys.stderr)
-        return 1
-
     downloads = build_download_list(items)
-    print(f"Found {len(items)} items, {len(downloads)} downloadable images.\n")
+    print(f"Ditemukan {len(items)} item, {len(downloads)} foto siap diunduh.\n")
 
     if not downloads:
-        print("Nothing to download.")
+        print("Tidak ada foto yang dapat diunduh (keranjang kosong).")
         return 0
 
     stats = asyncio.run(run_downloads(downloads, output_dir, args.concurrency))
 
     print("\n" + "=" * 50)
-    print("Download summary")
+    print("Ringkasan Pengunduhan")
     print("=" * 50)
-    print(f"  Total:     {len(downloads)}")
-    print(f"  Success:   {stats['success']}")
-    print(f"  Skipped:   {stats['skipped']} (already existed)")
-    print(f"  Failed:    {stats['failed']}")
-    print(f"  Downloaded:{format_bytes(stats['bytes'])}")
+    print(f"  Total foto:   {len(downloads)}")
+    print(f"  Berhasil:     {stats['success']}")
+    print(f"  Dilewati:     {stats['skipped']} (sudah ada)")
+    print(f"  Gagal:        {stats['failed']}")
+    print(f"  Total data:   {format_bytes(stats['bytes'])}")
     if stats["failed_files"]:
-        print("\nFailed files:")
+        print("\nFile yang gagal:")
         for name in stats["failed_files"]:
             print(f"  - {name}")
 

@@ -4,24 +4,24 @@ import { useState } from "react";
 
 const BOOKMARKLET_STEPS: Array<{ title: string; body: string }> = [
   {
-    title: "Buka fotoyu.com dengan Mobile Display",
+    title: "1. HP Android (Chrome / Samsung Internet)",
     body:
-      "Buka fotoyu.com di browser. Tekan Ctrl+Shift+M (atau Cmd+Opt+M di Mac) untuk mengaktifkan mode tampilan HP. Login dengan akun fotoyu kamu.",
+      "Salin kode bookmarklet di atas. Buat bookmark baru di Chrome dengan URL kode tersebut dan beri nama 'fotoyu'. Buka fotoyu.com, ketik 'fotoyu' di address bar, lalu ketuk bookmark.",
   },
   {
-    title: "Buka DevTools Console",
+    title: "2. HP Android (Kiwi Browser / Ekstensi)",
     body:
-      "Tekan F12 untuk membuka DevTools, atau klik kanan dan pilih 'Inspect'. Klik tab 'Console' di panel DevTools.",
+      "Gunakan Kiwi Browser dengan Tampermonkey / Violentmonkey. Pasang userscript fotoyu (1-klik). Tombol '⚡ Download Foto' akan otomatis muncul di pojok kanan bawah saat buka fotoyu.com.",
   },
   {
-    title: "Copy dan Paste kode",
+    title: "3. Laptop / PC (DevTools Console)",
     body:
-      "Kembali ke web app ini, klik tombol 'Copy Code' di bagian Console. Lalu paste kode tersebut ke Console DevTools fotoyu.com dan tekan Enter.",
+      "Buka fotoyu.com di browser PC. Tekan F12 → pilih tab Console. Paste kode Console di atas dan tekan Enter. Halaman akan otomatis redirect ke downloader ini.",
   },
   {
-    title: "Tunggu redirect otomatis",
+    title: "4. Download Foto di Galeri HP",
     body:
-      "Kode akan otomatis mengambil data cart kamu dan redirect kembali ke web app ini. Setelah redirect, semua foto di cart akan muncul dan siap didownload!",
+      "Setelah foto muncul di preview, kamu bisa memilih 'Galeri HP (Langsung)' untuk menyimpan foto satu per satu tanpa ekstrak ZIP, atau pilih 'File ZIP'.",
   },
 ];
 
@@ -29,22 +29,22 @@ const JSON_STEPS: Array<{ title: string; body: string }> = [
   {
     title: "Pilih foto di aplikasi fotoyu",
     body:
-      "Buka aplikasi fotoyu (mis. dari ancodebuddy/io). Pilih foto-foto yang ingin di-download, lalu tambahkan ke keranjang (cart).",
+      "Buka aplikasi fotoyu atau web fotoyu.com. Pilih foto-foto yang ingin di-download, lalu tambahkan ke keranjang belanja (cart).",
   },
   {
-    title: "Buka web fotoyu di laptop (mode HP)",
+    title: "Buka web fotoyu (Mode HP di DevTools)",
     body:
-      "Buka browser di laptop, tekan F12 → toggle device toolbar (Ctrl+Shift+M) untuk mode tampilan HP. Kunjungi fotoyu.com dan login dengan akun yang sama.",
+      "Buka browser laptop, tekan F12 → toggle device toolbar (Ctrl+Shift+M) untuk mode tampilan HP. Kunjungi fotoyu.com dan login dengan akun yang sama.",
   },
   {
     title: "Buka cart dan tangkap response API",
     body:
-      "Buka keranjang. Di DevTools → tab Network → filter Fetch/XHR. Cari request ke: https://api.fotoyu.com/gs/v1/carts/preview",
+      "Buka keranjang. Di DevTools → tab Network → filter Fetch/XHR. Cari request ke endpoint: carts/preview",
   },
   {
-    title: "Salin response",
+    title: "Salin response & Paste",
     body:
-      "Klik request-nya → tab Response → Copy response (atau salin manual teks JSON-nya). Lalu paste ke kotak di atas dan klik Proses.",
+      "Klik request-nya → tab Response → Copy response (atau salin manual teks JSON-nya). Lalu paste ke kotak di atas dan klik tombol Proses.",
   },
 ];
 
@@ -52,22 +52,22 @@ const TOKEN_STEPS: Array<{ title: string; body: string }> = [
   {
     title: "Login ke fotoyu.com",
     body:
-      "Buka fotoyu.com di tab baru. Login dengan akunmu. Pastikan foto-foto sudah ditambahkan ke cart lewat aplikasi sebelumnya.",
+      "Buka fotoyu.com di browser HP atau PC. Login dengan akunmu. Pastikan foto-foto sudah ditambahkan ke cart sebelumnya.",
   },
   {
-    title: "Buka DevTools",
+    title: "Ambil Token di HP / PC",
     body:
-      "Tekan F12 di keyboard. Buka tab Application (atau Storage di beberapa browser).",
+      "Di HP: Jalankan 'javascript:prompt(localStorage.getItem(\"persist:root\"))' di address bar. Di PC: F12 → Storage / Application → Local Storage → persist:root.",
   },
   {
-    title: "Copy value key persist:root",
+    title: "Paste di kotak Login Token",
     body:
-      "Di sidebar kiri: Storage → Local Storage → https://fotoyu.com. Cari key persist:root. Klik kanan value-nya → Copy (ini akan menyalin seluruh data, termasuk access_token yang tersembunyi di dalamnya).",
+      "Paste seluruh value persist:root ke kotak input di atas, lalu klik 'Ambil cart'. Sistem akan otomatis mengekstrak access_token dan mengambil foto.",
   },
   {
-    title: "Paste di web app ini",
+    title: "Tersimpan Otomatis",
     body:
-      "Paste seluruh value persist:root ke kotak di atas, lalu klik Ambil cart. Backend akan otomatis mengekstrak access_token dari data ini. Data akan disimpan otomatis di browser agar tidak perlu di-paste ulang sampai expired.",
+      "Data token disimpan aman di memori browser lokal kamu sehingga kamu tidak perlu login ulang setiap kali membuka downloader.",
   },
 ];
 
@@ -75,12 +75,12 @@ const ENHANCE_STEPS: Array<{ title: string; body: string }> = [
   {
     title: "Download foto dulu",
     body:
-      "Pakai tab 'Login dengan token' atau 'Paste JSON' untuk mengunduh foto dari cart fotoyu. Tab prompt AI ini untuk mempercantik foto yang sudah kamu download.",
+      "Gunakan tab '1-Klik' atau 'Login Token' untuk mengunduh foto dari cart fotoyu. Tab prompt AI ini untuk mempercantik foto yang sudah kamu download.",
   },
   {
     title: "Pilih varian prompt",
     body:
-      "Pilih salah satu varian di atas: Indonesia Lengkap, English Full (paling kompatibel untuk AI luar), atau Indonesia Singkat untuk penggunaan cepat.",
+      "Pilih salah satu varian: Indonesia Lengkap, English Full (paling kompatibel untuk AI luar), atau Indonesia Singkat untuk penggunaan cepat.",
   },
   {
     title: "Copy prompt atau download .txt",
@@ -90,15 +90,16 @@ const ENHANCE_STEPS: Array<{ title: string; body: string }> = [
   {
     title: "Upload foto + paste prompt",
     body:
-      "Di AI editor: upload foto hasil download, paste prompt tadi, lalu jalankan. Tunggu proses selesai dan download hasilnya. Gunakan AI berbayar (ChatGPT Plus, Gemini Advanced, Photoshop) untuk hasil terbaik.",
+      "Di AI editor: upload foto hasil download, paste prompt tadi, lalu jalankan. AI akan memperjelas detail wajah, pencahayaan, dan membersihkan noise.",
   },
 ];
 
 interface HelpSectionProps {
   mode?: "bookmarklet" | "token" | "paste" | "enhance";
+  onOpenAndroidGuide?: () => void;
 }
 
-export default function HelpSection({ mode = "bookmarklet" }: HelpSectionProps) {
+export default function HelpSection({ mode = "bookmarklet", onOpenAndroidGuide }: HelpSectionProps) {
   const [open, setOpen] = useState(false);
 
   const steps = 
@@ -109,19 +110,19 @@ export default function HelpSection({ mode = "bookmarklet" }: HelpSectionProps) 
     
   const label =
     mode === "bookmarklet"
-      ? "📚 Panduan: Cara pakai Console (Mobile Display)"
+      ? "📚 Panduan Lengkap: Cara Pakai di HP Android & PC"
       : mode === "token"
-      ? "📚 Panduan: Cara mendapatkan data login"
+      ? "📚 Panduan: Cara Mendapatkan Token Login"
       : mode === "paste"
-      ? "📚 Panduan: Cara mendapatkan JSON (untuk pengguna teknis)"
-      : "📚 Panduan: Cara pakai prompt AI";
+      ? "📚 Panduan: Cara Mendapatkan Response JSON"
+      : "📚 Panduan: Cara Mempercantik Foto dengan AI";
 
   return (
     <section className="w-full">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50"
+        className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/80"
       >
         <span className="inline-flex items-center gap-2">
           <InfoIcon />
@@ -144,23 +145,38 @@ export default function HelpSection({ mode = "bookmarklet" }: HelpSectionProps) 
       </button>
 
       {open && (
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 animate-fade-in">
-          {steps.map((s, i) => (
-            <div
-              key={i}
-              className="rounded-xl border border-slate-200 bg-white p-4"
-            >
-              <div className="mb-2 flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
-                  {i + 1}
-                </span>
-                <h4 className="text-sm font-semibold text-slate-800">
-                  {s.title}
-                </h4>
+        <div className="mt-3 space-y-3 animate-fade-in">
+          <div className="grid gap-3 sm:grid-cols-2">
+            {steps.map((s, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+              >
+                <div className="mb-1.5 flex items-center gap-2">
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-bold text-indigo-600 dark:bg-indigo-900/60 dark:text-indigo-400">
+                    {i + 1}
+                  </span>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    {s.title}
+                  </h4>
+                </div>
+                <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">{s.body}</p>
               </div>
-              <p className="text-sm leading-relaxed text-slate-600">{s.body}</p>
+            ))}
+          </div>
+
+          {onOpenAndroidGuide && (
+            <div className="flex justify-center pt-1">
+              <button
+                type="button"
+                onClick={onOpenAndroidGuide}
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/40 transition-colors"
+              >
+                <span>📱</span>
+                <span>Buka Panduan Bergambar Khusus Android</span>
+              </button>
             </div>
-          ))}
+          )}
         </div>
       )}
     </section>

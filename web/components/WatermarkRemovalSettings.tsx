@@ -81,7 +81,7 @@ export default function WatermarkRemovalSettingsPanel({
   const currentProvider = settings.provider || "gemini";
 
   return (
-    <div className="w-full space-y-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+    <div className="w-full space-y-4 rounded-3xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 transition-colors">
       {/* Header with toggle */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -89,26 +89,27 @@ export default function WatermarkRemovalSettingsPanel({
             type="button"
             onClick={toggleEnabled}
             className={[
-              "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
-              settings.enabled ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-600",
+              "relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors active:scale-95",
+              settings.enabled ? "bg-indigo-600" : "bg-slate-300 dark:bg-slate-700",
             ].join(" ")}
+            aria-label="Toggle Hapus Watermark AI"
           >
             <span
               className={[
-                "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
+                "inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform",
                 settings.enabled ? "translate-x-6" : "translate-x-1",
               ].join(" ")}
             />
           </button>
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-              <span>Hapus Watermark Langsung (AI)</span>
-              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+            <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2 flex-wrap">
+              <span>Hapus Watermark Otomatis (AI)</span>
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
                 GEMINI 2.0 FLASH FREE
               </span>
             </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Otomatis hilangkan watermark saat download tanpa re-upload ke ChatGPT/Gemini
+            <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400">
+              Bersihkan watermark langsung saat mengunduh foto
             </p>
           </div>
         </div>
@@ -116,7 +117,7 @@ export default function WatermarkRemovalSettingsPanel({
         {settings.enabled && currentProvider === "dewatermark" && (
           <div className="text-right">
             <p className="text-xs font-medium text-slate-600 dark:text-slate-300">Estimasi biaya</p>
-            <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">
+            <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
               {formatCost(cost.costUSD, cost.costIDR)}
             </p>
             <p className="text-[10px] text-slate-500 dark:text-slate-400">
@@ -128,10 +129,10 @@ export default function WatermarkRemovalSettingsPanel({
 
       {/* Settings panel (shown when enabled) */}
       {settings.enabled && (
-        <div className="space-y-4 border-t border-slate-200 pt-4 dark:border-slate-700">
+        <div className="space-y-4 border-t border-slate-100 pt-4 dark:border-slate-800 animate-fade-in">
           {/* Provider Selector */}
           <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
               Pilih AI Provider:
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -139,10 +140,10 @@ export default function WatermarkRemovalSettingsPanel({
                 type="button"
                 onClick={() => handleProviderChange("gemini")}
                 className={[
-                  "flex flex-col items-start rounded-xl border p-3 text-left transition-all",
+                  "flex flex-col items-start rounded-2xl border p-3 text-left transition-all active:scale-95",
                   currentProvider === "gemini"
-                    ? "border-emerald-500 bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200 shadow-sm"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                    ? "border-emerald-500 bg-emerald-50 text-emerald-950 dark:border-emerald-500 dark:bg-emerald-950/40 dark:text-emerald-200 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800",
                 ].join(" ")}
               >
                 <span className="font-bold text-xs">Google Gemini Flash</span>
@@ -153,10 +154,10 @@ export default function WatermarkRemovalSettingsPanel({
                 type="button"
                 onClick={() => handleProviderChange("dewatermark")}
                 className={[
-                  "flex flex-col items-start rounded-xl border p-3 text-left transition-all",
+                  "flex flex-col items-start rounded-2xl border p-3 text-left transition-all active:scale-95",
                   currentProvider === "dewatermark"
-                    ? "border-indigo-500 bg-indigo-50 text-indigo-900 dark:bg-indigo-950/40 dark:text-indigo-200 shadow-sm"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                    ? "border-indigo-500 bg-indigo-50 text-indigo-950 dark:border-indigo-500 dark:bg-indigo-950/40 dark:text-indigo-200 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800",
                 ].join(" ")}
               >
                 <span className="font-bold text-xs">Dewatermark.ai</span>
@@ -167,10 +168,10 @@ export default function WatermarkRemovalSettingsPanel({
                 type="button"
                 onClick={() => handleProviderChange("openai")}
                 className={[
-                  "flex flex-col items-start rounded-xl border p-3 text-left transition-all",
+                  "flex flex-col items-start rounded-2xl border p-3 text-left transition-all active:scale-95",
                   currentProvider === "openai"
-                    ? "border-purple-500 bg-purple-50 text-purple-900 dark:bg-purple-950/40 dark:text-purple-200 shadow-sm"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300",
+                    ? "border-purple-500 bg-purple-50 text-purple-950 dark:border-purple-500 dark:bg-purple-950/40 dark:text-purple-200 shadow-sm"
+                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-800",
                 ].join(" ")}
               >
                 <span className="font-bold text-xs">OpenAI GPT-4o</span>
@@ -181,67 +182,64 @@ export default function WatermarkRemovalSettingsPanel({
 
           {/* Gemini Key & Custom Base URL Inputs */}
           {currentProvider === "gemini" && (
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3.5 space-y-3 dark:border-emerald-900/50 dark:bg-emerald-950/20">
-              <div className="space-y-1">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 space-y-3 dark:border-emerald-900/50 dark:bg-emerald-950/30">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-300">
-                    Google Gemini Secret Key / API Key:
+                  <label className="text-xs font-bold text-emerald-950 dark:text-emerald-300">
+                    Google Gemini API Key:
                   </label>
                   <a
                     href="https://aistudio.google.com/app/apikey"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[11px] font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+                    className="text-[11px] font-bold text-emerald-700 hover:underline dark:text-emerald-400"
                   >
                     Dapatkan Key Gratis →
                   </a>
                 </div>
                 <input
                   type="password"
-                  placeholder="Paste AIzaSy... (tersimpan aman di localStorage browser)"
+                  placeholder="Paste AIzaSy... (tersimpan di memori browser)"
                   value={geminiKeyInput}
                   onChange={(e) => handleSaveGeminiKey(e.target.value)}
-                  className="w-full rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none dark:border-emerald-800 dark:bg-slate-900 dark:text-slate-100"
+                  className="w-full rounded-xl border border-emerald-300 bg-white px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-emerald-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-600"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-emerald-900 dark:text-emerald-300">
-                  Custom API Base URL (Opsional / Custom Proxy):
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-emerald-950 dark:text-emerald-300">
+                  Custom API Base URL (Opsional):
                 </label>
                 <input
                   type="text"
-                  placeholder="Opsional: https://generativelanguage.googleapis.com atau proxy custom Anda"
+                  placeholder="Opsional: https://generativelanguage.googleapis.com"
                   value={geminiBaseUrlInput}
                   onChange={(e) => handleSaveGeminiBaseUrl(e.target.value)}
-                  className="w-full rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-emerald-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500"
+                  className="w-full rounded-xl border border-emerald-300 bg-white px-3.5 py-2 text-xs sm:text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none dark:border-emerald-800 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-600"
                 />
-                <p className="text-[10px] text-emerald-800/80 dark:text-emerald-400/80">
-                  Kosongkan jika menggunakan endpoint resmi Google AI Studio. Isi jika Anda memakai Cloudflare AI Gateway atau reverse proxy custom.
-                </p>
               </div>
             </div>
           )}
 
           {/* Auto-detect toggle */}
           <div className="space-y-2">
-            <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+            <label className="flex items-center gap-2.5 text-xs sm:text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
               <input
                 type="checkbox"
                 checked={settings.autoDetect}
                 onChange={() => setRegionPosition(undefined)}
-                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-slate-600"
+                className="h-4 w-4 rounded-md border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800"
               />
-              <span className="font-medium">Auto-detect watermark</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">(AI deteksi otomatis)</span>
+              <span className="font-semibold">Auto-detect watermark</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">(Deteksi posisi otomatis oleh AI)</span>
             </label>
           </div>
 
           {/* Manual region selection */}
           {!settings.autoDetect && (
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Pilih posisi watermark
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                Pilih posisi watermark:
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {regionPresets.map((preset) => (
@@ -250,10 +248,10 @@ export default function WatermarkRemovalSettingsPanel({
                     type="button"
                     onClick={() => setRegionPosition(preset.id)}
                     className={[
-                      "rounded-lg border px-3 py-2 text-xs font-medium transition-all",
+                      "rounded-xl border px-3 py-2 text-xs font-semibold transition-all active:scale-95",
                       settings.region?.position === preset.id
-                        ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:border-indigo-500",
+                        ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700",
                     ].join(" ")}
                   >
                     {preset.label}
@@ -267,31 +265,30 @@ export default function WatermarkRemovalSettingsPanel({
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
+            className="text-xs font-bold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300"
           >
-            {showAdvanced ? "▼ Sembunyikan" : "▶ Pengaturan lanjutan"}
+            {showAdvanced ? "▼ Sembunyikan Opsi Lanjutan" : "▶ Opsi Lanjutan"}
           </button>
 
           {showAdvanced && (
-            <div className="space-y-3 rounded-lg bg-slate-50 p-3 dark:bg-slate-900/50">
-              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+            <div className="space-y-3 rounded-2xl bg-slate-50 p-3.5 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800">
+              <label className="flex items-center gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={settings.removeText}
                   onChange={toggleRemoveText}
-                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-slate-600"
+                  className="h-4 w-4 rounded-md border-slate-300 text-indigo-600 focus:ring-2 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-800"
                 />
-                <span>Remove text watermarks</span>
+                <span className="font-semibold">Hapus teks / watermark nama fotografer</span>
               </label>
 
-              <div className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-600 dark:bg-slate-800">
-                <h4 className="mb-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  ℹ️ Informasi Fitur AI
+              <div className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+                <h4 className="mb-1 text-xs font-bold text-slate-800 dark:text-slate-200">
+                  ℹ️ Info Pembersihan AI:
                 </h4>
                 <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
-                  <li>• Gemini 2.0 Flash: Sangat cepat & gratis via Google AI Studio Key</li>
-                  <li>• Processing time: 2-4 detik per foto</li>
-                  <li>• Langsung mengunduh foto bersih tanpa perlu manual ke ChatGPT/Gemini lagi</li>
+                  <li>• Gemini 2.0 Flash: Pemrosesan cepat 2-4 detik per foto.</li>
+                  <li>• Jika AI gagal, sistem otomatis menyimpan foto asli berkualitas penuh.</li>
                 </ul>
               </div>
             </div>
