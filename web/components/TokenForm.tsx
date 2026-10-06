@@ -99,7 +99,7 @@ export default function TokenForm({
           <button
             type="button"
             onClick={() => setValue("")}
-            className="text-xs sm:text-sm font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
+             className="btn-quiet"
           >
             Bersihkan Input
           </button>

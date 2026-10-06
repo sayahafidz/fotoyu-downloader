@@ -118,12 +118,12 @@ export default function HelpSection({ mode = "bookmarklet", onOpenAndroidGuide }
       : "Cara menggunakan prompt edit";
 
   return (
-    <section className="w-full">
+    <section className="themed-tool w-full">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open} aria-controls="import-help"
-        className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/80"
+        className="btn-secondary w-full justify-between text-left"
       >
         <span className="inline-flex items-center gap-2">
           <InfoIcon />

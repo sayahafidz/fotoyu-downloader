@@ -139,7 +139,7 @@ export default function CollageModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="dialog-sheet collage-sheet max-w-4xl">
+      <div className="dialog-sheet collage-sheet themed-tool max-w-4xl">
         {/* Left Side: Live Story/Card Preview */}
         <div className="collage-preview">
           {isRendering ? (
@@ -192,6 +192,7 @@ export default function CollageModal({
                   <button
                     type="button"
                     onClick={() => setRatio("story")}
+                    aria-pressed={ratio === "story"}
                     className={[
                       "flex flex-col items-center justify-center p-2 rounded-xl border text-xs font-bold transition-all active:scale-95",
                       ratio === "story"
@@ -206,6 +207,7 @@ export default function CollageModal({
                   <button
                     type="button"
                     onClick={() => setRatio("portrait")}
+                    aria-pressed={ratio === "portrait"}
                     className={[
                       "flex flex-col items-center justify-center p-2 rounded-xl border text-xs font-bold transition-all active:scale-95",
                       ratio === "portrait"
@@ -220,6 +222,7 @@ export default function CollageModal({
                   <button
                     type="button"
                     onClick={() => setRatio("square")}
+                    aria-pressed={ratio === "square"}
                     className={[
                       "flex flex-col items-center justify-center p-2 rounded-xl border text-xs font-bold transition-all active:scale-95",
                       ratio === "square"
@@ -242,6 +245,7 @@ export default function CollageModal({
                   <button
                     type="button"
                     onClick={() => setTheme("gradient")}
+                    aria-pressed={theme === "gradient"}
                     className={[
                       "p-1.5 rounded-xl border text-xs font-semibold text-center transition-all",
                       theme === "gradient"
@@ -255,6 +259,7 @@ export default function CollageModal({
                   <button
                     type="button"
                     onClick={() => setTheme("glass")}
+                    aria-pressed={theme === "glass"}
                     className={[
                       "p-1.5 rounded-xl border text-xs font-semibold text-center transition-all",
                       theme === "glass"
@@ -268,6 +273,7 @@ export default function CollageModal({
                   <button
                     type="button"
                     onClick={() => setTheme("minimal")}
+                    aria-pressed={theme === "minimal"}
                     className={[
                       "p-1.5 rounded-xl border text-xs font-semibold text-center transition-all",
                       theme === "minimal"
@@ -306,7 +312,7 @@ export default function CollageModal({
                   aria-label="Judul kolase" placeholder="Judul kolase (opsional)"
                   value={badgeTitle}
                   onChange={(e) => setBadgeTitle(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                  className="field"
                 />
 
                 <input
@@ -314,7 +320,7 @@ export default function CollageModal({
                   aria-label="Keterangan kolase" placeholder="Nama acara atau keterangan (opsional)"
                   value={badgeSubtitle}
                   onChange={(e) => setBadgeSubtitle(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                  className="field"
                 />
               </div>
 
@@ -338,7 +344,7 @@ export default function CollageModal({
                 type="button"
                 onClick={handleShare}
                 disabled={isRendering || !currentBlob}
-                className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 active:scale-95 disabled:opacity-50 transition-all"
+                className="btn-secondary flex-1"
               >
                 <span>📲</span>
                 <span>Share Story</span>

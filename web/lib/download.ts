@@ -217,6 +217,10 @@ export interface DownloadAllProgress {
   watermarkSuccess?: number;
   watermarkFailed?: number;
   mode?: "zip" | "direct";
+  stage?: "fetching" | "watermark" | "enhancing" | "saving" | "archiving";
+  photo?: { filename: string; url: string };
+  archivePercent?: number;
+  watermarkEnabled?: boolean;
 }
 
 export interface AdvancedDownloadOptions {
@@ -242,11 +246,14 @@ export async function downloadBatchDirectSequential(
   let watermarkSuccess = 0;
   let watermarkFailed = 0;
 
+  const report = (stage: DownloadAllProgress["stage"], photo: Photo) => onProgress({ done, total, current: photo.filename, photo: { filename: photo.filename, url: photo.url }, stage, watermarkSuccess, watermarkFailed, watermarkEnabled: Boolean(options?.removeWatermark), mode: "direct" });
+
   // Browser-triggered individual saves are serial to avoid RAM spikes.
   await runWithConcurrency(photos, 1, async (photo) => {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
     try {
+      report("fetching", photo);
       let blob: Blob | null = null;
       try {
         blob = await fetchImageBlobWithFallbacks(photo.url, signal);
@@ -261,6 +268,7 @@ export async function downloadBatchDirectSequential(
         // AI Watermark Removal
         if (options?.removeWatermark && options?.watermarkSettings) {
           try {
+            report("watermark", photo);
             const wmRes = await removeWatermark(photo, options.watermarkSettings, signal);
             if (wmRes.success && wmRes.processedImageBlob) {
               blob = wmRes.processedImageBlob;
@@ -276,12 +284,14 @@ export async function downloadBatchDirectSequential(
         // Offline Client-Side Auto-Enhance
         if (options?.autoEnhance) {
           try {
+            report("enhancing", photo);
             const enh = await enhanceImageCanvas(blob, DEFAULT_ENHANCE_OPTIONS);
             blob = enh.blob;
           } catch {}
         }
 
         if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+        report("saving", photo);
         downloadBlob(blob, photo.filename);
         if (delayMs > 0) await new Promise(resolve => setTimeout(resolve, delayMs));
       }
@@ -298,6 +308,8 @@ export async function downloadBatchDirectSequential(
       watermarkSuccess,
       watermarkFailed,
       mode: "direct",
+      stage: "saving",
+      watermarkEnabled: Boolean(options?.removeWatermark),
     });
   });
 
@@ -323,11 +335,14 @@ export async function downloadAllWithOptions(
   let watermarkSuccess = 0;
   let watermarkFailed = 0;
 
+  const report = (stage: DownloadAllProgress["stage"], photo: Photo) => onProgress({ done, total, current: photo.filename, photo: { filename: photo.filename, url: photo.url }, stage, watermarkSuccess, watermarkFailed, watermarkEnabled: Boolean(options?.removeWatermark), mode: "zip" });
+
   // Download in parallel (bounded) so the ZIP is ready much faster.
-  await runWithConcurrency(photos, options?.removeWatermark || options?.autoEnhance ? 2 : 3, async (photo) => {
+  await runWithConcurrency(photos, options?.removeWatermark ? 1 : options?.autoEnhance ? 2 : 3, async (photo) => {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
     try {
+      report("fetching", photo);
       let blob: Blob | null = null;
       try {
         blob = await fetchImageBlobWithFallbacks(photo.url, signal);
@@ -353,6 +368,7 @@ export async function downloadAllWithOptions(
       // 1. AI Watermark Removal
       if (options?.removeWatermark && options?.watermarkSettings) {
         try {
+          report("watermark", photo);
           const result = await removeWatermark(photo, options.watermarkSettings, signal);
           if (result.success && result.processedImageBlob) {
             blob = result.processedImageBlob;
@@ -368,6 +384,7 @@ export async function downloadAllWithOptions(
       // 2. Offline Client-Side Auto-Enhance
       if (options?.autoEnhance) {
         try {
+          report("enhancing", photo);
           const enh = await enhanceImageCanvas(blob, DEFAULT_ENHANCE_OPTIONS);
           blob = enh.blob;
         } catch {}
@@ -395,6 +412,7 @@ export async function downloadAllWithOptions(
       watermarkSuccess,
       watermarkFailed,
       mode: "zip",
+      watermarkEnabled: Boolean(options?.removeWatermark),
     });
   });
 
@@ -404,6 +422,9 @@ export async function downloadAllWithOptions(
       done,
       total,
       current: "Membuat file ZIP...",
+      stage: "archiving",
+      archivePercent: 0,
+      watermarkEnabled: Boolean(options?.removeWatermark),
       watermarkSuccess,
       watermarkFailed,
       mode: "zip",
@@ -421,6 +442,9 @@ export async function downloadAllWithOptions(
           done: total,
           total,
           current: `Membuat ZIP: ${Math.round(metadata.percent)}%`,
+          stage: "archiving",
+          archivePercent: Math.round(metadata.percent),
+          watermarkEnabled: Boolean(options?.removeWatermark),
           watermarkSuccess,
           watermarkFailed,
           mode: "zip",
@@ -430,6 +454,7 @@ export async function downloadAllWithOptions(
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
     const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, "").replace("T", "_");
+    onProgress({ done, total, current: "Mengirim file ZIP ke browser", stage: "saving", mode: "zip", watermarkEnabled: Boolean(options?.removeWatermark), watermarkSuccess, watermarkFailed });
     downloadBlob(zipBlob, `fotoyu_photos_${timestamp}.zip`);
     return { succeeded, failed };
   }

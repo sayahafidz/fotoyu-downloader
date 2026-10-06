@@ -51,6 +51,8 @@ Apply environment changes with `docker compose up -d --force-recreate web`. No r
 
 ## Quotas and rate limits
 
+For local `npm run dev`, Redis defaults to `redis://127.0.0.1:6379` when `REDIS_URL` is absent. Run a local Redis service or set `REDIS_URL` to your development instance. Production requires an explicit `REDIS_URL`; Compose provides it automatically. A quota HTTP 503 indicates unavailable or unconfigured Redis, rather than exhausted quota (HTTP 429).
+
 - Successful watermark edits: 5 per browser identity and public IP per day, reset at 00:00 WIB. Shared public IPs share this IP cap. Without accounts, this is not a verified human identity.
 - Failed provider/image operations release the reserved quota. Concurrent requests reserve atomically before processing, preventing a quota race.
 - One active edit per public IP, globally 2 active edits by default (`WATERMARK_CONCURRENCY`, maximum 16).

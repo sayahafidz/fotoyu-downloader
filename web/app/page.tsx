@@ -187,6 +187,8 @@ export default function HomePage() {
         total: toDownload.length,
         current: "Mempersiapkan pengunduhan...",
         mode: downloadMode,
+        stage: "fetching",
+        watermarkEnabled: watermarkSettings.enabled,
       });
 
       const controller = new AbortController();
@@ -284,7 +286,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col items-start gap-1 sm:gap-2">
-              <p className="text-base font-semibold tracking-tight text-slate-900 dark:text-slate-100">Fotoyu <span className="font-normal text-slate-600 dark:text-slate-400">Downloader</span></p>
+              <p className="app-wordmark">Fotoyu<span>Downloader</span></p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -313,8 +315,8 @@ export default function HomePage() {
 
         {(phase === "idle" || phase === "parsing" || phase === "error") && (
           <div className="import-flow space-y-6">
-            <div>
-              <h1 ref={importHeading} tabIndex={-1} className="text-2xl sm:text-3xl font-semibold tracking-tight">Simpan foto kamu.</h1>
+            <div className="import-intro">
+              <h1 ref={importHeading} tabIndex={-1}>Foto kamu.<br /><span>Simpan di sini.</span></h1>
               <p className="mt-2 text-base text-slate-600 dark:text-slate-400">Muat keranjang Fotoyu, pilih foto, lalu unduh ke perangkat.</p>
             </div>
             {savedToken && <div className="saved-session">

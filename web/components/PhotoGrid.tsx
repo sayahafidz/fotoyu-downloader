@@ -97,18 +97,21 @@ export default function PhotoGrid({ photos, allPhotos, onDownloadAll, zipping, s
             <button type="button" className="btn-quiet" disabled={!displayedPhotos.length} onClick={selectVisible}>{isAllSelected ? "Lepas yang tampil" : "Pilih yang tampil"}</button>
           </div>
         </div>
-        <details className="disclosure">
-          <summary>Opsi unduhan & kolase</summary>
-          <div className="space-y-5 pt-4">
+        <section aria-labelledby="download-options-title" className="space-y-4 border-t border-slate-200 pt-4 dark:border-slate-800">
+          <h2 id="download-options-title" className="text-base font-semibold">Opsi unduhan</h2>
+          <WatermarkRemovalSettingsPanel settings={watermarkSettings} photoCount={countToDownload} onChange={setWatermarkSettings} />
+          <div className="flex flex-wrap items-center justify-between gap-3 border-y border-slate-200 py-4 dark:border-slate-800">
+            <div>
+              <h3 className="text-sm font-semibold">Kolase foto</h3>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Gabungkan hingga 9 pilihan, atau 4 foto pertama.</p>
+            </div>
+            <button type="button" className="btn-secondary" onClick={() => setIsCollageOpen(true)}>Buat kolase</button>
+          </div>
+          <div className="space-y-3">
             <label className="setting-row"><input type="checkbox" checked={autoEnhance} onChange={(event) => setAutoEnhance(event.target.checked)} /><span>Koreksi warna otomatis<span className="setting-help">Sesuaikan kecerahan dan kontras saat mengunduh.</span></span></label>
             {downloadMode === "zip" && <label className="setting-row"><input type="checkbox" checked={folderByCreator} onChange={(event) => setFolderByCreator(event.target.checked)} /><span>Folder per fotografer<span className="setting-help">Kelompokkan foto di dalam file ZIP.</span></span></label>}
-            <WatermarkRemovalSettingsPanel settings={watermarkSettings} photoCount={countToDownload} onChange={setWatermarkSettings} />
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-4 dark:border-slate-800">
-              <p className="text-sm text-slate-600 dark:text-slate-400">Kolase memakai hingga 9 pilihan, atau 4 foto pertama.</p>
-              <button type="button" className="btn-secondary" onClick={() => setIsCollageOpen(true)}>Buat kolase</button>
-            </div>
           </div>
-        </details>
+        </section>
       </div>
       {displayedPhotos.length ? <div className={viewLayout === "grid" ? "grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5" : "space-y-2"}>
         {displayedPhotos.map((photo, index) => <PhotoCard key={photo.id} photo={photo} index={index} isSelected={selectedIds.has(photo.id)} onToggleSelect={() => toggleSelect(photo.id)} onImageClick={() => setLightboxIndex(index)} viewMode={viewLayout} />)}

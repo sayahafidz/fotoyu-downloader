@@ -56,7 +56,7 @@ export default function PwaInstallBanner({ hidden = false }: { hidden?: boolean 
 
   return (
     <div className="mx-auto max-w-2xl px-4 pb-6">
-      <div className="flex items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-white/95 p-3.5 shadow-xl shadow-indigo-500/10 backdrop-blur-md dark:border-indigo-900/50 dark:bg-slate-900/95">
+      <div className="tool-panel themed-tool flex flex-wrap items-center justify-between gap-3 p-4">
         <div className="flex items-center gap-3">
           <div>
             <h4 className="text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
@@ -72,7 +72,7 @@ export default function PwaInstallBanner({ hidden = false }: { hidden?: boolean 
           <button
             type="button"
             onClick={handleInstall}
-            className="rounded-xl bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-indigo-700 active:scale-95"
+             className="btn-primary"
           >
             Pasang
           </button>

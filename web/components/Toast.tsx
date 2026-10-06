@@ -44,7 +44,7 @@ export function ToastContainer({
   if (toasts.length === 0) return null;
 
   return (
-    <div className="pointer-events-none fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
+    <div className="toast-stack pointer-events-none fixed z-[100] flex flex-col gap-3">
       {toasts.map((t) => (
         <ToastCard key={t.id} toast={t} onRemove={onRemove} />
       ))}
@@ -69,8 +69,8 @@ function ToastCard({
 
   return (
     <div
-      className="pointer-events-auto animate-slide-in-right rounded-xl border bg-white p-4 shadow-lg dark:border-slate-700 dark:bg-slate-800"
-      role="alert"
+      className="toast-message pointer-events-auto p-4"
+      role={isError ? "alert" : "status"}
     >
       <div className="flex items-start gap-3">
         <span
@@ -99,7 +99,7 @@ function ToastCard({
         <button
           type="button"
           onClick={() => onRemove(toast.id)}
-          className="shrink-0 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300"
+           className="btn-quiet shrink-0" aria-label="Tutup notifikasi"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="18" y1="6" x2="6" y2="18" />

@@ -106,8 +106,8 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
   };
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="themed-tool space-y-5">
+      <div className="tool-panel p-5 sm:p-6">
         <div className="mb-4 flex items-start gap-3.5">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
@@ -159,7 +159,7 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
       </div>
 
       {/* Prompt preview */}
-      <div className="rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+      <div className="tool-panel overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300">
@@ -189,7 +189,7 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
           aria-label="Isi prompt edit foto"
           readOnly
           value={selected.text}
-          className="block h-48 sm:h-40 w-full resize-y border-0 bg-transparent px-5 py-4 font-mono text-xs sm:text-sm leading-relaxed text-slate-800 focus:outline-none focus:ring-0 dark:text-slate-200"
+          className="field h-56 resize-y font-mono"
           spellCheck={false}
         />
       </div>
@@ -199,7 +199,7 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
         <button
           type="button"
           onClick={handleOpenChatGPT}
-          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-500/20 transition-all hover:bg-emerald-700 active:scale-95"
+          className="btn-primary flex-1"
         >
           <ChatIcon />
           Buka ChatGPT
@@ -207,7 +207,7 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
         <button
           type="button"
           onClick={handleOpenGemini}
-          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-fuchsia-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-indigo-500/20 transition-all hover:opacity-90 active:scale-95"
+          className="btn-secondary flex-1"
         >
           Buka Gemini
         </button>
@@ -215,7 +215,7 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
           type="button"
           onClick={handleDownloadTxt}
           disabled={downloading}
-          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-5 py-3 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 disabled:opacity-60 transition-colors active:scale-95"
+          className="btn-secondary w-full sm:w-auto"
         >
           <DownloadIcon />
           {downloading ? "Mengunduh..." : "Download .txt"}

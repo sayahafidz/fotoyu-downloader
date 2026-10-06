@@ -40,7 +40,7 @@ export default function WatermarkRemovalSettingsPanel({ settings, photoCount, on
         <label htmlFor="watermark-provider" className="block text-sm font-medium">Provider pemrosesan</label>
         <select id="watermark-provider" className="field" value={settings.provider || "gemini"} onChange={(event) => onChange({ ...settings, provider: event.target.value as "gemini" | "openai" | "dewatermark" })}>
           <option value="gemini">Gemini (default)</option>
-          <option value="openai">OpenAI / ChatGPT</option>
+          <option value="openai" disabled>OpenAI / ChatGPT (Coming soon)</option>
           <option value="dewatermark">Dewatermark</option>
         </select>
         <p className="text-sm text-slate-600 dark:text-slate-400">Model, API key, dan custom base URL dikelola oleh pemilik server. Jika pemrosesan gagal, foto asli tetap diunduh.</p>

@@ -45,7 +45,7 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="dialog-sheet max-w-2xl">
+      <div className="dialog-sheet themed-tool max-w-2xl">
         {/* Header */}
         <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
@@ -75,6 +75,7 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
           <button
             type="button"
             onClick={() => setTab("chrome")}
+            aria-pressed={tab === "chrome"}
             className={[
               "flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-semibold transition-all",
               tab === "chrome"
@@ -87,6 +88,7 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
           <button
             type="button"
             onClick={() => setTab("kiwi")}
+            aria-pressed={tab === "kiwi"}
             className={[
               "flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-semibold transition-all",
               tab === "kiwi"
@@ -99,6 +101,7 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
           <button
             type="button"
             onClick={() => setTab("quick")}
+            aria-pressed={tab === "quick"}
             className={[
               "flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-semibold transition-all",
               tab === "quick"
@@ -111,6 +114,7 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
           <button
             type="button"
             onClick={() => setTab("termux")}
+            aria-pressed={tab === "termux"}
             className={[
               "flex items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-xs font-semibold transition-all",
               tab === "termux"

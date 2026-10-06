@@ -87,6 +87,7 @@ export default function BookmarkletSection({
           <button
             type="button"
             onClick={() => setActiveTab("android")}
+            aria-pressed={activeTab === "android"}
             className={[
               "flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs sm:text-sm font-bold transition-all active:scale-95",
               activeTab === "android"
@@ -99,6 +100,7 @@ export default function BookmarkletSection({
           <button
             type="button"
             onClick={() => setActiveTab("kiwi")}
+            aria-pressed={activeTab === "kiwi"}
             className={[
               "flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs sm:text-sm font-bold transition-all active:scale-95",
               activeTab === "kiwi"
@@ -111,6 +113,7 @@ export default function BookmarkletSection({
           <button
             type="button"
             onClick={() => setActiveTab("pc")}
+            aria-pressed={activeTab === "pc"}
             className={[
               "flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 px-2 text-xs sm:text-sm font-bold transition-all active:scale-95",
               activeTab === "pc"

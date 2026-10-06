@@ -58,7 +58,7 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
   const charCount = value.length;
 
   return (
-    <form onSubmit={handleSubmit} className="import-panel space-y-4" aria-busy={loading}>
+    <form onSubmit={handleSubmit} className="import-panel themed-tool space-y-4" aria-busy={loading}>
       <h2 className="text-xl font-semibold">Muat file atau JSON</h2>
       <p className="text-sm text-slate-600 dark:text-slate-400">Pilih file ekspor .json / .txt atau tempel response keranjang Fotoyu.</p>
       <label htmlFor="json-input" className="block text-sm font-medium">Data keranjang</label>
@@ -113,7 +113,7 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
         <button
           type="button"
           onClick={handlePaste}
-          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors active:scale-95"
+          className="btn-secondary flex-1"
         >
           <ClipboardIcon />
           Tempel clipboard

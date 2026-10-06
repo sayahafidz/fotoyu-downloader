@@ -43,7 +43,7 @@ export default function EmptyState({
         <button
           type="button"
           onClick={onReset}
-          className="mt-5 inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-indigo-500/20 hover:bg-indigo-700 active:scale-95 transition-all"
+          className="btn-primary mt-5"
         >
           <span>✕</span>
           <span>Reset Pencarian</span>

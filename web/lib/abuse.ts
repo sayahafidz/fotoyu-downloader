@@ -6,9 +6,10 @@ let client: ReturnType<typeof createClient> | undefined;
 let connecting: Promise<unknown> | undefined;
 
 export async function abuseStore() {
-  if (!process.env.REDIS_URL) throw new Error("REDIS_URL belum dikonfigurasi.");
+  const url = process.env.REDIS_URL || (process.env.NODE_ENV === "development" ? "redis://127.0.0.1:6379" : undefined);
+  if (!url) throw new Error("REDIS_URL belum dikonfigurasi.");
   if (!client) {
-    client = createClient({ url: process.env.REDIS_URL, socket: { connectTimeout: 3000, reconnectStrategy: false }, disableOfflineQueue: true });
+    client = createClient({ url, socket: { connectTimeout: 3000, reconnectStrategy: false }, disableOfflineQueue: true });
     client.on("error", () => {});
   }
   if (!client.isReady) {
