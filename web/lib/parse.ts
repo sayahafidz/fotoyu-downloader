@@ -55,6 +55,7 @@ export const ALLOWED_HOSTS = new Set<string>([
 export function isAllowedHost(url: string): boolean {
   try {
     const u = new URL(url);
+    if (!['https:', 'http:'].includes(u.protocol) || u.username || u.password || (u.port && u.port !== '443' && u.port !== '80')) return false;
     const host = u.hostname.toLowerCase();
     if (ALLOWED_HOSTS.has(host)) return true;
     if (host.endsWith(".fototree.com") || host.endsWith(".fotoyu.com")) return true;
@@ -120,7 +121,7 @@ function inferExtension(url: string): string {
 
 // Extract the list of downloadable photos from a raw fotoyu JSON string.
 export function extractPhotos(rawJson: string): Photo[] {
-  const data = JSON.parse(rawJson) as FotoyuResponse;
+  const data = JSON.parse(rawJson) as FotoyuResponse | null;
   const items = data?.result?.data;
   if (!Array.isArray(items)) {
     throw new Error("JSON tidak valid: field `result.data` tidak ditemukan.");

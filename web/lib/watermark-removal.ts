@@ -28,25 +28,39 @@ export interface WatermarkRemovalResult {
   fallback?: "original" | "client-side";
 }
 
-/**
- * Remove watermark from a photo using the Dewatermark.ai API
- */
+// Share one queue across single-photo and batch downloads, including the
+// parallel workers in download.ts. A failure must not block later jobs.
+let dewatermarkQueue: Promise<unknown> = Promise.resolve();
+function stored(key: string): string {
+  try { return typeof window !== "undefined" ? localStorage.getItem(key) || "" : ""; } catch { return ""; }
+}
+
+function queueDewatermark<T>(work: () => Promise<T>): Promise<T> {
+  const job = dewatermarkQueue.then(work, work);
+  dewatermarkQueue = job.catch(() => undefined);
+  return job;
+}
+
+/** Remove watermark through the selected server-side provider. */
 export async function removeWatermark(
   photo: Photo,
-  settings: WatermarkRemovalSettings
+  settings: WatermarkRemovalSettings,
+  signal?: AbortSignal
 ): Promise<WatermarkRemovalResult> {
   try {
     const savedGeminiKey =
       settings.geminiKey ||
-      (typeof window !== "undefined" ? localStorage.getItem("fotoyu_gemini_key") || "" : "");
+      stored("fotoyu_gemini_key");
     const savedGeminiBaseUrl =
       settings.geminiBaseUrl ||
-      (typeof window !== "undefined" ? localStorage.getItem("fotoyu_gemini_base_url") || "" : "");
+      stored("fotoyu_gemini_base_url");
     const savedOpenAIKey =
       settings.openaiKey ||
-      (typeof window !== "undefined" ? localStorage.getItem("fotoyu_openai_key") || "" : "");
+      stored("fotoyu_openai_key");
 
-    const response = await fetch("/api/remove-watermark", {
+    const sendRequest = () => {
+      if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+      return fetch("/api/remove-watermark", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,8 +77,12 @@ export async function removeWatermark(
         region: settings.region,
         removeText: settings.removeText || settings.autoDetect,
       }),
-      signal: AbortSignal.timeout(45000), // 45s timeout (API takes 2-5s + overhead)
+      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(55000)]) : AbortSignal.timeout(55000),
     });
+    };
+    const response = settings.provider === "dewatermark"
+      ? await queueDewatermark(sendRequest)
+      : await sendRequest();
 
     if (!response.ok) {
       // Try to parse error response
@@ -86,14 +104,13 @@ export async function removeWatermark(
 
     // Get processed image as blob
     const blob = await response.blob();
+    if (!blob.size || !blob.type.startsWith("image/")) return { success: false, error: "Provider tidak mengembalikan file gambar valid.", fallback: "original" };
     const creditsUsed = parseInt(response.headers.get("X-Credits-Used") || "1", 10);
 
     // Create object URL for the processed image
-    const processedImageUrl = URL.createObjectURL(blob);
 
     return {
       success: true,
-      processedImageUrl,
       processedImageBlob: blob,
       creditsUsed,
     };
@@ -126,8 +143,8 @@ export async function removeWatermarkBatch(
   let success = 0;
   let failed = 0;
 
-  // Process photos with concurrency limit (max 5 at a time to avoid overwhelming API)
-  const concurrency = 5;
+  // Keep DeWatermark jobs serial to respect its published fair-use guidance.
+  const concurrency = settings.provider === "dewatermark" ? 1 : 5;
   const queue = [...photos];
   const processing: Promise<void>[] = [];
 

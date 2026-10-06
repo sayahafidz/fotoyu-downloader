@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { isAllowedHost } from "@/lib/parse";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
 interface RemoveWatermarkRequest {
   imageUrl: string;
@@ -33,32 +35,36 @@ async function fetchImage(url: string): Promise<{ buffer: Buffer; contentType: s
   };
 
   try {
-    const response = await fetch(url, { headers, signal: AbortSignal.timeout(15000) });
+    const response = await fetch(url, { headers, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(10000) });
     if (response.ok) {
-      const buffer = Buffer.from(await response.arrayBuffer());
       const contentType = response.headers.get("content-type") || "image/jpeg";
+      if (!contentType.startsWith("image/") && contentType !== "application/octet-stream") {
+        await response.body?.cancel();
+        throw new Error("CDN tidak mengembalikan gambar.");
+      }
+      // Bound memory in a serverless invocation, including base64 expansion.
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("File foto kosong.");
+      const chunks: Uint8Array[] = [];
+      let size = 0;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          size += value.byteLength;
+          if (size > 20 * 1024 * 1024) throw new Error("Foto terlalu besar untuk pemrosesan (maksimum 20 MB).");
+          chunks.push(value);
+        }
+      } finally {
+        await reader.cancel().catch(() => {});
+      }
+      const buffer = Buffer.concat(chunks);
+      if (!buffer.length) throw new Error("File foto kosong.");
       return { buffer, contentType };
     }
-  } catch {
-    // try fallback public proxy
-  }
-
-  const fallbackProxies = [
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-  ];
-
-  for (const proxyUrl of fallbackProxies) {
-    try {
-      const response = await fetch(proxyUrl, { signal: AbortSignal.timeout(15000) });
-      if (response.ok) {
-        const buffer = Buffer.from(await response.arrayBuffer());
-        const contentType = response.headers.get("content-type") || "image/jpeg";
-        return { buffer, contentType };
-      }
-    } catch {
-      // try next
-    }
+    await response.body?.cancel();
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : "Gagal mengambil foto dari URL.");
   }
 
   throw new Error("Gagal mengambil foto dari URL.");
@@ -85,7 +91,6 @@ async function callGeminiAPI(
 
   // Determine endpoint format
   let endpoint: string;
-  const isCustomProxy = baseUrl.includes("/v1") || baseUrl.includes("antigravity");
   
   if (baseUrl.includes("/chat/completions")) {
     endpoint = baseUrl;
@@ -102,7 +107,8 @@ async function callGeminiAPI(
   // If using OpenAI-compatible custom proxy like /v1/chat/completions
   if (endpoint.includes("/chat/completions")) {
     const openaiPayload = {
-      model: "gemini-3.6-flash-high",
+      model: process.env.GEMINI_MODEL?.trim() || "hfz/gemini-3.1-flash-image",
+      stream: false,
       messages: [
         {
           role: "user",
@@ -137,8 +143,14 @@ async function callGeminiAPI(
     });
 
     if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Custom OpenAI-compatible Proxy error (HTTP ${response.status}): ${errText}`);
+      const detail = await response.json().catch(() => null);
+      console.error("[remove-watermark] router request failed", {
+        status: response.status,
+        model: openaiPayload.model,
+        endpoint: new URL(endpoint).origin + new URL(endpoint).pathname,
+      });
+      const reason = typeof detail?.error?.message === "string" ? detail.error.message.slice(0, 300) : "Respons router tidak valid.";
+      throw new Error(`Router gagal (HTTP ${response.status}): ${reason}`);
     }
 
     const data = await response.json();
@@ -260,7 +272,7 @@ async function callDewatermarkAPI(imageBuffer: Buffer, apiKey: string): Promise<
   const formData = new FormData();
   formData.append(
     "original_preview_image",
-    new Blob([imageBuffer], { type: "image/jpeg" }),
+    new Blob([new Uint8Array(imageBuffer)], { type: "image/jpeg" }),
     "image.jpg"
   );
   formData.append("remove_text", "true");
@@ -274,24 +286,52 @@ async function callDewatermarkAPI(imageBuffer: Buffer, apiKey: string): Promise<
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Dewatermark API error: HTTP ${response.status} - ${errorText}`);
+    // Do not echo upstream responses: they may contain account information.
+    if (response.status === 429) {
+      throw new DewatermarkError("Dewatermark membatasi permintaan. Coba lagi nanti.", 429);
+    }
+    if (response.status === 402) {
+      throw new DewatermarkError("Kredit Dewatermark habis.", 402);
+    }
+    if (response.status === 401 || response.status === 403) {
+      throw new DewatermarkError("API key Dewatermark ditolak. Periksa akses API akun.", 502);
+    }
+    throw new DewatermarkError(`Dewatermark gagal (HTTP ${response.status}).`, 502);
   }
 
   const data = await response.json();
-  if (data?.status === "success" && data?.edited_image?.image) {
-    return Buffer.from(data.edited_image.image, "base64");
+  const image = data?.edited_image?.image;
+  if (typeof image === "string" && image.length > 0 && data?.status === "success") {
+    const encoded = image.replace(/^data:image\/[a-zA-Z+.-]+;base64,/, "");
+    return Buffer.from(encoded, "base64");
   }
-  throw new Error("Dewatermark API gagal memproses foto.");
+  throw new DewatermarkError("Respons gambar Dewatermark tidak dikenali. Periksa format API akun Anda.", 502);
+}
+
+class DewatermarkError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+  }
 }
 
 export async function POST(req: Request) {
+  let body: RemoveWatermarkRequest;
   try {
-    const body: RemoveWatermarkRequest = await req.json();
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Body harus berupa JSON valid." }, { status: 400 });
+  }
+  try {
+    if (!body || typeof body !== "object") return NextResponse.json({ error: "Body JSON tidak valid." }, { status: 400 });
     const { imageUrl, provider = "gemini", geminiKey, geminiBaseUrl, openaiKey } = body;
 
-    if (!imageUrl) {
+    if (!imageUrl || typeof imageUrl !== "string") {
       return NextResponse.json({ error: "Parameter imageUrl wajib diisi." }, { status: 400 });
+    }
+    if (!isAllowedHost(imageUrl)) return NextResponse.json({ error: "Host foto tidak diizinkan." }, { status: 403 });
+
+    if (provider !== "gemini" && provider !== "openai" && provider !== "dewatermark") {
+      return NextResponse.json({ error: "Provider tidak dikenal." }, { status: 400 });
     }
 
     // Step 1: Resolve API key & provider & base url
@@ -299,6 +339,23 @@ export async function POST(req: Request) {
     const effectiveGeminiBaseUrl = process.env.GEMINI_BASE_URL || geminiBaseUrl || req.headers.get("x-gemini-base-url") || "";
     const effectiveOpenAIKey = process.env.OPENAI_API_KEY || openaiKey || req.headers.get("x-openai-key") || "";
     const effectiveDewatermarkKey = process.env.DEWATERMARK_API_KEY || "";
+    if (effectiveGeminiBaseUrl) {
+      let base: URL;
+      try { base = new URL(effectiveGeminiBaseUrl); } catch { return NextResponse.json({ error: "Base URL Gemini tidak valid." }, { status: 400 }); }
+      if (base.protocol !== "https:" || base.username || base.password) return NextResponse.json({ error: "Base URL Gemini harus HTTPS tanpa kredensial URL." }, { status: 400 });
+      // User-selected endpoints cannot receive a server-owned credential.
+      if (process.env.GEMINI_API_KEY && !process.env.GEMINI_BASE_URL && base.hostname !== "generativelanguage.googleapis.com") return NextResponse.json({ error: "Base URL custom dengan key server harus diatur melalui GEMINI_BASE_URL." }, { status: 400 });
+    }
+    if (provider === "gemini" && !effectiveGeminiKey && !effectiveGeminiBaseUrl) return NextResponse.json({ error: "Gemini belum dikonfigurasi.", fallback: "original" }, { status: 503 });
+    if (provider === "openai") return NextResponse.json({ error: "Provider OpenAI Chat yang dikonfigurasi tidak mendukung output gambar edit. Pilih Gemini image-capable atau Dewatermark.", fallback: "original" }, { status: 422 });
+
+    // Fail before fetching an image or contacting any provider.
+    if (provider === "dewatermark" && !effectiveDewatermarkKey) {
+      return NextResponse.json(
+        { error: "DEWATERMARK_API_KEY server belum di-set.", fallback: "original" },
+        { status: 503 }
+      );
+    }
 
     // Step 2: Fetch original image
     let imageBuffer: Buffer;
@@ -318,7 +375,7 @@ export async function POST(req: Request) {
     let processedBuffer: Buffer | null = null;
     let usedProvider = provider;
 
-    if (provider === "gemini" || (!effectiveDewatermarkKey && effectiveGeminiKey)) {
+    if (provider === "gemini") {
       if (!effectiveGeminiKey && !effectiveGeminiBaseUrl) {
         return NextResponse.json(
           {
@@ -330,32 +387,19 @@ export async function POST(req: Request) {
       }
       processedBuffer = await callGeminiAPI(imageBuffer, effectiveGeminiKey, effectiveGeminiBaseUrl);
       usedProvider = "gemini";
-    } else if (provider === "openai") {
-      if (!effectiveOpenAIKey) {
-        return NextResponse.json(
-          { error: "OpenAI API Key tidak ditemukan.", fallback: "original" },
-          { status: 400 }
-        );
-      }
-      processedBuffer = await callOpenAIAPI(imageBuffer, effectiveOpenAIKey);
-      usedProvider = "openai";
     } else if (provider === "dewatermark") {
-      if (!effectiveDewatermarkKey) {
-        return NextResponse.json(
-          { error: "DEWATERMARK_API_KEY server belum di-set.", fallback: "original" },
-          { status: 503 }
-        );
-      }
       processedBuffer = await callDewatermarkAPI(imageBuffer, effectiveDewatermarkKey);
       usedProvider = "dewatermark";
     }
 
     if (processedBuffer) {
-      return new Response(processedBuffer, {
+      return new Response(new ReadableStream({ start(controller) { controller.enqueue(new Uint8Array(processedBuffer!)); controller.close(); } }), {
         status: 200,
         headers: {
-          "Content-Type": contentType || "image/jpeg",
-          "Cache-Control": "public, max-age=86400",
+          "Content-Type": usedProvider === "dewatermark" && processedBuffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+            ? "image/png"
+            : usedProvider === "dewatermark" ? "image/jpeg" : contentType || "image/jpeg",
+          "Cache-Control": "private, no-store",
           "X-AI-Provider": usedProvider,
         },
       });
@@ -371,7 +415,7 @@ export async function POST(req: Request) {
         error: `Gagal menghapus watermark: ${error?.message || "Unknown error"}`,
         fallback: "original",
       },
-      { status: 500 }
+      { status: error instanceof DewatermarkError ? error.status : 500 }
     );
   }
 }

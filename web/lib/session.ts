@@ -46,6 +46,7 @@ export async function fetchCartViaToken(
   const res = await fetch("/api/cart", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(25000),
     body: JSON.stringify({
       token,
       method: options.method ?? "POST",

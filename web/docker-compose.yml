@@ -22,6 +22,7 @@ services:
       HOSTNAME: 0.0.0.0
       # Pass through so the app/build can read it.
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://fotoyu.example.com}
+      DEWATERMARK_API_KEY: ${DEWATERMARK_API_KEY:-}
     # Do not publish port directly; Caddy proxies to it on the internal
     # docker network. If you want to skip Caddy, uncomment the lines below.
     # ports:

@@ -1,122 +1,77 @@
 import { NextResponse } from "next/server";
-import { isAllowedHost } from "@/lib/parse";
+import { isAllowedHost, sanitizeFilename } from "@/lib/parse";
 
 export const runtime = "nodejs";
-// Allow longer runtime for slow image CDN responses.
 export const maxDuration = 60;
-// Cache proxy responses at the edge (CDN) so repeated views are instant.
 export const dynamic = "force-dynamic";
 
-// Headers mimic a real browser request to fotoyu.com. cfsimgproxy.fototree.com
-// rejects requests that look like bots/server-side fetches (Vercel IPs get 403),
-// so we send a complete, realistic browser fingerprint.
-  const BROWSER_HEADERS: HeadersInit = {
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9,id;q=0.8",
-    Referer: "https://fotoyu.com/",
-    Origin: "https://fotoyu.com",
-    "Sec-Fetch-Dest": "image",
-    "Sec-Fetch-Mode": "no-cors",
-    "Sec-Fetch-Site": "cross-site",
-    "Sec-Ch-Ua": '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
-    "Sec-Ch-Ua-Mobile": "?0",
-    "Sec-Ch-Ua-Platform": '"Windows"',
-    "Cache-Control": "no-cache",
-    Pragma: "no-cache",
-    DNT: "1",
-  };
+const UPSTREAM_HEADERS: HeadersInit = {
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+  Accept: "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.9,id;q=0.8",
+  Referer: "https://fotoyu.com/",
+  Origin: "https://fotoyu.com",
+};
 
-  const MINIMAL_HEADERS: HeadersInit = {
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    Accept: "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9,id;q=0.8",
-  };
+async function fetchAllowed(target: string, headers: HeadersInit): Promise<Response> {
+  let current = target;
+  const signal = AbortSignal.timeout(20000);
+  for (let hop = 0; hop < 5; hop++) {
+    if (!isAllowedHost(current)) throw new Error("Host redirect CDN tidak diizinkan.");
+    const response = await fetch(current, { headers, cache: "no-store", redirect: "manual", signal });
+    if (![301, 302, 303, 307, 308].includes(response.status)) return response;
+    const location = response.headers.get("location");
+    await response.body?.cancel();
+    if (!location) throw new Error("Redirect CDN tidak valid.");
+    current = new URL(location, current).href;
+  }
+  throw new Error("Terlalu banyak redirect CDN.");
+}
 
 async function fetchUpstream(target: string): Promise<Response> {
-  // Try with browser headers, and if 403 or failure, retry with minimal headers.
-  let lastErr: unknown = null;
-  const headerVariants = [BROWSER_HEADERS, MINIMAL_HEADERS];
+  // Attempt 1: Fast direct fetch
+  try {
+    const res = await fetchAllowed(target, UPSTREAM_HEADERS);
 
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
-    for (const headers of headerVariants) {
-      try {
-        const res = await fetch(target, {
-          headers,
-          cache: "no-store",
-          signal: AbortSignal.timeout(15000),
-        });
-        if (res.ok && res.body) {
-          return res;
-        }
-        if (res.status === 403 || res.status >= 500) {
-          lastErr = new Error(`HTTP ${res.status}`);
-          try {
-            await res.arrayBuffer();
-          } catch {
-            // ignore
-          }
-        }
-      } catch (e) {
-        lastErr = e;
-      }
+    // If 200 OK or 404 Not Found, return immediately (don't waste time retrying 404s)
+    if (res.ok || res.status === 404 || res.status === 410) {
+      return res;
     }
-    if (attempt < 3) {
-      await new Promise((r) => setTimeout(r, 1000 * attempt));
-    }
+    await res.body?.cancel();
+  } catch {
+    // Retry once on network timeout/glitch
   }
-  throw lastErr ?? new Error("Gagal menghubungi upstream setelah beberapa percobaan.");
+
+  // Attempt 2: Quick retry with minimal headers
+  try {
+    const res2 = await fetchAllowed(target, {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        Referer: "https://fotoyu.com/",
+        Accept: "image/*,*/*;q=0.8",
+    });
+    return res2;
+  } catch (e: any) {
+    throw new Error(e?.message || "Upstream CDN unreachable");
+  }
 }
 
-// Public CORS/image proxies that operate from non-Vercel IP ranges.
-// When our own proxy is blocked by the CDN (Vercel datacenter IP), these
-// public services can often fetch successfully since they use residential
-// or diverse IP pools.
-const PUBLIC_PROXIES = [
-  // allorigins raw CORS proxy
-  "https://api.allorigins.win/raw?url=${URL}",
-  // codetabs CORS proxy
-  "https://api.codetabs.com/v1/proxy?quest=${URL}",
-  // open image proxy
-  "https://imgproxy.gamma.app/${URL}",
-];
-
-async function fetchViaPublicProxy(target: string): Promise<Response | null> {
-  // Public proxies don't support our full headers usually, but we can pass basic ones
-  for (const tmpl of PUBLIC_PROXIES) {
-    try {
-      const isGamma = tmpl.includes("gamma.app");
-      // gamma expects url directly (not encoded fully, but let's see), wsrv.nl handles encoded
-      const url = tmpl.replace("${URL}", isGamma ? target : encodeURIComponent(target));
-      const res = await fetch(url, { 
-        signal: AbortSignal.timeout(15000),
-        headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-        } 
-      });
-      if (res.ok && res.body) return res;
-    } catch (e) {
-      continue;
-    }
-  }
-  return null;
-}
-
-// Streams a Response body back to the client with CORS and cache headers.
 function streamProxyResponse(upstream: Response, opts?: { downloadFilename?: string }): Response {
   const headers = new Headers();
   const ct = upstream.headers.get("content-type");
   headers.set("Content-Type", ct && ct.startsWith("image/") ? ct : "image/jpeg");
-  headers.set("Cache-Control", "public, max-age=86400, immutable");
+  headers.set("Cache-Control", opts?.downloadFilename ? "private, no-store" : "public, max-age=300, s-maxage=3600");
+  headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Access-Control-Allow-Origin", "*");
-  // Copy over the length if available so the browser knows the download size
-  const cl = upstream.headers.get("content-length");
-  if (cl) headers.set("Content-Length", cl);
-  
+  headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+  // fetch may decompress upstream bytes: forwarding its Content-Length can
+  // truncate the stream or cause a length mismatch on serverless hosting.
+
   if (opts?.downloadFilename) {
-    headers.set("Content-Disposition", `attachment; filename="${opts.downloadFilename}"`);
+    const safe = sanitizeFilename(opts.downloadFilename).slice(0, 180) || "foto.jpg";
+    const ascii = safe.replace(/[^\x20-\x7e]/g, "_");
+    headers.set("Content-Disposition", `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(safe).replace(/['()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)}`);
   }
   return new Response(upstream.body, { status: 200, headers });
 }
@@ -141,41 +96,37 @@ export async function GET(req: Request) {
     );
   }
 
-  let upstream: Response | null = null;
-
-  let upstreamErr: any = null;
-
-  // Strategy 1: Direct upstream fetch (fails on Vercel due to datacenter IP block)
   try {
-    upstream = await fetchUpstream(target);
-  } catch (e) {
-    upstreamErr = e instanceof Error ? e.message : String(e);
-  }
+    const upstream = await fetchUpstream(target);
 
-  // Strategy 2: Public CORS proxy fallback (different IP ranges)
-  let pubErr: any = null;
-  if (!upstream || !upstream.ok || !upstream.body) {
-    try {
-      const pub = await fetchViaPublicProxy(target);
-      if (pub) upstream = pub;
-    } catch (e) {
-      pubErr = e instanceof Error ? e.message : String(e);
+    if (upstream.status === 404) {
+      return NextResponse.json(
+        { error: "Foto tidak ditemukan (URL CDN sudah kadaluarsa atau dihapus).", status: 404 },
+        { status: 404 }
+      );
     }
-  }
 
-  if (!upstream || !upstream.ok || !upstream.body) {
-    const status = upstream?.status || 502;
+    if (!upstream.ok || !upstream.body) {
+      await upstream.body?.cancel();
+      return NextResponse.json(
+        { error: `Upstream CDN mengembalikan status ${upstream.status}.`, status: upstream.status },
+        { status: upstream.status || 502 }
+      );
+    }
+
+    const contentType = upstream.headers.get("content-type")?.split(";")[0].trim().toLowerCase();
+    if (contentType && !contentType.startsWith("image/") && contentType !== "application/octet-stream") {
+      await upstream.body.cancel();
+      return NextResponse.json({ error: "CDN mengirim halaman error, bukan file foto." }, { status: 502 });
+    }
+
+    return streamProxyResponse(upstream, {
+      downloadFilename: mode === "download" ? filename || "foto.jpg" : undefined,
+    });
+  } catch (err: any) {
     return NextResponse.json(
-      {
-        error: `Upstream mengembalikan HTTP ${status}.`,
-        details: { upstreamErr, pubErr, status },
-        fallback: "direct",
-      },
-      { status: 502 }
+      { error: `Gagal menghubungi CDN: ${err?.message || "Timeout"}`, status: 504 },
+      { status: 504 }
     );
   }
-
-  return streamProxyResponse(upstream, {
-    downloadFilename: mode === "download" ? filename : undefined,
-  });
 }

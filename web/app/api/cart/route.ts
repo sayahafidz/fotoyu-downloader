@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const rawInput = payload.token;
+  const rawInput = payload?.token;
   if (!rawInput || typeof rawInput !== "string") {
     return NextResponse.json(
       {
@@ -127,7 +127,7 @@ export async function POST(req: Request) {
   const headers = new Headers(BROWSER_HEADERS as HeadersInit);
   headers.set("Authorization", `Bearer ${token}`);
 
-  const fetchInit: RequestInit = { method, headers };
+  const fetchInit: RequestInit = { method, headers, cache: "no-store", signal: AbortSignal.timeout(20000), redirect: "error" };
   if (typeof payload.cookies === "string" && payload.cookies) {
     headers.set("Cookie", payload.cookies);
   }
@@ -150,10 +150,9 @@ export async function POST(req: Request) {
   }
 
   if (upstream.status === 401 || upstream.status === 403) {
-    const upstreamBody = await upstream.text().catch(() => "");
-    console.error("[cart] upstream 401/403:", upstream.status, upstreamBody.slice(0, 500));
+    await upstream.body?.cancel();
     return NextResponse.json(
-      { error: "Token tidak valid atau sudah expired. Silakan ambil data persist:root baru.", debug: upstreamBody.slice(0, 500) },
+      { error: "Token tidak valid atau sudah expired. Silakan ambil data persist:root baru." },
       { status: 401 }
     );
   }
@@ -170,9 +169,9 @@ export async function POST(req: Request) {
     );
   }
 
-  const raw = await upstream.text();
   let photos;
   try {
+    const raw = await upstream.text();
     photos = extractPhotos(raw);
   } catch {
     return NextResponse.json(
@@ -181,5 +180,5 @@ export async function POST(req: Request) {
     );
   }
 
-  return NextResponse.json({ photos, count: photos.length });
+  return NextResponse.json({ photos, count: photos.length }, { headers: { "Cache-Control": "private, no-store" } });
 }

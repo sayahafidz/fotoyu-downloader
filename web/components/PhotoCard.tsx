@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Photo } from "@/lib/parse";
 import type { WatermarkRemovalSettings } from "@/lib/watermark-removal";
 
@@ -38,6 +38,11 @@ export default function PhotoCard({
   const [src, setSrc] = useState<string>(proxyUrl);
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
+  useEffect(() => {
+    setSrc(proxyUrl);
+    setLoaded(false);
+    setErrored(false);
+  }, [proxyUrl]);
 
   // List View Mode (Compact row for tablet/desktop)
   if (viewMode === "list") {

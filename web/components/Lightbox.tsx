@@ -20,6 +20,13 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
   const [touchDelta, setTouchDelta] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isZoomed, setIsZoomed] = useState(false);
   const [supportsShare, setSupportsShare] = useState(false);
+  const proxyUrl = photo ? `/api/proxy?url=${encodeURIComponent(photo.url)}` : "";
+  const [imageSrc, setImageSrc] = useState(proxyUrl);
+  const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const activePhotoRef = useRef(photo?.url);
+  activePhotoRef.current = photo?.url;
 
   // Before/After Enhancement State
   const [showCompare, setShowCompare] = useState(false);
@@ -42,7 +49,15 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
     setEnhancedDataUrl(null);
     setEnhancedBlob(null);
     setSliderPos(50);
-  }, [index]);
+    setImageSrc(proxyUrl);
+    setImageLoading(true);
+    setImageError(false);
+    setActionError(null);
+    setIsZoomed(false);
+    setIsEnhancing(false);
+    setDownloading(false);
+    setSharing(false);
+  }, [proxyUrl]);
 
   const goNext = useCallback(() => {
     setIsZoomed(false);
@@ -58,15 +73,28 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Tab") {
+        const controls = containerRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), [tabindex="0"]');
+        if (controls?.length) {
+          const first = controls[0];
+          const last = controls[controls.length - 1];
+          if (e.shiftKey && (document.activeElement === first || document.activeElement === containerRef.current)) { e.preventDefault(); last.focus(); }
+          else if (!e.shiftKey && (document.activeElement === last || document.activeElement === containerRef.current)) { e.preventDefault(); first.focus(); }
+        }
+      }
       if (e.key === "Escape") onClose();
       if (e.key === "ArrowRight") goNext();
       if (e.key === "ArrowLeft") goPrev();
     };
     document.addEventListener("keydown", handleKey);
+    const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement as HTMLElement | null;
     document.body.style.overflow = "hidden";
+    containerRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", handleKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
     };
   }, [onClose, goNext, goPrev]);
 
@@ -116,17 +144,20 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
     }
 
     if (!photo) return;
+    const requestedUrl = photo.url;
+    setActionError(null);
     setIsEnhancing(true);
     try {
       const blob = await fetchImageBlobWithFallbacks(photo.url);
       const res = await enhanceImageCanvas(blob, DEFAULT_ENHANCE_OPTIONS);
+      if (activePhotoRef.current !== requestedUrl) return;
       setEnhancedDataUrl(res.dataUrl);
       setEnhancedBlob(res.blob);
       setShowCompare(true);
     } catch (e) {
-      console.warn("Enhance comparison failed:", e);
+      if (activePhotoRef.current === requestedUrl) setActionError(e instanceof Error ? e.message : "Gagal memproses preview enhance.");
     } finally {
-      setIsEnhancing(false);
+      if (activePhotoRef.current === requestedUrl) setIsEnhancing(false);
     }
   };
 
@@ -141,19 +172,24 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
 
   const handleShare = async () => {
     if (!photo) return;
+    const requestedUrl = photo.url;
+    setActionError(null);
     setSharing(true);
     try {
       const blob = (showCompare && enhancedBlob) ? enhancedBlob : await fetchImageBlobWithFallbacks(photo.url);
-      await sharePhoto(photo, blob);
+      if (activePhotoRef.current !== requestedUrl) return;
+      if (!await sharePhoto(photo, blob)) setActionError("Tidak dapat membagikan foto. Gunakan tombol download untuk menyimpannya.");
     } catch (e) {
-      console.warn("Share failed:", e);
+      if (activePhotoRef.current === requestedUrl) setActionError(e instanceof Error ? e.message : "Gagal membagikan foto.");
     } finally {
-      setSharing(false);
+      if (activePhotoRef.current === requestedUrl) setSharing(false);
     }
   };
 
   const handleDownload = async () => {
     if (!photo) return;
+    const requestedUrl = photo.url;
+    setActionError(null);
     setDownloading(true);
     try {
       if (showCompare && enhancedBlob) {
@@ -161,13 +197,14 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
       } else {
         await downloadPhotoDirect(photo);
       }
+    } catch (e) {
+      if (activePhotoRef.current === requestedUrl) setActionError(e instanceof Error ? e.message : "Gagal mengunduh foto. Silakan coba lagi.");
     } finally {
-      setDownloading(false);
+      if (activePhotoRef.current === requestedUrl) setDownloading(false);
     }
   };
 
   if (!photo) {
-    onClose();
     return null;
   }
 
@@ -176,11 +213,23 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
   };
 
   const sizeText = photo.size > 0 ? formatSize(photo.size) : null;
-  const proxyUrl = `/api/proxy?url=${encodeURIComponent(photo.url)}`;
+  const handleImageError = () => {
+    setImageLoading(true);
+    if (imageSrc !== photo.url) {
+      setImageSrc(photo.url);
+    } else {
+      setImageError(true);
+      setImageLoading(false);
+    }
+  };
 
   return (
     <div
       ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`Preview ${photo.filename}`}
+      tabIndex={-1}
       className="fixed inset-0 z-[60] flex flex-col items-center justify-between bg-black/95 p-3 sm:p-5 backdrop-blur-md animate-fade-in select-none"
       onClick={handleBackdrop}
       onTouchStart={handleTouchStart}
@@ -288,7 +337,7 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
 
       {/* Main Image / Interactive Comparison Slider Viewport */}
       <div
-        className="relative flex flex-1 w-full items-center justify-center overflow-hidden my-auto"
+        className={`relative flex min-h-0 flex-1 w-full my-auto ${isZoomed ? "overflow-auto" : "items-center justify-center overflow-hidden"}`}
         style={{
           transform: !isZoomed && !showCompare && touchDelta.x !== 0 ? `translateX(${touchDelta.x * 0.7}px)` : undefined,
           transition: touchStart ? "none" : "transform 0.2s ease-out",
@@ -324,7 +373,7 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={proxyUrl}
+                src={imageSrc}
                 alt="Original"
                 className="max-h-[72vh] max-w-none rounded-2xl object-contain"
                 style={{ width: sliderRef.current?.offsetWidth }}
@@ -347,21 +396,38 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
         ) : (
           /* Normal Single Image View */
           // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={proxyUrl}
+          <>
+          {imageLoading && <p role="status" className="absolute inset-0 flex items-center justify-center text-sm text-slate-200">Memuat foto besar…</p>}
+          {imageError ? (
+            <div role="alert" className="flex flex-col items-center gap-3 p-4 text-center text-slate-200">
+              <p>Foto gagal dimuat. URL CDN mungkin kedaluwarsa; muat ulang data Fotoyu jika masalah berlanjut.</p>
+              <button type="button" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold" onClick={() => {
+                setImageError(false);
+                setImageLoading(true);
+                setImageSrc(`${proxyUrl}&retry=${Date.now()}`);
+              }}>Coba lagi</button>
+              <a href={photo.url} target="_blank" rel="noopener noreferrer" className="text-sm underline">Buka foto sumber</a>
+            </div>
+          ) : <img
+            key={`${photo.url}:${imageSrc}`}
+            src={imageSrc}
             alt={photo.title}
+            onLoad={() => setImageLoading(false)}
+            onError={handleImageError}
             onClick={() => setIsZoomed((z) => !z)}
             className={[
               "rounded-2xl object-contain transition-all duration-300",
               isZoomed
-                ? "max-h-none max-w-none scale-150 cursor-zoom-out overflow-auto"
-                : "max-h-[72vh] max-w-[94vw] sm:max-w-[85vw] cursor-zoom-in",
+                 ? "m-auto shrink-0 max-h-none max-w-none cursor-zoom-out"
+                 : "max-h-[72vh] max-w-[94vw] sm:max-w-[85vw] cursor-zoom-in",
             ].join(" ")}
-          />
+          />}
+          </>
         )}
       </div>
 
       {/* Bottom Action & Metadata Bar */}
+      {actionError && <p role="alert" className="z-20 my-2 max-w-xl rounded-lg bg-red-950 px-4 py-2 text-center text-sm text-red-100">{actionError}</p>}
       <div className="flex w-full max-w-xl flex-col sm:flex-row items-center justify-between gap-2.5 rounded-2xl bg-slate-900/85 p-3 text-white backdrop-blur-xl border border-white/10 z-20">
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-white/80">
           <span className="font-mono font-bold text-white truncate max-w-[160px]">{photo.filename}</span>

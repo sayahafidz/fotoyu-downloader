@@ -111,21 +111,15 @@ export default function HomePage() {
     setPhase("parsing");
     setError(null);
     try {
-      const res = await fetch("/api/parse", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ raw }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data?.error || "Gagal memproses response.");
-      }
-      if (!data.photos || data.photos.length === 0) {
+      // Local parsing avoids Vercel's request body limit for large cart exports.
+      const parsedPhotos = extractPhotos(raw);
+      if (parsedPhotos.length === 0) {
         throw new Error("Tidak ada foto yang ditemukan di response.");
       }
-      setPhotos(data.photos);
+      setPhotos(parsedPhotos);
+      setSelectedIds(new Set());
       setPhase("preview");
-      addToast({ type: "success", message: `${data.photos.length} foto berhasil diproses.` });
+      addToast({ type: "success", message: `${parsedPhotos.length} foto berhasil diproses.` });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Terjadi kesalahan.";
       setError(msg);
@@ -145,6 +139,7 @@ export default function HomePage() {
       saveToken(token);
       setSavedToken(token);
       setPhotos(photos);
+      setSelectedIds(new Set());
       setPhase("preview");
       addToast({ type: "success", message: `${photos.length} foto ditemukan di cart.` });
     } catch (e) {
@@ -169,11 +164,14 @@ export default function HomePage() {
       downloadMode = "direct",
       autoEnhance = false,
       folderByCreator = true,
+      photoIds,
     }: DownloadExecutionOptions) => {
-      const toDownload =
-        selectedIds.size > 0
-          ? photos.filter((p) => selectedIds.has(p.product_id))
-          : photos;
+      const requestedIds = new Set(photoIds);
+      const toDownload = photos.filter(p => requestedIds.has(p.id));
+      if (!toDownload.length) {
+        addToast({ type: "error", message: "Pilih minimal satu foto untuk diunduh." });
+        return;
+      }
 
       setPhase("zipping");
       setError(null);
@@ -191,7 +189,7 @@ export default function HomePage() {
         let res: { succeeded: number; failed: number };
 
         if (downloadMode === "direct") {
-          // Direct sequential download straight to device / Android downloads folder
+          // Direct parallel download straight to device / Android downloads folder
           res = await downloadBatchDirectSequential(
             toDownload,
             (p) => setProgress(p),
@@ -200,7 +198,7 @@ export default function HomePage() {
               watermarkSettings,
               autoEnhance,
             },
-            300,
+            350,
             controller.signal
           );
         } else {
@@ -214,7 +212,7 @@ export default function HomePage() {
               autoEnhance,
               folderByCreator,
             },
-            250,
+            0,
             controller.signal
           );
         }
@@ -233,7 +231,7 @@ export default function HomePage() {
             type: "success",
             message:
               downloadMode === "direct"
-                ? `${toDownload.length} foto berhasil tersimpan langsung ke folder Download HP!`
+                 ? `${toDownload.length} foto dikirim ke browser. Izinkan download beberapa file jika diminta.`
                 : `${toDownload.length} foto berhasil diunduh sebagai ZIP.`,
           });
         }

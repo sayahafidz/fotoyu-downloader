@@ -121,7 +121,7 @@ export default function WatermarkRemovalSettingsPanel({
               {formatCost(cost.costUSD, cost.costIDR)}
             </p>
             <p className="text-[10px] text-slate-500 dark:text-slate-400">
-              {photoCount} foto × {cost.credits} credits
+              {photoCount} foto · ~{cost.credits} credits (model 3.0)
             </p>
           </div>
         )}
@@ -161,7 +161,7 @@ export default function WatermarkRemovalSettingsPanel({
                 ].join(" ")}
               >
                 <span className="font-bold text-xs">Dewatermark.ai</span>
-                <span className="text-[10px] opacity-80">Memerlukan API Key Server</span>
+                <span className="text-[10px] opacity-80">API resmi · key di server · kredit terbatas</span>
               </button>
 
               <button

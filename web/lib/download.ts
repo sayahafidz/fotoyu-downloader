@@ -71,9 +71,20 @@ export async function sharePhoto(
 /**
  * Fallback to fetch image blob via HTML5 Canvas DOM rendering.
  */
-export async function fetchImageBlobViaCanvas(url: string): Promise<Blob | null> {
+export async function fetchImageBlobViaCanvas(url: string, signal?: AbortSignal): Promise<Blob | null> {
   return new Promise((resolve) => {
     const img = new Image();
+    const finish = (blob: Blob | null) => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+      img.onload = null;
+      img.onerror = null;
+      resolve(blob);
+    };
+    const onAbort = () => { finish(null); img.src = ""; };
+    const timer = setTimeout(onAbort, 15000);
+    if (signal?.aborted) { onAbort(); return; }
+    signal?.addEventListener("abort", onAbort, { once: true });
     img.crossOrigin = "anonymous";
     img.onload = () => {
       try {
@@ -81,78 +92,106 @@ export async function fetchImageBlobViaCanvas(url: string): Promise<Blob | null>
         canvas.width = img.naturalWidth || img.width;
         canvas.height = img.naturalHeight || img.height;
         const ctx = canvas.getContext("2d");
-        if (!ctx) return resolve(null);
+        if (!ctx) return finish(null);
         ctx.drawImage(img, 0, 0);
         canvas.toBlob(
           (blob) => {
-            resolve(blob);
+            finish(blob);
           },
           "image/jpeg",
           0.95
         );
       } catch {
-        resolve(null);
+        finish(null);
       }
     };
-    img.onerror = () => resolve(null);
+    img.onerror = () => finish(null);
     img.src = url;
   });
 }
 
 /**
- * Robust multi-layer fetcher for image blobs:
- * 1. Next.js /api/proxy
- * 2. Public open CORS/image proxies (allorigins, codetabs)
- * 3. Client-side HTML5 Canvas draw fallback
+ * Fast two-layer fetcher for image blobs:
+ * 1. Next.js internal /api/proxy (fast, no CORS issues)
+ * 2. Client-side HTML5 Canvas fallback (last resort)
+ *
+ * Note: public CORS proxies (allorigins/codetabs) were removed because they
+ * fail with CORS errors, are rate-limited, and made downloads extremely slow.
  */
 export async function fetchImageBlobWithFallbacks(
   url: string,
   signal?: AbortSignal
 ): Promise<Blob> {
   const encoded = encodeURIComponent(url);
+  if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+  let lastError = "Gagal mengunduh foto. Coba muat ulang data Fotoyu.";
 
-  // Layer 1: Next.js API Proxy
+  // Stream through our server first, then try CDN CORS directly.
+  for (const source of [`/api/proxy?url=${encoded}`, url]) {
   try {
-    const res = await fetch(`/api/proxy?url=${encoded}`, { signal });
-    if (res.ok) {
-      const blob = await res.blob();
-      if (blob && blob.size > 0) return blob;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), source.startsWith("/api/") ? 45000 : 15000);
+    const onAbort = () => controller.abort();
+    signal?.addEventListener("abort", onAbort, { once: true });
+
+    try {
+      const res = await fetch(source, { signal: controller.signal });
+      if (res.ok) {
+        const blob = await res.blob();
+        if (blob.size > 0 && (blob.type.startsWith("image/") || blob.type === "application/octet-stream" || !blob.type)) return blob;
+        lastError = "Respons CDN bukan file foto yang valid.";
+      } else {
+        const detail = await res.json().catch(() => null);
+        if (source.startsWith("/api/")) lastError = detail?.error || `Gagal mengunduh foto (HTTP ${res.status}).`;
+      }
+    } finally {
+      clearTimeout(timeout);
+      signal?.removeEventListener("abort", onAbort);
     }
   } catch (e) {
-    if (e instanceof DOMException && e.name === "AbortError") throw e;
+    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
+    // fall through to canvas fallback
+  }
   }
 
-  // Layer 2: allorigins public CORS proxy
+  // Layer 2: Client-side HTML5 Canvas fallback
   try {
-    const res = await fetch(`https://api.allorigins.win/raw?url=${encoded}`, { signal });
-    if (res.ok) {
-      const blob = await res.blob();
-      if (blob && blob.size > 0) return blob;
-    }
-  } catch (e) {
-    if (e instanceof DOMException && e.name === "AbortError") throw e;
-  }
-
-  // Layer 3: Codetabs / open CORS proxy fallback
-  try {
-    const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encoded}`, { signal });
-    if (res.ok) {
-      const blob = await res.blob();
-      if (blob && blob.size > 0) return blob;
-    }
-  } catch (e) {
-    if (e instanceof DOMException && e.name === "AbortError") throw e;
-  }
-
-  // Layer 4: Client-side HTML5 Canvas fallback
-  try {
-    const canvasBlob = await fetchImageBlobViaCanvas(url);
+    const canvasBlob = await fetchImageBlobViaCanvas(url, signal);
+    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
     if (canvasBlob && canvasBlob.size > 0) return canvasBlob;
   } catch (e) {
     if (e instanceof DOMException && e.name === "AbortError") throw e;
   }
 
-  throw new Error("Gagal mengunduh foto dari server proxy maupun fallback.");
+  throw new Error(lastError);
+}
+
+/**
+ * Run async tasks with a bounded concurrency pool.
+ * Keeps a fast number of parallel downloads while respecting mobile RAM.
+ */
+export async function runWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  worker: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+
+  async function runner() {
+    while (true) {
+      const current = nextIndex++;
+      if (current >= items.length) return;
+      results[current] = await worker(items[current], current);
+    }
+  }
+
+  const runners = Array.from(
+    { length: Math.max(1, Math.min(limit, items.length)) },
+    () => runner()
+  );
+  await Promise.all(runners);
+  return results;
 }
 
 // Download a single photo automatically to the user's downloads folder.
@@ -203,23 +242,16 @@ export async function downloadBatchDirectSequential(
   let watermarkSuccess = 0;
   let watermarkFailed = 0;
 
-  for (const photo of photos) {
+  // Browser-triggered individual saves are serial to avoid RAM spikes.
+  await runWithConcurrency(photos, 1, async (photo) => {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-
-    onProgress({
-      done,
-      total,
-      current: `Menyimpan ${photo.filename} ke galeri...`,
-      watermarkSuccess,
-      watermarkFailed,
-      mode: "direct",
-    });
 
     try {
       let blob: Blob | null = null;
       try {
         blob = await fetchImageBlobWithFallbacks(photo.url, signal);
-      } catch {
+      } catch (error) {
+        if (signal?.aborted) throw error;
         blob = null;
       }
 
@@ -229,7 +261,7 @@ export async function downloadBatchDirectSequential(
         // AI Watermark Removal
         if (options?.removeWatermark && options?.watermarkSettings) {
           try {
-            const wmRes = await removeWatermark(photo, options.watermarkSettings);
+            const wmRes = await removeWatermark(photo, options.watermarkSettings, signal);
             if (wmRes.success && wmRes.processedImageBlob) {
               blob = wmRes.processedImageBlob;
               watermarkSuccess++;
@@ -249,7 +281,9 @@ export async function downloadBatchDirectSequential(
           } catch {}
         }
 
+        if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
         downloadBlob(blob, photo.filename);
+        if (delayMs > 0) await new Promise(resolve => setTimeout(resolve, delayMs));
       }
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") throw e;
@@ -265,13 +299,10 @@ export async function downloadBatchDirectSequential(
       watermarkFailed,
       mode: "direct",
     });
-
-    if (done < total) {
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
-  }
+  });
 
   const succeeded = done - failed;
+  if (!succeeded && total) throw new Error(`Semua download gagal (${failed}/${total}). Muat ulang data Fotoyu lalu coba lagi.`);
   return { succeeded, failed };
 }
 
@@ -292,36 +323,37 @@ export async function downloadAllWithOptions(
   let watermarkSuccess = 0;
   let watermarkFailed = 0;
 
-  for (const photo of photos) {
+  // Download in parallel (bounded) so the ZIP is ready much faster.
+  await runWithConcurrency(photos, options?.removeWatermark || options?.autoEnhance ? 2 : 3, async (photo) => {
     if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
-
-    onProgress({
-      done,
-      total,
-      current: `Mengunduh ${photo.filename}...`,
-      watermarkSuccess,
-      watermarkFailed,
-      mode: "zip",
-    });
 
     try {
       let blob: Blob | null = null;
       try {
         blob = await fetchImageBlobWithFallbacks(photo.url, signal);
-      } catch {
+      } catch (error) {
+        if (signal?.aborted) throw error;
         blob = null;
       }
 
       if (!blob) {
         failed++;
         done++;
-        continue;
+        onProgress({
+          done,
+          total,
+          current: `${done}/${total} foto diproses`,
+          watermarkSuccess,
+          watermarkFailed,
+          mode: "zip",
+        });
+        return;
       }
 
       // 1. AI Watermark Removal
       if (options?.removeWatermark && options?.watermarkSettings) {
         try {
-          const result = await removeWatermark(photo, options.watermarkSettings);
+          const result = await removeWatermark(photo, options.watermarkSettings, signal);
           if (result.success && result.processedImageBlob) {
             blob = result.processedImageBlob;
             watermarkSuccess++;
@@ -348,6 +380,7 @@ export async function downloadAllWithOptions(
         zipPath = `${safeCreator}/${photo.filename}`;
       }
 
+      if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
       zip.file(zipPath, blob);
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") throw error;
@@ -363,11 +396,7 @@ export async function downloadAllWithOptions(
       watermarkFailed,
       mode: "zip",
     });
-
-    if (done < total) {
-      await new Promise((r) => setTimeout(r, options?.removeWatermark ? 400 : delayMs));
-    }
-  }
+  });
 
   const succeeded = done - failed;
   if (succeeded > 0) {
@@ -383,10 +412,11 @@ export async function downloadAllWithOptions(
     const zipBlob = await zip.generateAsync(
       {
         type: "blob",
-        compression: "DEFLATE",
-        compressionOptions: { level: 6 },
+        // JPEG/PNG/WebP already compressed; recompression wastes CPU and RAM.
+        compression: "STORE",
       },
       (metadata) => {
+        if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
         onProgress({
           done: total,
           total,
@@ -397,6 +427,7 @@ export async function downloadAllWithOptions(
         });
       }
     );
+    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
 
     const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, "").replace("T", "_");
     downloadBlob(zipBlob, `fotoyu_photos_${timestamp}.zip`);

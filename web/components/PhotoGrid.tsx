@@ -18,6 +18,7 @@ export interface DownloadExecutionOptions {
   downloadMode: DownloadMode;
   autoEnhance: boolean;
   folderByCreator: boolean;
+  photoIds: string[];
 }
 
 interface PhotoGridProps {
@@ -81,14 +82,14 @@ export default function PhotoGrid({
   };
 
   const selectAll = () => {
-    if (selectedIds.size === displayedPhotos.length && displayedPhotos.length > 0) {
+    if (displayedPhotos.length > 0 && displayedPhotos.every(p => selectedIds.has(p.id))) {
       onSelectedChange(new Set());
     } else {
-      onSelectedChange(new Set(displayedPhotos.map((p) => p.product_id)));
+      onSelectedChange(new Set(displayedPhotos.map((p) => p.id)));
     }
   };
 
-  const isAllSelected = selectedIds.size === displayedPhotos.length && displayedPhotos.length > 0;
+  const isAllSelected = displayedPhotos.length > 0 && displayedPhotos.every(p => selectedIds.has(p.id));
   const countToDownload = selectedIds.size > 0 ? selectedIds.size : displayedPhotos.length;
   const downloadBtnLabel = selectedIds.size > 0
     ? `Download ${selectedIds.size} Terpilih`
@@ -100,6 +101,7 @@ export default function PhotoGrid({
       downloadMode,
       autoEnhance,
       folderByCreator,
+      photoIds: selectedIds.size ? allPhotos.filter(p => selectedIds.has(p.id)).map(p => p.id) : displayedPhotos.map(p => p.id),
     });
   };
 
@@ -297,13 +299,13 @@ export default function PhotoGrid({
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3.5 md:grid-cols-4 lg:grid-cols-5">
             {displayedPhotos.map((photo, i) => (
               <PhotoCard
-                key={photo.product_id + i}
+                key={photo.url}
                 photo={photo}
                 index={i}
-                isSelected={selectedIds.has(photo.product_id)}
-                onToggleSelect={() => toggleSelect(photo.product_id)}
+                isSelected={selectedIds.has(photo.id)}
+                onToggleSelect={() => toggleSelect(photo.id)}
                 onImageClick={() => {
-                  const idx = displayedPhotos.findIndex((p) => p.product_id === photo.product_id);
+                  const idx = displayedPhotos.findIndex((p) => p.url === photo.url);
                   setLightboxIndex(idx >= 0 ? idx : null);
                 }}
                 viewMode="grid"
@@ -315,13 +317,13 @@ export default function PhotoGrid({
           <div className="flex flex-col gap-2">
             {displayedPhotos.map((photo, i) => (
               <PhotoCard
-                key={photo.product_id + i}
+                key={photo.url}
                 photo={photo}
                 index={i}
-                isSelected={selectedIds.has(photo.product_id)}
-                onToggleSelect={() => toggleSelect(photo.product_id)}
+                isSelected={selectedIds.has(photo.id)}
+                onToggleSelect={() => toggleSelect(photo.id)}
                 onImageClick={() => {
-                  const idx = displayedPhotos.findIndex((p) => p.product_id === photo.product_id);
+                  const idx = displayedPhotos.findIndex((p) => p.url === photo.url);
                   setLightboxIndex(idx >= 0 ? idx : null);
                 }}
                 viewMode="list"
@@ -414,7 +416,7 @@ export default function PhotoGrid({
       <CollageModal
         isOpen={isCollageOpen}
         onClose={() => setIsCollageOpen(false)}
-        selectedPhotos={allPhotos.filter((p) => selectedIds.has(p.product_id))}
+        selectedPhotos={allPhotos.filter((p) => selectedIds.has(p.id))}
         allPhotos={allPhotos}
       />
     </div>
