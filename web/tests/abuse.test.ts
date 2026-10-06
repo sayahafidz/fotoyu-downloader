@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { dailyWindow, visitorIdentity, checkSameOrigin, AbuseError, abuseStore, rateLimit, reserveWatermark, watermarkQuota } from "../lib/abuse.ts";
+import { createRedeemCode, redeemCredits, codeKey } from "../lib/credits.ts";
+import { loginAdmin, requireAdmin, logoutAdmin, adminCookie } from "../lib/admin.ts";
 
 test("daily quota resets at midnight WIB", () => {
   const before = dailyWindow(Date.parse("2026-10-06T16:59:59Z"));
@@ -44,6 +46,30 @@ test("Redis atomically limits attempts, parallel processing and daily quotas acr
     assert.equal((await watermarkQuota(request())).remaining, 0);
     await assert.rejects(reserveWatermark(request()), /Kuota 5/);
     await assert.rejects(reserveWatermark(request("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")), /Kuota 5/);
+    const code = await createRedeemCode(3, 1, 7);
+    const redemptions = await Promise.allSettled(Array.from({ length: 5 }, () => redeemCredits(request(), code)));
+    assert.equal(redemptions.filter((entry) => entry.status === "fulfilled").length, 1);
+    assert.equal((await watermarkQuota(request())).credits, 3);
+    await assert.rejects(redeemCredits(request("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"), code), /sudah habis/);
+    const paidFailed = await reserveWatermark(request());
+    assert.equal((await watermarkQuota(request())).credits, 2);
+    await paidFailed.finish(false);
+    assert.equal((await watermarkQuota(request())).credits, 3);
+    const paidSuccess = await reserveWatermark(request());
+    await paidSuccess.finish(true);
+    assert.equal((await watermarkQuota(request())).credits, 2);
+    assert.equal((await watermarkQuota(request())).freeRemaining, 0);
+    const disabled = await createRedeemCode(2, 5, 7);
+    await (await abuseStore()).hSet(codeKey(disabled), "active", "0");
+    await assert.rejects(redeemCredits(request(), disabled), /tidak aktif/);
+    await assert.rejects(requireAdmin(request()), /login admin/);
+    process.env.ADMIN_PASSWORD = "a-long-admin-test-password";
+    await assert.rejects(loginAdmin("wrong"), /tidak cocok/);
+    const token = await loginAdmin(process.env.ADMIN_PASSWORD);
+    const adminRequest = new Request("https://app.example/api", { headers: { cookie: adminCookie(request(), token).split(";")[0] } });
+    await requireAdmin(adminRequest);
+    await logoutAdmin(adminRequest);
+    await assert.rejects(requireAdmin(adminRequest), /login admin/);
   } finally {
     await (await abuseStore()).quit();
     redis.kill("SIGTERM");

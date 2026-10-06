@@ -33,6 +33,7 @@ services:
       TRUST_PROXY: "true"
       APP_ORIGIN: https://${APP_DOMAIN:-fotoyu.example.com}
       WATERMARK_CONCURRENCY: ${WATERMARK_CONCURRENCY:-2}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     depends_on:
       redis:
         condition: service_healthy

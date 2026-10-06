@@ -51,6 +51,16 @@ Apply environment changes with `docker compose up -d --force-recreate web`. No r
 
 ## Quotas and rate limits
 
+## Admin and redeem credits
+
+Set `ADMIN_PASSWORD` to a unique password of at least 16 characters in the server environment, then recreate the web container. Open `/admin` to log in. Sessions use an HttpOnly cookie and expire after 8 hours; login attempts are limited to 5 per 15 minutes per IP.
+
+The admin can generate redeem codes with credits per redemption, a maximum redemption count, and an expiry of 1–365 days. Codes can be copied or disabled. Each browser identity may redeem a given code once, and code usage and balances are updated atomically in Redis.
+
+Users redeem codes in the watermark options. Free daily quota is used first, then extra credits. Failed image operations refund whichever quota/credit was reserved. Rate limits and concurrency caps apply to both free and extra-credit edits.
+
+Extra credits are tied to the visitor cookie, not a verified user account. Clearing cookies loses access to that balance. Multi-use codes can be redeemed again by another browser identity; use single-redemption codes for individual grants. Redis data contains balances and codes and must be backed up. This feature does not process payments.
+
 For local `npm run dev`, Redis defaults to `redis://127.0.0.1:6379` when `REDIS_URL` is absent. Run a local Redis service or set `REDIS_URL` to your development instance. Production requires an explicit `REDIS_URL`; Compose provides it automatically. A quota HTTP 503 indicates unavailable or unconfigured Redis, rather than exhausted quota (HTTP 429).
 
 - Successful watermark edits: 5 per browser identity and public IP per day, reset at 00:00 WIB. Shared public IPs share this IP cap. Without accounts, this is not a verified human identity.

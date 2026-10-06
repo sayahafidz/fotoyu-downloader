@@ -82,7 +82,9 @@ export async function watermarkQuota(req: Request) {
   const { identity, window, keys } = quotaKeys(req);
   const counts = await store.mGet(keys);
   const used = Math.max(...counts.map((count) => Number(count || 0)));
-  return { limit: 5, remaining: Math.max(0, 5 - used), resetsAt: new Date(window.resetsAt).toISOString(), cookie: identity.cookie };
+  const credits = Number(await store.get(`credits:${identity.browser}`) || 0);
+  const freeRemaining = Math.max(0, 5 - used);
+  return { limit: 5, remaining: freeRemaining + credits, freeRemaining, credits, resetsAt: new Date(window.resetsAt).toISOString(), cookie: identity.cookie };
 }
 
 const reserveScript = `
@@ -90,24 +92,33 @@ local now = tonumber(ARGV[1])
 redis.call('ZREMRANGEBYSCORE', KEYS[3], '-inf', now)
 if redis.call('EXISTS', KEYS[4]) == 1 then return -2 end
 if redis.call('ZCARD', KEYS[3]) >= tonumber(ARGV[4]) then return -2 end
+local paid = 0
 for i=1,2 do
-  if tonumber(redis.call('GET', KEYS[i]) or '0') >= 5 then return -1 end
+  if tonumber(redis.call('GET', KEYS[i]) or '0') >= 5 then paid = 1 end
 end
-for i=1,2 do
-  local n = redis.call('INCR', KEYS[i])
-  if n == 1 then redis.call('EXPIRE', KEYS[i], ARGV[2]) end
+if paid == 1 then
+  if tonumber(redis.call('GET', KEYS[5]) or '0') < 1 then return -1 end
+  redis.call('DECR', KEYS[5])
+else
+  for i=1,2 do
+    local n = redis.call('INCR', KEYS[i])
+    if n == 1 then redis.call('EXPIRE', KEYS[i], ARGV[2]) end
+  end
 end
 redis.call('SET', KEYS[4], ARGV[3], 'EX', 180)
 redis.call('ZADD', KEYS[3], now + 180000, ARGV[3])
 redis.call('EXPIRE', KEYS[3], 180)
-return 1`;
+return paid + 1`;
 
 const finishScript = `
 if redis.call('GET', KEYS[4]) == ARGV[1] then redis.call('DEL', KEYS[4]) end
 redis.call('ZREM', KEYS[3], ARGV[1])
 if ARGV[2] == '0' then
-  for i=1,2 do
-    if tonumber(redis.call('GET', KEYS[i]) or '0') > 0 then redis.call('DECR', KEYS[i]) end
+  if ARGV[3] == '2' then redis.call('INCR', KEYS[5])
+  else
+    for i=1,2 do
+      if tonumber(redis.call('GET', KEYS[i]) or '0') > 0 then redis.call('DECR', KEYS[i]) end
+    end
   end
 end
 return 1`;
@@ -116,7 +127,7 @@ export async function reserveWatermark(req: Request) {
   const store = await abuseStore();
   const { identity, window, keys } = quotaKeys(req);
   const lease = randomUUID();
-  const allKeys = [...keys, "watermark:active", `watermark:lock:${identity.ip}`];
+  const allKeys = [...keys, "watermark:active", `watermark:lock:${identity.ip}`, `credits:${identity.browser}`];
   const concurrency = Math.max(1, Math.min(16, Number(process.env.WATERMARK_CONCURRENCY) || 2));
   const result = Number(await store.eval(reserveScript, { keys: allKeys, arguments: [String(Date.now()), String(window.seconds), lease, String(concurrency)] }));
   if (result === -1) throw new AbuseError("Kuota 5 foto hari ini habis. Coba lagi besok pukul 00.00 WIB.", 429, window.seconds, "DAILY_QUOTA_EXCEEDED");
@@ -126,7 +137,7 @@ export async function reserveWatermark(req: Request) {
     cookie: identity.cookie,
     async finish(success: boolean) {
       if (finished) return;
-      await store.eval(finishScript, { keys: allKeys, arguments: [lease, success ? "1" : "0"] });
+      await store.eval(finishScript, { keys: allKeys, arguments: [lease, success ? "1" : "0", String(result)] });
       finished = true;
     },
   };
