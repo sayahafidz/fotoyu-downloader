@@ -107,10 +107,25 @@ export async function GET(req: Request) {
     }
 
     if (!upstream.ok || !upstream.body) {
+      console.warn("[proxy] CDN request rejected", {
+        status: upstream.status,
+        host: new URL(target).hostname,
+        region: process.env.VERCEL_REGION || "local",
+        server: upstream.headers.get("server"),
+        cdnRay: upstream.headers.get("cf-ray"),
+        mitigation: upstream.headers.get("cf-mitigated"),
+        contentType: upstream.headers.get("content-type"),
+      });
       await upstream.body?.cancel();
       return NextResponse.json(
-        { error: `Upstream CDN mengembalikan status ${upstream.status}.`, status: upstream.status },
-        { status: upstream.status || 502 }
+        {
+          error: upstream.status === 403
+            ? "CDN menolak akses dari server hosting. Coba buka foto sumber; jika bisa, akses browser tersedia tetapi akses server ditolak."
+            : `Upstream CDN mengembalikan status ${upstream.status}.`,
+          status: upstream.status,
+          code: upstream.status === 403 ? "CDN_ACCESS_DENIED" : "CDN_REQUEST_FAILED",
+        },
+        { status: upstream.status || 502, headers: { "Cache-Control": "private, no-store" } }
       );
     }
 
