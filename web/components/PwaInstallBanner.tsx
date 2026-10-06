@@ -7,7 +7,7 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-export default function PwaInstallBanner() {
+export default function PwaInstallBanner({ hidden = false }: { hidden?: boolean }) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -40,11 +40,9 @@ export default function PwaInstallBanner() {
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
-    deferredPrompt.prompt();
+    await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
-      setIsVisible(false);
-    }
+    setIsVisible(false);
     setDeferredPrompt(null);
   };
 
@@ -54,21 +52,18 @@ export default function PwaInstallBanner() {
     sessionStorage.setItem("pwa_prompt_dismissed", "1");
   };
 
-  if (!isVisible || isDismissed) return null;
+  if (!isVisible || isDismissed || hidden) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-40 mx-auto max-w-md animate-slide-up sm:left-auto sm:right-6">
+    <div className="mx-auto max-w-2xl px-4 pb-6">
       <div className="flex items-center justify-between gap-3 rounded-2xl border border-indigo-200 bg-white/95 p-3.5 shadow-xl shadow-indigo-500/10 backdrop-blur-md dark:border-indigo-900/50 dark:bg-slate-900/95">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-fuchsia-600 text-lg font-bold text-white shadow-md shadow-indigo-500/30">
-            F
-          </div>
           <div>
             <h4 className="text-xs font-bold text-slate-900 dark:text-white sm:text-sm">
               Pasang Aplikasi di HP
             </h4>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 sm:text-xs">
-              Akses Fotoyu Downloader 1-klik dari Home Screen
+              Buka dari layar utama perangkat.
             </p>
           </div>
         </div>

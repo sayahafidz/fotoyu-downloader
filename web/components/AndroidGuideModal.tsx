@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useDialog } from "@/lib/use-dialog";
 
 interface AndroidGuideModalProps {
   isOpen: boolean;
@@ -13,6 +14,8 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
   const [tab, setTab] = useState<AndroidTab>("chrome");
   const [copiedBookmarklet, setCopiedBookmarklet] = useState(false);
   const [copiedQuickSnippet, setCopiedQuickSnippet] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
+  const dialogRef = useDialog(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -26,30 +29,29 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
   const quickSnippet = `javascript:(function(){var r=localStorage.getItem('persist:root');if(!r){alert('Belum login di fotoyu!');return;}prompt('Salin data token fotoyu:',r);})();`;
 
   const copyToClipboard = async (text: string, setter: (v: boolean) => void) => {
+    setCopyError(null);
     try {
       await navigator.clipboard.writeText(text);
       setter(true);
       setTimeout(() => setter(false), 2000);
-    } catch {}
+    } catch { setCopyError("Tidak dapat menyalin. Pilih teks kode dan salin secara manual."); }
   };
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm animate-fade-in"
+      ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="android-guide-title" tabIndex={-1}
+      className="dialog-backdrop"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative flex max-h-[90vh] w-full max-w-2xl flex-col rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+      <div className="dialog-sheet max-w-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 bg-gradient-to-r from-indigo-50/80 via-white to-blue-50/80 px-6 py-4 dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-md shadow-emerald-500/20 text-lg">
-              📱
-            </span>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white sm:text-lg">
-                Panduan Penggunaan di HP Android
+              <h3 id="android-guide-title" className="text-lg font-semibold text-slate-900 dark:text-white">
+                Panduan Android
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Download foto fotoyu langsung dari smartphone tanpa perlu laptop
@@ -59,7 +61,7 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
+            className="btn-quiet shrink-0" aria-label="Tutup panduan"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -121,7 +123,8 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
         </div>
 
         {/* Content Body */}
-        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          {copyError && <p role="alert" className="text-sm text-red-700 dark:text-red-300">{copyError}</p>}
           {tab === "chrome" && (
             <div className="space-y-4">
               <div className="rounded-2xl border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-900/50 dark:bg-indigo-950/30">
@@ -186,7 +189,7 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
             <div className="space-y-4">
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 dark:border-emerald-900/50 dark:bg-emerald-950/30">
                 <h4 className="text-sm font-bold text-emerald-950 dark:text-emerald-200">
-                  ⚡ Metode Paling Praktis (Tombol Otomatis di Layar)
+                   Browser dengan ekstensi
                 </h4>
                 <p className="mt-1 text-xs leading-relaxed text-emerald-900/80 dark:text-emerald-300">
                   Gunakan browser Android yang mendukung ekstensi seperti <strong>Kiwi Browser</strong>, <strong>Firefox Android</strong>, atau <strong>Lemur Browser</strong>.
@@ -282,10 +285,10 @@ export default function AndroidGuideModal({ isOpen, onClose }: AndroidGuideModal
             <div className="space-y-4">
               <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-4 dark:border-purple-900/50 dark:bg-purple-950/30">
                 <h4 className="text-sm font-bold text-purple-950 dark:text-purple-200">
-                  Jalankan Downloader di Termux Android (CLI Ultra-Cepat)
+                   Downloader Python di Termux
                 </h4>
                 <p className="mt-1 text-xs leading-relaxed text-purple-900/80 dark:text-purple-300">
-                  Untuk pengguna mahir Android: download ratusan foto super cepat dengan multi-threading di Termux.
+                   Untuk pengguna yang terbiasa dengan terminal Android.
                 </p>
               </div>
 

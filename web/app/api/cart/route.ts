@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { extractPhotos } from "@/lib/parse";
+import { abuseResponse, checkSameOrigin, rateLimit } from "@/lib/abuse";
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
 
 const FOTOYU_CART_URL = "https://api.fotoyu.com/gs/v1/carts/preview";
 
@@ -87,6 +87,7 @@ function extractToken(rawInput: string): string | null {
 }
 
 export async function POST(req: Request) {
+  try { checkSameOrigin(req); await rateLimit(req, "cart", 10); } catch (error) { return abuseResponse(error); }
   let payload: CartRequestBody;
   try {
     payload = (await req.json()) as CartRequestBody;

@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { isAllowedHost, sanitizeFilename } from "@/lib/parse";
+import { abuseResponse, rateLimit } from "@/lib/abuse";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 const UPSTREAM_HEADERS: HeadersInit = {
@@ -14,9 +14,9 @@ const UPSTREAM_HEADERS: HeadersInit = {
   Origin: "https://fotoyu.com",
 };
 
-async function fetchAllowed(target: string, headers: HeadersInit): Promise<Response> {
+async function fetchAllowed(target: string, headers: HeadersInit, requestSignal: AbortSignal): Promise<Response> {
   let current = target;
-  const signal = AbortSignal.timeout(20000);
+  const signal = AbortSignal.any([requestSignal, AbortSignal.timeout(60000)]);
   for (let hop = 0; hop < 5; hop++) {
     if (!isAllowedHost(current)) throw new Error("Host redirect CDN tidak diizinkan.");
     const response = await fetch(current, { headers, cache: "no-store", redirect: "manual", signal });
@@ -29,10 +29,10 @@ async function fetchAllowed(target: string, headers: HeadersInit): Promise<Respo
   throw new Error("Terlalu banyak redirect CDN.");
 }
 
-async function fetchUpstream(target: string): Promise<Response> {
+async function fetchUpstream(target: string, signal: AbortSignal): Promise<Response> {
   // Attempt 1: Fast direct fetch
   try {
-    const res = await fetchAllowed(target, UPSTREAM_HEADERS);
+    const res = await fetchAllowed(target, UPSTREAM_HEADERS, signal);
 
     // If 200 OK or 404 Not Found, return immediately (don't waste time retrying 404s)
     if (res.ok || res.status === 404 || res.status === 410) {
@@ -40,6 +40,7 @@ async function fetchUpstream(target: string): Promise<Response> {
     }
     await res.body?.cancel();
   } catch {
+    signal.throwIfAborted();
     // Retry once on network timeout/glitch
   }
 
@@ -49,7 +50,7 @@ async function fetchUpstream(target: string): Promise<Response> {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
         Referer: "https://fotoyu.com/",
         Accept: "image/*,*/*;q=0.8",
-    });
+    }, signal);
     return res2;
   } catch (e: any) {
     throw new Error(e?.message || "Upstream CDN unreachable");
@@ -60,7 +61,7 @@ function streamProxyResponse(upstream: Response, opts?: { downloadFilename?: str
   const headers = new Headers();
   const ct = upstream.headers.get("content-type");
   headers.set("Content-Type", ct && ct.startsWith("image/") ? ct : "image/jpeg");
-  headers.set("Cache-Control", opts?.downloadFilename ? "private, no-store" : "public, max-age=300, s-maxage=3600");
+  headers.set("Cache-Control", opts?.downloadFilename ? "private, no-store" : "private, max-age=300");
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Access-Control-Allow-Origin", "*");
   headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -77,6 +78,7 @@ function streamProxyResponse(upstream: Response, opts?: { downloadFilename?: str
 }
 
 export async function GET(req: Request) {
+  try { await rateLimit(req, "proxy", 180); } catch (error) { return abuseResponse(error); }
   const { searchParams } = new URL(req.url);
   const target = searchParams.get("url");
   const mode = searchParams.get("mode") || "display";
@@ -97,7 +99,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const upstream = await fetchUpstream(target);
+    const upstream = await fetchUpstream(target, req.signal);
 
     if (upstream.status === 404) {
       return NextResponse.json(
@@ -110,7 +112,6 @@ export async function GET(req: Request) {
       console.warn("[proxy] CDN request rejected", {
         status: upstream.status,
         host: new URL(target).hostname,
-        region: process.env.VERCEL_REGION || "local",
         server: upstream.headers.get("server"),
         cdnRay: upstream.headers.get("cf-ray"),
         mitigation: upstream.headers.get("cf-mitigated"),

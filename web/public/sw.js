@@ -1,7 +1,6 @@
 // Service Worker for Fotoyu Downloader PWA
-const CACHE_NAME = "fotoyudl-cache-v3";
+const CACHE_NAME = "fotoyudl-cache-v4";
 const PRECACHE_ASSETS = [
-  "/",
   "/manifest.json",
   "/icon-192.png",
   "/icon-512.png"
@@ -43,7 +42,7 @@ self.addEventListener("fetch", (event) => {
   // HTML must follow the deployment. A stale shell can reference JS chunks
   // that disappeared after a production release.
   if (event.request.mode === "navigate") {
-    event.respondWith(fetch(event.request).catch(() => caches.match("/").then(response => response || new Response("Offline", { status: 503 }))));
+    event.respondWith(fetch(event.request).catch(() => new Response('<!doctype html><html lang="id"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline</title><body style="font-family:system-ui;padding:24px"><h1>Koneksi terputus</h1><p>Sambungkan internet untuk memuat dan mengunduh foto.</p><a href="/">Muat ulang</a></body></html>', { status: 503, headers: { "Content-Type": "text/html; charset=utf-8" } })));
     return;
   }
   // Next handles immutable chunk caching; never serve an older framework asset.

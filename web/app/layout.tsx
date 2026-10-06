@@ -1,13 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { DARK_MODE_SCRIPT } from "@/lib/dark-mode";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: dark)", color: "#090d16" },
-    { media: "(prefers-color-scheme: light)", color: "#4f46e5" },
+    { media: "(prefers-color-scheme: light)", color: "#f8fafc" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -18,7 +16,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Fotoyu Downloader Mobile & Web",
   description:
-    "Unduh foto resolusi tinggi dari fotoyu.com langsung di Android & PC dalam satu klik. Concurrent, cepat, dan gratis.",
+    "Muat keranjang Fotoyu, pilih foto, dan simpan ke perangkat sebagai file foto atau ZIP.",
   keywords: ["fotoyu", "downloader", "photo", "batch download", "zip", "android", "pwa"],
   authors: [{ name: "sayahafidz" }],
   manifest: "/manifest.json",
@@ -30,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Fotoyu Downloader Mobile & Web",
     description:
-      "Unduh foto resolusi tinggi dari fotoyu.com langsung di browser Android & PC. Cepat & tanpa ribet.",
+      "Pilih, lihat, dan unduh foto Fotoyu melalui browser di ponsel atau komputer.",
     type: "website",
   },
 };
@@ -61,8 +59,6 @@ export default function RootLayout({
       </head>
       <body>
         {children}
-        <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   );

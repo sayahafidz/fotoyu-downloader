@@ -1,6 +1,7 @@
 "use client";
 
 import type { DownloadAllProgress } from "@/lib/download";
+import { useDialog } from "@/lib/use-dialog";
 
 interface ProgressOverlayProps {
   progress: DownloadAllProgress | null;
@@ -15,17 +16,18 @@ export default function ProgressOverlay({
   onClose,
   onCancel,
 }: ProgressOverlayProps) {
+  const dialogRef = useDialog(Boolean(progress || error), error ? onClose : undefined);
   if (!progress && !error) return null;
 
   const pct = progress
-    ? Math.min(100, Math.round((progress.done / progress.total) * 100))
+     ? Math.min(100, Math.round((progress.done / Math.max(1, progress.total)) * 100))
     : error
     ? 100
     : 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm dark:bg-slate-950/80 animate-fade-in">
-      <div className="w-[min(90vw,420px)] rounded-2xl bg-white p-6 shadow-2xl dark:bg-slate-800 animate-scale-in">
+    <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={error ? "Unduhan gagal" : "Progres unduhan"} tabIndex={-1} className="dialog-backdrop">
+      <div className="dialog-sheet max-w-md p-6">
         {error ? (
           <>
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 dark:bg-red-900">
@@ -77,10 +79,10 @@ export default function ProgressOverlay({
             <p className="mt-1 truncate text-center text-xs text-slate-500 dark:text-slate-400">
               {progress?.current}
             </p>
-            <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+            <div role="progressbar" aria-label="Foto diproses" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} className="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-300"
-                style={{ width: `${pct}%` }}
+                className="h-full origin-left rounded-full bg-indigo-600 transition-transform duration-300"
+                style={{ transform: `scaleX(${pct / 100})` }}
               />
             </div>
             <p className="mt-2 text-center text-xs font-medium text-slate-600 dark:text-slate-300">
@@ -97,7 +99,7 @@ export default function ProgressOverlay({
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="text-xs font-medium text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                  className="btn-secondary w-full"
                 >
                   Batalkan download
                 </button>

@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ModeTabs, { type Mode } from "@/components/ModeTabs";
 import PasteForm from "@/components/PasteForm";
 import TokenForm from "@/components/TokenForm";
 import EnhanceForm from "@/components/EnhanceForm";
 import BookmarkletSection from "@/components/BookmarkletSection";
-import PhotoGrid, { type DownloadMode, type DownloadExecutionOptions } from "@/components/PhotoGrid";
+import PhotoGrid, { type DownloadExecutionOptions } from "@/components/PhotoGrid";
 import ProgressOverlay from "@/components/ProgressOverlay";
 import HelpSection from "@/components/HelpSection";
 import DarkModeToggle from "@/components/DarkModeToggle";
@@ -18,7 +18,6 @@ import {
   downloadBatchDirectSequential,
   type DownloadAllProgress,
 } from "@/lib/download";
-import type { WatermarkRemovalSettings } from "@/lib/watermark-removal";
 import {
   fetchCartViaToken,
   loadToken,
@@ -43,6 +42,12 @@ export default function HomePage() {
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [isAndroidGuideOpen, setIsAndroidGuideOpen] = useState(false);
   const { toasts, addToast, removeToast } = useToast();
+  const galleryHeading = useRef<HTMLHeadingElement>(null);
+  const importHeading = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (phase === "preview") galleryHeading.current?.focus();
+  }, [photos]);
 
   const filteredPhotos = useMemo(() => {
     if (!searchQuery.trim()) return photos;
@@ -114,9 +119,10 @@ export default function HomePage() {
       // Local parsing avoids Vercel's request body limit for large cart exports.
       const parsedPhotos = extractPhotos(raw);
       if (parsedPhotos.length === 0) {
-        throw new Error("Tidak ada foto yang ditemukan di response.");
+      throw new Error("Tidak ada foto di data ini. Periksa response keranjang Fotoyu.");
       }
       setPhotos(parsedPhotos);
+      setSearchQuery("");
       setSelectedIds(new Set());
       setPhase("preview");
       addToast({ type: "success", message: `${parsedPhotos.length} foto berhasil diproses.` });
@@ -139,6 +145,7 @@ export default function HomePage() {
       saveToken(token);
       setSavedToken(token);
       setPhotos(photos);
+      setSearchQuery("");
       setSelectedIds(new Set());
       setPhase("preview");
       addToast({ type: "success", message: `${photos.length} foto ditemukan di cart.` });
@@ -219,7 +226,7 @@ export default function HomePage() {
 
         setPhase("preview");
         setProgress(null);
-        setSelectedIds(new Set());
+        if (res.failed === 0) setSelectedIds(new Set());
 
         if (res.failed > 0) {
           addToast({
@@ -247,10 +254,6 @@ export default function HomePage() {
         setPhase("preview");
         setProgress((p) => (p ? { ...p, current: msg } : null));
         addToast({ type: "error", message: msg });
-        setTimeout(() => {
-          setProgress(null);
-          setError(null);
-        }, 4000);
       } finally {
         setAbortController(null);
       }
@@ -269,36 +272,19 @@ export default function HomePage() {
     setSearchQuery("");
     setSelectedIds(new Set());
     setPhase("idle");
+    requestAnimationFrame(() => importHeading.current?.focus());
   }, []);
 
   const zipping = phase === "zipping";
 
   return (
-    <main className="min-h-screen bg-slate-50 dark:bg-slate-950 dark:text-slate-100 transition-colors">
-      {/* Hero Header - Compact & Direct on Mobile */}
-      <header className="relative overflow-hidden border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 transition-colors">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-60 dark:opacity-30"
-          style={{
-            backgroundImage:
-              "radial-gradient(60% 50% at 50% 0%, rgba(99,102,241,0.18) 0%, rgba(255,255,255,0) 70%)",
-          }}
-        />
-        <div className="relative mx-auto max-w-6xl px-4 py-4 sm:py-8">
+    <main className="app-shell">
+      <a href="#app-content" className="skip-link">Lewati ke konten</a>
+      <header className="app-header">
+        <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col items-start gap-1 sm:gap-2">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                  <span className="text-gradient">Fotoyu</span> Downloader
-                </h1>
-                <span className="rounded-full border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/80 dark:text-indigo-300">
-                  Mobile
-                </span>
-              </div>
-              <p className="text-xs text-slate-600 dark:text-slate-400 hidden sm:block">
-                Unduh foto resolusi tinggi dari fotoyu.com langsung di Android & PC dalam 1-klik.
-              </p>
+              <p className="text-base font-semibold tracking-tight text-slate-900 dark:text-slate-100">Fotoyu <span className="font-normal text-slate-600 dark:text-slate-400">Downloader</span></p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -309,25 +295,38 @@ export default function HomePage() {
       </header>
 
       {/* Main Body */}
-      <section className="mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6 space-y-4">
-        {phase === "preview" && (
+      <section id="app-content" className="mx-auto max-w-6xl px-4 sm:px-6 py-6 sm:py-8 space-y-5">
+        {(phase === "preview" || zipping) && (
           <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
               onClick={handleReset}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs sm:text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors active:scale-95"
+              disabled={zipping}
+              className="btn-quiet"
             >
               <BackIcon />
-              Kembali ke Menu Awal
+              Muat foto lain
             </button>
+            <h1 ref={galleryHeading} tabIndex={-1} className="text-2xl font-semibold tracking-tight">Foto kamu</h1>
           </div>
         )}
 
         {(phase === "idle" || phase === "parsing" || phase === "error") && (
-          <div className="space-y-5">
+          <div className="import-flow space-y-6">
+            <div>
+              <h1 ref={importHeading} tabIndex={-1} className="text-2xl sm:text-3xl font-semibold tracking-tight">Simpan foto kamu.</h1>
+              <p className="mt-2 text-base text-slate-600 dark:text-slate-400">Muat keranjang Fotoyu, pilih foto, lalu unduh ke perangkat.</p>
+            </div>
+            {savedToken && <div className="saved-session">
+              <div><p className="font-semibold">Login tersimpan</p><p className="text-sm text-slate-600 dark:text-slate-400">Muat keranjang tanpa menempelkan token lagi.</p></div>
+              <div className="flex flex-wrap gap-2">
+                <button type="button" className="btn-primary" disabled={phase === "parsing"} onClick={() => handleFetchCart(savedToken)}>Muat keranjang</button>
+                <button type="button" className="btn-quiet" disabled={phase === "parsing"} onClick={() => { clearToken(); setSavedToken(null); }}>Hapus login</button>
+              </div>
+            </div>}
             <ModeTabs
               mode={mode}
-              onChange={setMode}
+              onChange={(nextMode) => { if (phase === "parsing") return; setMode(nextMode); setError(null); setPhase("idle"); }}
               onOpenAndroidGuide={() => setIsAndroidGuideOpen(true)}
             />
 
@@ -356,7 +355,7 @@ export default function HomePage() {
             )}
 
             {phase === "error" && error && (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/40 animate-fade-in shadow-sm">
+              <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/50 dark:bg-red-950/40">
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400 font-bold text-xs">
                     ✕
@@ -382,7 +381,7 @@ export default function HomePage() {
           </div>
         )}
 
-        {phase === "preview" && photos.length > 0 && (
+         {(phase === "preview" || zipping) && photos.length > 0 && (
           <PhotoGrid
             photos={filteredPhotos}
             allPhotos={photos}
@@ -397,14 +396,9 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 transition-colors mt-12">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400 space-y-1">
-          <p>
-            Dibuat dengan Next.js · PWA · Tailwind CSS. Bukan berafiliasi dengan fotoyu.com.
-          </p>
-          <p>Gunakan untuk mendownload foto milikmu sendiri secara legal dan bertanggung jawab.</p>
-        </div>
-      </footer>
+      {photos.length === 0 && <footer className="mx-auto max-w-2xl px-4 py-8 text-sm text-slate-600 dark:text-slate-400">
+        <p>Tidak berafiliasi dengan Fotoyu. Unduh foto yang kamu miliki atau boleh gunakan.</p>
+      </footer>}
 
       {/* ZIP / Batch Download Progress Overlay */}
       <ProgressOverlay
@@ -424,7 +418,7 @@ export default function HomePage() {
       />
 
       {/* PWA Home Screen Install Banner for Android */}
-      <PwaInstallBanner />
+      <PwaInstallBanner hidden={photos.length > 0 || isAndroidGuideOpen} />
 
       {/* Toast Notification Container */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />

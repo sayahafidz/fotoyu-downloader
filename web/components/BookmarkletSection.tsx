@@ -2,12 +2,8 @@
 
 import { useState } from "react";
 
-const APP_URL =
-  process.env.NEXT_PUBLIC_APP_URL ||
-  (typeof window !== "undefined" ? window.location.origin : "https://fakyu.sayahafidz.my.id");
-
-const CONSOLE_CODE = `(function(){
-  var APP_URL = "${APP_URL}";
+const consoleCode = (appUrl: string) => `(function(){
+  var APP_URL = ${JSON.stringify(appUrl)};
   function fallback() {
     var v = localStorage.getItem("persist:root");
     if (!v) { alert("persist:root tidak ditemukan."); return; }
@@ -44,7 +40,7 @@ const CONSOLE_CODE = `(function(){
   .catch(function(){ fallback(); });
 })();`;
 
-const ANDROID_BOOKMARKLET = `javascript:(function(){var s=document.createElement('script');s.src='${APP_URL}/android-inject.js?t='+Date.now();document.body.appendChild(s);})();`;
+const androidBookmarklet = (appUrl: string) => `javascript:(function(){var s=document.createElement('script');s.src=${JSON.stringify(appUrl + "/android-inject.js")}+'?t='+Date.now();document.body.appendChild(s);})();`;
 
 interface BookmarkletSectionProps {
   onTokenReceived?: (token: string) => void;
@@ -55,28 +51,36 @@ export default function BookmarkletSection({
   onTokenReceived,
   onOpenAndroidGuide,
 }: BookmarkletSectionProps) {
+  const appUrl = typeof window !== "undefined" ? window.location.origin : "";
+  const CONSOLE_CODE = consoleCode(appUrl);
+  const ANDROID_BOOKMARKLET = androidBookmarklet(appUrl);
   const [activeTab, setActiveTab] = useState<"android" | "kiwi" | "pc">("android");
   const [copiedAndroid, setCopiedAndroid] = useState(false);
   const [copiedConsole, setCopiedConsole] = useState(false);
+  const [copyError, setCopyError] = useState<string | null>(null);
 
   const handleCopyAndroid = async () => {
+    setCopyError(null);
     try {
       await navigator.clipboard.writeText(ANDROID_BOOKMARKLET);
       setCopiedAndroid(true);
       setTimeout(() => setCopiedAndroid(false), 2000);
-    } catch {}
+    } catch { setCopyError("Tidak dapat menyalin otomatis. Pilih dan salin kode di bawah."); }
   };
 
   const handleCopyConsole = async () => {
+    setCopyError(null);
     try {
       await navigator.clipboard.writeText(CONSOLE_CODE);
       setCopiedConsole(true);
       setTimeout(() => setCopiedConsole(false), 2000);
-    } catch {}
+    } catch { setCopyError("Tidak dapat menyalin otomatis. Pilih dan salin kode di bawah."); }
   };
 
   return (
-    <div className="rounded-3xl border border-indigo-200 bg-white p-4 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 transition-colors">
+    <div className="import-panel">
+      <h2 className="text-xl font-semibold">Hubungkan keranjang Fotoyu</h2>
+      <p className="mt-2 mb-5 text-sm text-slate-600 dark:text-slate-400">Siapkan bookmark sekali, lalu jalankan saat membuka keranjang di Fotoyu. Pilih browser yang kamu gunakan.</p>
       <div className="space-y-4">
         {/* Device Switcher Segmented Control */}
         <div className="flex rounded-2xl bg-slate-100 p-1 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
@@ -90,8 +94,7 @@ export default function BookmarkletSection({
                 : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200",
             ].join(" ")}
           >
-            <span>📱</span>
-            <span>Chrome Android</span>
+            <span>Android</span>
           </button>
           <button
             type="button"
@@ -103,8 +106,7 @@ export default function BookmarkletSection({
                 : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200",
             ].join(" ")}
           >
-            <span>⚡</span>
-            <span>Kiwi Browser</span>
+            <span>Ekstensi</span>
           </button>
           <button
             type="button"
@@ -116,8 +118,7 @@ export default function BookmarkletSection({
                 : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200",
             ].join(" ")}
           >
-            <span>💻</span>
-            <span>PC / Laptop</span>
+            <span>Laptop</span>
           </button>
         </div>
 
@@ -127,27 +128,27 @@ export default function BookmarkletSection({
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 rounded-2xl bg-indigo-50/70 p-3.5 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40">
               <div className="flex-1">
                 <p className="text-xs sm:text-sm font-bold text-indigo-950 dark:text-indigo-200">
-                  Bookmarklet 1-Klik Chrome HP
+                   Siapkan bookmark di Chrome Android
                 </p>
                 <p className="text-[11px] sm:text-xs text-indigo-900/80 dark:text-indigo-300">
-                  Salin URL di bawah, simpan sebagai Bookmark di Chrome dengan nama <code className="font-mono font-bold">fotoyu</code>.
+                   Salin kode ini dan simpan sebagai URL bookmark bernama <code className="font-mono font-bold">fotoyu</code>.
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleCopyAndroid}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-indigo-500/25 hover:bg-indigo-700 active:scale-95 transition-all"
+                className="btn-primary"
               >
                 <CopyIcon />
-                <span>{copiedAndroid ? "✓ Tersalin!" : "Salin URL Bookmark"}</span>
+                <span>{copiedAndroid ? "Kode tersalin" : "Salin kode bookmark"}</span>
               </button>
             </div>
 
             <ol className="list-decimal list-inside space-y-1 text-xs text-slate-600 dark:text-slate-400 pl-1">
               <li>Di Chrome HP: Bookmark sembarang web lalu Edit URL jadi kode yang kamu salin.</li>
               <li>Buka <strong>fotoyu.com</strong>, login & isi keranjang foto.</li>
-              <li>Ketik <code className="font-mono font-bold text-slate-800 dark:text-slate-200">fotoyu</code> di Address Bar Chrome → Ketuk bookmark → Selesai!</li>
+               <li>Ketik <code className="font-mono font-bold text-slate-800 dark:text-slate-200">fotoyu</code> di bilah alamat Chrome, lalu ketuk bookmark. Foto akan dimuat di sini.</li>
             </ol>
           </div>
         )}
@@ -158,7 +159,7 @@ export default function BookmarkletSection({
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 rounded-2xl bg-emerald-50/70 p-3.5 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
               <div className="flex-1">
                 <p className="text-xs sm:text-sm font-bold text-emerald-950 dark:text-emerald-200">
-                  Tombol Download Otomatis di Layar HP
+                   Gunakan browser yang mendukung ekstensi
                 </p>
                 <p className="text-[11px] sm:text-xs text-emerald-900/80 dark:text-emerald-300">
                   Pasang ekstensi Tampermonkey di Kiwi Browser untuk memunculkan tombol download di fotoyu.com.
@@ -169,9 +170,8 @@ export default function BookmarkletSection({
                 href="/fotoyu-mobile-helper.user.js"
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-md shadow-emerald-500/25 hover:bg-emerald-700 active:scale-95 transition-all"
+                className="btn-primary"
               >
-                <span>⚡</span>
                 <span>Pasang Userscript</span>
               </a>
             </div>
@@ -198,7 +198,7 @@ export default function BookmarkletSection({
               <button
                 type="button"
                 onClick={handleCopyConsole}
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2.5 text-xs sm:text-sm font-bold text-white hover:bg-indigo-600 dark:bg-slate-800 dark:hover:bg-indigo-600 active:scale-95 transition-all"
+                className="btn-primary"
               >
                 <CopyIcon />
                 <span>{copiedConsole ? "✓ Tersalin!" : "Salin Kode Console"}</span>
@@ -207,6 +207,8 @@ export default function BookmarkletSection({
           </div>
         )}
       </div>
+      {copyError && <div className="mt-4 space-y-2"><p role="alert" className="text-sm text-red-700 dark:text-red-300">{copyError}</p><textarea aria-label="Kode untuk disalin manual" readOnly value={activeTab === "pc" ? CONSOLE_CODE : ANDROID_BOOKMARKLET} className="field h-32 font-mono" /></div>}
+      {activeTab === "android" && onOpenAndroidGuide && <button type="button" className="btn-quiet mt-4" onClick={onOpenAndroidGuide}>Lihat panduan bookmark</button>}
     </div>
   );
 }

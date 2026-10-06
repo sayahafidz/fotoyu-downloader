@@ -4,6 +4,7 @@ import { useEffect, useCallback, useState, useRef } from "react";
 import type { Photo } from "@/lib/parse";
 import { downloadPhotoDirect, fetchImageBlobWithFallbacks, sharePhoto, canWebShareFiles, downloadBlob } from "@/lib/download";
 import { enhanceImageCanvas, DEFAULT_ENHANCE_OPTIONS } from "@/lib/canvas-enhance";
+import { useDialog } from "@/lib/use-dialog";
 
 interface LightboxProps {
   photos: Photo[];
@@ -36,7 +37,7 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
   const [sliderPos, setSliderPos] = useState<number>(50); // percentage 0-100%
   const [isDraggingSlider, setIsDraggingSlider] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useDialog(true, onClose);
   const sliderRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -73,34 +74,19 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Tab") {
-        const controls = containerRef.current?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), [tabindex="0"]');
-        if (controls?.length) {
-          const first = controls[0];
-          const last = controls[controls.length - 1];
-          if (e.shiftKey && (document.activeElement === first || document.activeElement === containerRef.current)) { e.preventDefault(); last.focus(); }
-          else if (!e.shiftKey && (document.activeElement === last || document.activeElement === containerRef.current)) { e.preventDefault(); first.focus(); }
-        }
-      }
-      if (e.key === "Escape") onClose();
+      if ((e.target as HTMLElement).matches("input, textarea, select")) return;
       if (e.key === "ArrowRight") goNext();
       if (e.key === "ArrowLeft") goPrev();
     };
     document.addEventListener("keydown", handleKey);
-    const previousOverflow = document.body.style.overflow;
-    const previousFocus = document.activeElement as HTMLElement | null;
-    document.body.style.overflow = "hidden";
-    containerRef.current?.focus();
     return () => {
       document.removeEventListener("keydown", handleKey);
-      document.body.style.overflow = previousOverflow;
-      previousFocus?.focus();
     };
   }, [onClose, goNext, goPrev]);
 
   // Touch gesture handlers for mobile swipe navigation
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (isZoomed || isDraggingSlider) return;
+    if (isZoomed || isDraggingSlider || showCompare || e.touches.length !== 1 || (e.target as HTMLElement).closest("button, input")) return;
     const touch = e.touches[0];
     setTouchStart({ x: touch.clientX, y: touch.clientY });
     setTouchDelta({ x: 0, y: 0 });
@@ -230,14 +216,14 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
       aria-modal="true"
       aria-label={`Preview ${photo.filename}`}
       tabIndex={-1}
-      className="fixed inset-0 z-[60] flex flex-col items-center justify-between bg-black/95 p-3 sm:p-5 backdrop-blur-md animate-fade-in select-none"
+      className="photo-viewer fixed inset-0 z-[60] flex flex-col items-center justify-between p-3 sm:p-5 animate-fade-in"
       onClick={handleBackdrop}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
       {/* Top Header Bar */}
-      <div className="flex w-full max-w-4xl items-center justify-between gap-2 z-20">
+      <div className="flex w-full max-w-4xl flex-wrap items-center justify-between gap-2 z-20">
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-white/15 px-3 py-1 font-mono text-xs font-semibold text-white backdrop-blur-sm">
             {index + 1} / {photos.length}
@@ -263,9 +249,9 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
             {isEnhancing ? (
               <span className="animate-spin text-xs">⏳</span>
             ) : (
-              <span>✨</span>
+              <span aria-hidden="true">◐</span>
             )}
-            <span>{showCompare ? "Bandingkan Aktif" : "Preview Enhance"}</span>
+            <span>{showCompare ? "Lihat asli" : "Koreksi warna"}</span>
           </button>
 
           {/* Zoom toggle button */}
@@ -274,22 +260,9 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
               type="button"
               onClick={() => setIsZoomed((z) => !z)}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 active:scale-95"
-              aria-label="Toggle Zoom"
+              aria-label={isZoomed ? "Perkecil foto" : "Perbesar foto"} aria-pressed={isZoomed}
             >
               {isZoomed ? <ZoomOutIcon /> : <ZoomInIcon />}
-            </button>
-          )}
-
-          {/* Share button */}
-          {supportsShare && (
-            <button
-              type="button"
-              onClick={handleShare}
-              disabled={sharing}
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600/90 text-white backdrop-blur-sm transition-all hover:bg-indigo-600 active:scale-95 disabled:opacity-50"
-              aria-label="Share ke WhatsApp / Galeri"
-            >
-              <ShareIcon />
             </button>
           )}
 
@@ -298,7 +271,7 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 active:scale-95"
-            aria-label="Close"
+            aria-label="Tutup foto"
           >
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="18" y1="6" x2="6" y2="18" />
@@ -351,7 +324,7 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
             onMouseMove={(e) => {
               if (isDraggingSlider || e.buttons === 1) handleSliderMove(e.clientX);
             }}
-            onTouchMove={(e) => handleSliderMove(e.touches[0].clientX)}
+            onTouchMove={(e) => { e.stopPropagation(); handleSliderMove(e.touches[0].clientX); }}
             onMouseDown={() => setIsDraggingSlider(true)}
             onMouseUp={() => setIsDraggingSlider(false)}
           >
@@ -363,7 +336,7 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
               className="max-h-[72vh] w-auto rounded-2xl object-contain pointer-events-none"
             />
             <span className="absolute right-3 top-3 rounded-md bg-emerald-600/80 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm z-10 pointer-events-none">
-              ✨ Sesudah (Enhanced)
+               Sesudah
             </span>
 
             {/* Original Image (Clipped Overlay on the Left) */}
@@ -425,6 +398,7 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
           </>
         )}
       </div>
+      {showCompare && <label className="flex w-full max-w-xl items-center gap-3 py-3 text-sm text-slate-100">Sebelum<input aria-label="Perbandingan sebelum dan sesudah" type="range" min="0" max="100" value={sliderPos} onChange={(event) => setSliderPos(Number(event.target.value))} className="min-h-11 flex-1" />Sesudah</label>}
 
       {/* Bottom Action & Metadata Bar */}
       {actionError && <p role="alert" className="z-20 my-2 max-w-xl rounded-lg bg-red-950 px-4 py-2 text-center text-sm text-red-100">{actionError}</p>}
@@ -446,7 +420,7 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
               className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-white transition-all hover:bg-white/20 active:scale-95 disabled:opacity-50"
             >
               <ShareIcon />
-              <span>Share</span>
+              <span>{sharing ? "Membagikan…" : "Bagikan"}</span>
             </button>
           )}
 
@@ -454,14 +428,14 @@ export default function Lightbox({ photos, index, onClose, onNavigate }: Lightbo
             type="button"
             onClick={handleDownload}
             disabled={downloading}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 px-5 py-2 text-xs font-bold text-white shadow-md shadow-emerald-500/25 hover:shadow-emerald-500/40 active:scale-95 disabled:opacity-50 transition-all"
+            className="btn-primary flex-1 sm:flex-none"
           >
             {downloading ? (
               <span className="animate-spin">⏳</span>
             ) : (
               <DownloadIcon />
             )}
-            <span>{showCompare ? "Simpan Enhanced" : "Simpan Foto"}</span>
+            <span>{downloading ? "Mengunduh…" : showCompare ? "Simpan hasil koreksi" : "Simpan foto"}</span>
           </button>
         </div>
       </div>

@@ -15,7 +15,7 @@ interface PromptVariant {
 const PROMPTS: PromptVariant[] = [
   {
     id: "id-full",
-    label: "Indonesia — Lengkap",
+    label: "Indonesia lengkap",
     badge: "ID",
     description:
       "Prompt detail berbahasa Indonesia untuk AI image editor (mis. Photoshop Generative Fill, Gemini).",
@@ -24,16 +24,16 @@ const PROMPTS: PromptVariant[] = [
   },
   {
     id: "en-full",
-    label: "English — Full",
+    label: "English full",
     badge: "EN",
     description:
       "Versi Inggris untuk AI generator / chatbot (ChatGPT, Gemini, Midjourney editor). Paling kompatibel.",
     text:
-      "Remove all text, watermarks, captions, and any faint color artifacts such as rainbow-colored streaks, light leaks, lens flare lines, or color banding from this photo, then fill the cleared areas with natural textures that blend seamlessly with the surroundings, leaving no trace or artifacts. Professionally enhance the photo quality by improving sharpness and detail, correcting color balance for a natural look, adjusting lighting subtly, and reducing noise or grain where present.\n\nPerform natural retouching on minor skin blemishes, with strict constraints: do not alter facial structure including the nose, eyes, lips, or jaw; do not change body proportions such as posture, size, or shape; do not modify identifying features so the person remains recognizable; and preserve the original facial expression.\n\nMaintain the original background composition and elements, only subtly improving clarity without adding or removing anything except the unwanted artifacts mentioned above (text, watermarks, captions, rainbow streaks/light leaks). The final result must be photorealistic, appearing like a professional photograph rather than an edited image, with the original composition and framing fully intact — with no visible trace of the removed rainbow line or any other artifact.",
+       "Remove text, watermarks, captions, rainbow streaks, light leaks, and color banding. Fill the cleared areas with natural surrounding textures. Improve sharpness, color balance, lighting, and noise reduction subtly. Preserve facial structure, body proportions, identity, expression, composition, and background. Keep the result photorealistic with no visible editing artifacts.",
   },
   {
     id: "id-short",
-    label: "Indonesia — Singkat",
+    label: "Indonesia singkat",
     badge: "ID",
     description: "Versi ringkas untuk penggunaan cepat tanpa banyak detail teknis.",
     text:
@@ -109,15 +109,12 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
     <div className="space-y-4 animate-fade-in">
       <div className="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-4 flex items-start gap-3.5">
-          <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-500 to-fuchsia-500 text-white shadow-md shadow-indigo-500/20">
-            <SparkleIcon />
-          </span>
           <div>
             <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
-              Prompt AI untuk Mempercantik & Hapus Watermark Foto
+              Prompt untuk editor foto
             </h2>
             <p className="mt-1 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-              Pilih varian prompt di bawah, lalu copy ke ChatGPT Plus, Google Gemini, atau Photoshop untuk meningkatkan resolusi foto.
+              Salin instruksi lalu gunakan bersama foto di editor pilihanmu. Foto tidak diedit di halaman ini.
             </p>
           </div>
         </div>
@@ -132,6 +129,7 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
                 type="button"
                 disabled={loading}
                 onClick={() => setSelectedId(p.id)}
+                aria-pressed={active}
                 className={[
                   "inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-xs sm:text-sm font-semibold transition-all active:scale-95",
                   active
@@ -188,6 +186,7 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
         </div>
 
         <textarea
+          aria-label="Isi prompt edit foto"
           readOnly
           value={selected.text}
           className="block h-48 sm:h-40 w-full resize-y border-0 bg-transparent px-5 py-4 font-mono text-xs sm:text-sm leading-relaxed text-slate-800 focus:outline-none focus:ring-0 dark:text-slate-200"
@@ -210,7 +209,6 @@ export default function EnhanceForm({ loading = false }: EnhanceFormProps) {
           onClick={handleOpenGemini}
           className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-fuchsia-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-md shadow-indigo-500/20 transition-all hover:opacity-90 active:scale-95"
         >
-          <SparkleIcon />
           Buka Gemini
         </button>
         <button

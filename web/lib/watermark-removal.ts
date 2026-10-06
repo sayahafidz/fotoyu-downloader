@@ -31,9 +31,6 @@ export interface WatermarkRemovalResult {
 // Share one queue across single-photo and batch downloads, including the
 // parallel workers in download.ts. A failure must not block later jobs.
 let dewatermarkQueue: Promise<unknown> = Promise.resolve();
-function stored(key: string): string {
-  try { return typeof window !== "undefined" ? localStorage.getItem(key) || "" : ""; } catch { return ""; }
-}
 
 function queueDewatermark<T>(work: () => Promise<T>): Promise<T> {
   const job = dewatermarkQueue.then(work, work);
@@ -48,41 +45,28 @@ export async function removeWatermark(
   signal?: AbortSignal
 ): Promise<WatermarkRemovalResult> {
   try {
-    const savedGeminiKey =
-      settings.geminiKey ||
-      stored("fotoyu_gemini_key");
-    const savedGeminiBaseUrl =
-      settings.geminiBaseUrl ||
-      stored("fotoyu_gemini_base_url");
-    const savedOpenAIKey =
-      settings.openaiKey ||
-      stored("fotoyu_openai_key");
-
     const sendRequest = () => {
       if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
       return fetch("/api/remove-watermark", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(savedGeminiKey ? { "X-Gemini-Key": savedGeminiKey } : {}),
-        ...(savedGeminiBaseUrl ? { "X-Gemini-Base-Url": savedGeminiBaseUrl } : {}),
-        ...(savedOpenAIKey ? { "X-OpenAI-Key": savedOpenAIKey } : {}),
       },
       body: JSON.stringify({
         imageUrl: photo.url,
         provider: settings.provider || "gemini",
-        geminiKey: savedGeminiKey,
-        geminiBaseUrl: savedGeminiBaseUrl,
-        openaiKey: savedOpenAIKey,
         region: settings.region,
         removeText: settings.removeText || settings.autoDetect,
       }),
-      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(55000)]) : AbortSignal.timeout(55000),
+       signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(160000)]) : AbortSignal.timeout(160000),
     });
     };
-    const response = settings.provider === "dewatermark"
-      ? await queueDewatermark(sendRequest)
-      : await sendRequest();
+    const response = await queueDewatermark(async () => {
+      const result = await sendRequest();
+      const bytes = await result.arrayBuffer();
+      return new Response(bytes, { status: result.status, headers: result.headers });
+    });
+    if (typeof window !== "undefined") window.dispatchEvent(new Event("watermark-quota-changed"));
 
     if (!response.ok) {
       // Try to parse error response

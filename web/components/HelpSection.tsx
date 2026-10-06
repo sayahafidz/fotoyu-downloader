@@ -21,7 +21,7 @@ const BOOKMARKLET_STEPS: Array<{ title: string; body: string }> = [
   {
     title: "4. Download Foto di Galeri HP",
     body:
-      "Setelah foto muncul di preview, kamu bisa memilih 'Galeri HP (Langsung)' untuk menyimpan foto satu per satu tanpa ekstrak ZIP, atau pilih 'File ZIP'.",
+      "Setelah foto muncul, pilih 'File terpisah' untuk menyimpan ke folder unduhan browser, atau 'File ZIP' untuk satu arsip. Browser mungkin meminta izin untuk beberapa unduhan.",
   },
 ];
 
@@ -67,7 +67,7 @@ const TOKEN_STEPS: Array<{ title: string; body: string }> = [
   {
     title: "Tersimpan Otomatis",
     body:
-      "Data token disimpan aman di memori browser lokal kamu sehingga kamu tidak perlu login ulang setiap kali membuka downloader.",
+      "Token disimpan di penyimpanan lokal browser. Kamu bisa menghapusnya lewat tombol Hapus login di halaman awal.",
   },
 ];
 
@@ -110,18 +110,19 @@ export default function HelpSection({ mode = "bookmarklet", onOpenAndroidGuide }
     
   const label =
     mode === "bookmarklet"
-      ? "📚 Panduan Lengkap: Cara Pakai di HP Android & PC"
+      ? "Bantuan menghubungkan Fotoyu"
       : mode === "token"
-      ? "📚 Panduan: Cara Mendapatkan Token Login"
+      ? "Cara mendapatkan token login"
       : mode === "paste"
-      ? "📚 Panduan: Cara Mendapatkan Response JSON"
-      : "📚 Panduan: Cara Mempercantik Foto dengan AI";
+      ? "Cara mendapatkan response JSON"
+      : "Cara menggunakan prompt edit";
 
   return (
     <section className="w-full">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open} aria-controls="import-help"
         className="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left text-xs sm:text-sm font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800/80"
       >
         <span className="inline-flex items-center gap-2">
@@ -145,12 +146,12 @@ export default function HelpSection({ mode = "bookmarklet", onOpenAndroidGuide }
       </button>
 
       {open && (
-        <div className="mt-3 space-y-3 animate-fade-in">
-          <div className="grid gap-3 sm:grid-cols-2">
+        <div id="import-help" className="mt-3 space-y-3">
+          <div className="space-y-5 px-4 py-3">
             {steps.map((s, i) => (
               <div
                 key={i}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                className="space-y-2"
               >
                 <div className="mb-1.5 flex items-center gap-2">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-100 text-[11px] font-bold text-indigo-600 dark:bg-indigo-900/60 dark:text-indigo-400">
@@ -172,7 +173,6 @@ export default function HelpSection({ mode = "bookmarklet", onOpenAndroidGuide }
                 onClick={onOpenAndroidGuide}
                 className="inline-flex items-center gap-2 rounded-xl bg-indigo-50 border border-indigo-200 px-4 py-2 text-xs font-bold text-indigo-700 hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/40 transition-colors"
               >
-                <span>📱</span>
                 <span>Buka Panduan Bergambar Khusus Android</span>
               </button>
             </div>

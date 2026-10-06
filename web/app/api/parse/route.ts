@@ -4,6 +4,7 @@ import { extractPhotos } from "@/lib/parse";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  try { checkSameOrigin(req); await rateLimit(req, "parse", 20); } catch (error) { return abuseResponse(error); }
   let body: unknown;
   try {
     body = await req.json();
@@ -35,3 +36,4 @@ export async function POST(req: Request) {
     count: photos.length,
   });
 }
+import { abuseResponse, checkSameOrigin, rateLimit } from "@/lib/abuse";

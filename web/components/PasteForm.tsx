@@ -10,6 +10,7 @@ interface PasteFormProps {
 export default function PasteForm({ onProcess, loading }: PasteFormProps) {
   const [value, setValue] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [inputError, setInputError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +23,8 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
     const reader = new FileReader();
+    setInputError(null);
+    reader.onerror = () => setInputError("File tidak dapat dibaca. Pilih ulang atau tempel JSON.");
     reader.onload = () => {
       const text = String(reader.result || "");
       setValue(text);
@@ -33,6 +36,8 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
+    setInputError(null);
+    reader.onerror = () => setInputError("File tidak dapat dibaca. Pilih ulang atau tempel JSON.");
     reader.onload = () => {
       const text = String(reader.result || "");
       setValue(text);
@@ -41,18 +46,22 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
   };
 
   const handlePaste = async () => {
+    setInputError(null);
     try {
       const text = await navigator.clipboard.readText();
       if (text) setValue(text);
     } catch {
-      // clipboard read blocked by browser permissions
+      setInputError("Akses clipboard tidak tersedia. Tekan lama kotak teks, lalu pilih Tempel.");
     }
   };
 
   const charCount = value.length;
 
   return (
-    <form onSubmit={handleSubmit} className="w-full animate-fade-in space-y-4">
+    <form onSubmit={handleSubmit} className="import-panel space-y-4" aria-busy={loading}>
+      <h2 className="text-xl font-semibold">Muat file atau JSON</h2>
+      <p className="text-sm text-slate-600 dark:text-slate-400">Pilih file ekspor .json / .txt atau tempel response keranjang Fotoyu.</p>
+      <label htmlFor="json-input" className="block text-sm font-medium">Data keranjang</label>
       <div
         onDragOver={(e) => {
           e.preventDefault();
@@ -68,27 +77,26 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
         ].join(" ")}
       >
         <textarea
+          id="json-input"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder={
-            "Tempelkan (paste) response JSON dari fotoyu di sini...\n\n" +
-            "Tip: Salin isi response dari API carts/preview, lalu paste ke kotak ini.\n" +
-            "Atau drag & drop file .txt / .json langsung ke sini."
-          }
+          placeholder="Tempel response JSON di sini"
+          disabled={loading}
           spellCheck={false}
-          className="block h-64 sm:h-72 w-full resize-y rounded-3xl bg-transparent p-4 sm:p-5 font-mono text-xs sm:text-sm leading-relaxed text-slate-900 placeholder:text-slate-400 focus:outline-none dark:text-slate-100 dark:placeholder:text-slate-500"
+          className="field h-48 pb-10 font-mono"
         />
         <div className="pointer-events-none absolute bottom-3 right-4 select-none text-xs font-mono text-slate-400 dark:text-slate-500">
           {charCount.toLocaleString("id-ID")} karakter
         </div>
       </div>
+      {inputError && <p role="alert" className="text-sm text-red-700 dark:text-red-300">{inputError}</p>}
 
       {/* Buttons */}
       <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
         <button
           type="submit"
           disabled={loading || !value.trim()}
-          className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-indigo-500/25 transition-all hover:shadow-indigo-500/40 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn-primary w-full"
         >
           {loading ? (
             <>
@@ -97,8 +105,7 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
             </>
           ) : (
             <>
-              <SparklesIcon />
-              Proses Response
+              Muat foto
             </>
           )}
         </button>
@@ -109,17 +116,17 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
           className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors active:scale-95"
         >
           <ClipboardIcon />
-          Paste Clipboard
+          Tempel clipboard
         </button>
 
-        <label className="inline-flex flex-1 sm:flex-none cursor-pointer items-center justify-center gap-2 rounded-2xl border border-slate-300 bg-white px-4 py-3 text-xs sm:text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors active:scale-95">
+        <label className="relative btn-secondary flex-1 cursor-pointer focus-within:outline focus-within:outline-2 focus-within:outline-indigo-500">
           <FileIcon />
           Pilih File
           <input
             type="file"
             accept=".txt,.json,application/json,text/plain"
             onChange={handleFilePick}
-            className="hidden"
+            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
           />
         </label>
 
@@ -142,7 +149,7 @@ export default function PasteForm({ onProcess, loading }: PasteFormProps) {
           </span>
           <div className="flex-1 space-y-2 text-xs sm:text-sm">
             <p className="font-bold text-blue-950 dark:text-blue-200">
-              Tips: Gunakan Tampilan Mobile saat Menangkap Response
+               Mengambil JSON lewat laptop?
             </p>
             <p className="text-blue-900/90 dark:text-blue-300 leading-relaxed text-xs">
               Response JSON dari fotoyu.com menyertakan field <code className="rounded bg-blue-100 px-1 py-0.5 font-mono text-[11px] text-blue-900 dark:bg-blue-900/60 dark:text-blue-200">url</code> untuk link foto resolusi tinggi ketika diakses dalam mode mobile.

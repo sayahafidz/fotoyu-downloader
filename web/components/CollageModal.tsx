@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useDialog } from "@/lib/use-dialog";
 import type { Photo } from "@/lib/parse";
 import {
   generateCollageCanvas,
@@ -19,12 +20,12 @@ interface CollageModalProps {
 }
 
 const BADGE_PRESETS = [
-  { title: "🏅 RACE FINISHER", subtitle: "Finish Line Glory · Strong to the End" },
-  { title: "🏃 PERSONAL BEST (PB)", subtitle: "New Record · Pace & Endurance" },
-  { title: "⚡ MARATHON MEMORY", subtitle: "Full Distance · Unstoppable Spirit" },
-  { title: "🚴 CYCLING & TRIATHLON", subtitle: "Pure Speed & High Cadence" },
-  { title: "📸 FOTOYU MOMENTS", subtitle: "Captured in Full Resolution" },
-  { title: "🎓 GRADUATION DAY", subtitle: "Celebrating Success & Future" },
+  { title: "Race finisher", subtitle: "" },
+  { title: "Personal best", subtitle: "" },
+  { title: "Marathon", subtitle: "" },
+  { title: "Cycling", subtitle: "" },
+  { title: "Momen favorit", subtitle: "" },
+  { title: "Wisuda", subtitle: "" },
 ];
 
 export default function CollageModal({
@@ -33,17 +34,21 @@ export default function CollageModal({
   selectedPhotos,
   allPhotos,
 }: CollageModalProps) {
-  const photosToUse = selectedPhotos.length > 0 ? selectedPhotos.slice(0, 9) : allPhotos.slice(0, 4);
+  const photosToUse = useMemo(() => selectedPhotos.length > 0 ? selectedPhotos.slice(0, 9) : allPhotos.slice(0, 4), [selectedPhotos, allPhotos]);
 
   const [ratio, setRatio] = useState<CollageRatio>("story");
-  const [theme, setTheme] = useState<CollageTheme>("gradient");
-  const [badgeTitle, setBadgeTitle] = useState<string>("🏅 RACE FINISHER");
-  const [badgeSubtitle, setBadgeSubtitle] = useState<string>("Finish Line Glory · Marathon 2026");
+  const [theme, setTheme] = useState<CollageTheme>("minimal");
+  const [badgeTitle, setBadgeTitle] = useState<string>("");
+  const [badgeSubtitle, setBadgeSubtitle] = useState<string>("");
   const [showPhotographer, setShowPhotographer] = useState<boolean>(true);
   const [isRendering, setIsRendering] = useState<boolean>(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [currentBlob, setCurrentBlob] = useState<Blob | null>(null);
   const [supportsShare, setSupportsShare] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const dialogRef = useDialog(isOpen, onClose);
+  const previewUrlRef = useRef<string | null>(null);
+  useEffect(() => () => { if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current); }, []);
 
   const previewCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -57,6 +62,8 @@ export default function CollageModal({
 
     let isMounted = true;
     setIsRendering(true);
+    setError(null);
+    setCurrentBlob(null);
 
     const config: CollageBadgeConfig = {
       title: badgeTitle,
@@ -73,13 +80,14 @@ export default function CollageModal({
         if (!isMounted) return;
         setCurrentBlob(blob);
         const url = URL.createObjectURL(blob);
+        previewUrlRef.current = url;
         setPreviewUrl((prev) => {
           if (prev) URL.revokeObjectURL(prev);
           return url;
         });
       })
       .catch((err) => {
-        console.error("Collage generation failed:", err);
+        if (isMounted) setError(err instanceof Error ? err.message : "Kolase gagal dibuat. Periksa koneksi dan coba lagi.");
       })
       .finally(() => {
         if (isMounted) setIsRendering(false);
@@ -112,9 +120,9 @@ export default function CollageModal({
         resolution: null,
         size: currentBlob.size,
       };
-      await sharePhoto(dummyPhoto, currentBlob);
+      if (!await sharePhoto(dummyPhoto, currentBlob)) setError("Kolase tidak dapat dibagikan. Simpan file untuk membagikannya.");
     } catch (e) {
-      console.warn("Share failed:", e);
+      setError(e instanceof Error ? e.message : "Kolase gagal dibagikan.");
     }
   };
 
@@ -125,18 +133,19 @@ export default function CollageModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-6 backdrop-blur-md animate-fade-in"
+      ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="collage-title" tabIndex={-1}
+      className="dialog-backdrop"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative flex max-h-[92vh] w-full max-w-4xl flex-col lg:flex-row rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+      <div className="dialog-sheet collage-sheet max-w-4xl">
         {/* Left Side: Live Story/Card Preview */}
-        <div className="flex flex-1 items-center justify-center bg-slate-950 p-4 sm:p-6 overflow-hidden min-h-[280px] sm:min-h-[420px]">
+        <div className="collage-preview">
           {isRendering ? (
             <div className="flex flex-col items-center gap-3 text-white">
               <div className="h-10 w-10 animate-spin rounded-full border-3 border-indigo-500 border-t-transparent" />
-              <p className="text-xs font-semibold text-slate-300">Merender Story Kolase HD...</p>
+               <p role="status" className="text-sm text-slate-300">Membuat kolase…</p>
             </div>
           ) : previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -145,26 +154,26 @@ export default function CollageModal({
               alt="Story Preview"
               className={[
                 "rounded-2xl object-contain shadow-2xl transition-all duration-300",
-                ratio === "story" ? "max-h-[65vh] max-w-[260px] sm:max-w-[340px]" : "max-h-[60vh] max-w-[360px]",
+                 "max-h-full max-w-full",
               ].join(" ")}
             />
           ) : null}
         </div>
 
         {/* Right Side: Customizer Controls */}
-        <div className="flex flex-1 flex-col justify-between border-t lg:border-t-0 lg:border-l border-slate-200 p-4 sm:p-6 dark:border-slate-800 dark:bg-slate-900 overflow-y-auto max-h-[50vh] lg:max-h-[92vh] space-y-4">
+        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+          {error && <p role="alert" className="text-sm text-red-700 dark:text-red-300">{error}</p>}
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <span className="text-xl">🎨</span>
-                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  Story & Finisher Card Studio
+                <h3 id="collage-title" className="text-lg font-semibold text-slate-900 dark:text-white">
+                  Buat kolase
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="btn-quiet" aria-label="Tutup kolase"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -273,9 +282,9 @@ export default function CollageModal({
 
               {/* Quick Badge Presets */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                  Preset Badge Cepat:
-                </label>
+                  <p className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                    Teks opsional:
+                  </p>
                 <div className="flex flex-wrap gap-1.5">
                   {BADGE_PRESETS.map((preset, i) => (
                     <button
@@ -294,7 +303,7 @@ export default function CollageModal({
               <div className="space-y-2">
                 <input
                   type="text"
-                  placeholder="Judul Badge (mis: 🏅 RACE FINISHER)"
+                  aria-label="Judul kolase" placeholder="Judul kolase (opsional)"
                   value={badgeTitle}
                   onChange={(e) => setBadgeTitle(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm font-semibold text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
@@ -302,7 +311,7 @@ export default function CollageModal({
 
                 <input
                   type="text"
-                  placeholder="Sub-judul (mis: Jakarta Marathon 2026 · PB 3:45)"
+                  aria-label="Keterangan kolase" placeholder="Nama acara atau keterangan (opsional)"
                   value={badgeSubtitle}
                   onChange={(e) => setBadgeSubtitle(e.target.value)}
                   className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm text-slate-900 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
@@ -340,10 +349,9 @@ export default function CollageModal({
               type="button"
               onClick={handleDownload}
               disabled={isRendering || !currentBlob}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 active:scale-95 disabled:opacity-50 transition-all"
+              className="btn-primary flex-1"
             >
-              <span>💾</span>
-              <span>Download Kolase (HD)</span>
+              <span>Simpan kolase</span>
             </button>
           </div>
         </div>
