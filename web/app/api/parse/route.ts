@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { extractPhotos } from "@/lib/parse";
+import { abuseResponse, checkSameOrigin, rateLimit } from "@/lib/abuse";
+import { readJsonBody } from "@/lib/request-body";
 
 export const runtime = "nodejs";
 
@@ -7,12 +9,9 @@ export async function POST(req: Request) {
   try { checkSameOrigin(req); await rateLimit(req, "parse", 20); } catch (error) { return abuseResponse(error); }
   let body: unknown;
   try {
-    body = await req.json();
-  } catch {
-    return NextResponse.json(
-      { error: "Body harus berupa JSON valid." },
-      { status: 400 }
-    );
+    body = await readJsonBody(req, 2 * 1024 * 1024);
+  } catch (error) {
+    return abuseResponse(error);
   }
 
   const raw = (body as { raw?: string } | null)?.raw;
@@ -36,4 +35,3 @@ export async function POST(req: Request) {
     count: photos.length,
   });
 }
-import { abuseResponse, checkSameOrigin, rateLimit } from "@/lib/abuse";

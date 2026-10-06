@@ -65,6 +65,7 @@ function streamProxyResponse(upstream: Response, opts?: { downloadFilename?: str
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Access-Control-Allow-Origin", "*");
   headers.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  headers.set("Content-Security-Policy", "default-src 'none'; sandbox");
 
   // fetch may decompress upstream bytes: forwarding its Content-Length can
   // truncate the stream or cause a length mismatch on serverless hosting.
@@ -74,7 +75,15 @@ function streamProxyResponse(upstream: Response, opts?: { downloadFilename?: str
     const ascii = safe.replace(/[^\x20-\x7e]/g, "_");
     headers.set("Content-Disposition", `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(safe).replace(/['()*]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)}`);
   }
-  return new Response(upstream.body, { status: 200, headers });
+  let size = 0;
+  const boundedStream = upstream.body?.pipeThrough(new TransformStream<Uint8Array, Uint8Array>({
+    transform(chunk, controller) {
+      size += chunk.byteLength;
+      if (size > 30 * 1024 * 1024) { controller.error(new Error("Foto melebihi batas 30 MB.")); return; }
+      controller.enqueue(chunk);
+    },
+  }));
+  return new Response(boundedStream, { status: 200, headers });
 }
 
 export async function GET(req: Request) {
@@ -131,7 +140,11 @@ export async function GET(req: Request) {
     }
 
     const contentType = upstream.headers.get("content-type")?.split(";")[0].trim().toLowerCase();
-    if (contentType && !contentType.startsWith("image/") && contentType !== "application/octet-stream") {
+    if (Number(upstream.headers.get("content-length")) > 30 * 1024 * 1024) {
+      await upstream.body.cancel();
+      return NextResponse.json({ error: "Foto melebihi batas 30 MB." }, { status: 413 });
+    }
+    if (contentType && !["image/jpeg", "image/png", "image/webp", "image/avif", "image/gif", "application/octet-stream"].includes(contentType)) {
       await upstream.body.cancel();
       return NextResponse.json({ error: "CDN mengirim halaman error, bukan file foto." }, { status: 502 });
     }

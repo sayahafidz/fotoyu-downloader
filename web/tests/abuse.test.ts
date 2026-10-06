@@ -68,6 +68,9 @@ test("Redis atomically limits attempts, parallel processing and daily quotas acr
     const token = await loginAdmin(process.env.ADMIN_PASSWORD);
     const adminRequest = new Request("https://app.example/api", { headers: { cookie: adminCookie(request(), token).split(";")[0] } });
     await requireAdmin(adminRequest);
+    process.env.ADMIN_PASSWORD = "new-long-admin-test-password";
+    await assert.rejects(requireAdmin(adminRequest), /login admin/);
+    process.env.ADMIN_PASSWORD = "a-long-admin-test-password";
     await logoutAdmin(adminRequest);
     await assert.rejects(requireAdmin(adminRequest), /login admin/);
   } finally {

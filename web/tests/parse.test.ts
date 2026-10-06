@@ -4,7 +4,7 @@ import { extractPhotos, isAllowedHost, sanitizeFilename } from "../lib/parse.ts"
 
 test("proxy accepts CDN hosts but rejects unsupported protocols and credentials", () => {
   assert.equal(isAllowedHost("https://cfsimgproxy.fototree.com/images/photo.jpeg"), true);
-  for (const url of ["file://cdn.fotoyu.com/a", "ftp://cdn.fotoyu.com/a", "https://cdn.fotoyu.com.evil.example/a", "https://user:password@cdn.fotoyu.com/a", "https://cdn.fotoyu.com:8080/a", "http://127.0.0.1/a"]) {
+  for (const url of ["http://cdn.fotoyu.com/a", "https://storage.googleapis.com/random/a", "https://unknown.fotoyu.com/a", "file://cdn.fotoyu.com/a", "ftp://cdn.fotoyu.com/a", "https://cdn.fotoyu.com.evil.example/a", "https://user:password@cdn.fotoyu.com/a", "https://cdn.fotoyu.com:8080/a", "http://127.0.0.1/a"]) {
     assert.equal(isAllowedHost(url), false, url);
   }
 });

@@ -49,16 +49,14 @@ export const ALLOWED_HOSTS = new Set<string>([
   "api.fotoyu.com",
   "www.fotoyu.com",
   "fotoyu.com",
-  "storage.googleapis.com",
 ]);
 
 export function isAllowedHost(url: string): boolean {
   try {
     const u = new URL(url);
-    if (!['https:', 'http:'].includes(u.protocol) || u.username || u.password || (u.port && u.port !== '443' && u.port !== '80')) return false;
+    if (u.protocol !== 'https:' || u.username || u.password || (u.port && u.port !== '443')) return false;
     const host = u.hostname.toLowerCase();
     if (ALLOWED_HOSTS.has(host)) return true;
-    if (host.endsWith(".fototree.com") || host.endsWith(".fotoyu.com")) return true;
     return false;
   } catch {
     return false;
@@ -140,8 +138,9 @@ export function extractPhotos(rawJson: string): Photo[] {
     if (seenUrls.has(url)) continue;
     seenUrls.add(url);
 
-    const title = item.title ?? "";
-    const productId = item.product_id ?? "";
+    if (!isAllowedHost(url)) continue;
+    const title = typeof item.title === "string" ? item.title.slice(0, 200) : "";
+    const productId = typeof item.product_id === "string" ? item.product_id.slice(0, 200) : "";
     const filename = buildFilename(title, productId, url, used);
 
     const res = item.resolution;
@@ -151,13 +150,13 @@ export function extractPhotos(rawJson: string): Photo[] {
       title: title || filename,
       filename,
       product_id: productId,
-      creator_name: item.creator_name ?? "",
+      creator_name: typeof item.creator_name === "string" ? item.creator_name.slice(0, 200) : "",
       content_type: item.content_type ?? "photo",
       resolution:
         res && typeof res.width === "number" && typeof res.height === "number"
           ? { width: res.width, height: res.height }
           : null,
-      size: item.size ?? 0,
+      size: typeof item.size === "number" && Number.isFinite(item.size) && item.size >= 0 ? item.size : 0,
     });
   }
 

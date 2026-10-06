@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { extractPhotos } from "@/lib/parse";
 import { abuseResponse, checkSameOrigin, rateLimit } from "@/lib/abuse";
+import { readJsonBody } from "@/lib/request-body";
+import { boundedBytes } from "@/lib/image-provider";
 
 export const runtime = "nodejs";
 
@@ -90,12 +92,9 @@ export async function POST(req: Request) {
   try { checkSameOrigin(req); await rateLimit(req, "cart", 10); } catch (error) { return abuseResponse(error); }
   let payload: CartRequestBody;
   try {
-    payload = (await req.json()) as CartRequestBody;
-  } catch {
-    return NextResponse.json(
-      { error: "Body harus berupa JSON valid." },
-      { status: 400 }
-    );
+    payload = await readJsonBody(req, 128 * 1024) as CartRequestBody;
+  } catch (error) {
+    return abuseResponse(error);
   }
 
   const rawInput = payload?.token;
@@ -129,9 +128,6 @@ export async function POST(req: Request) {
   headers.set("Authorization", `Bearer ${token}`);
 
   const fetchInit: RequestInit = { method, headers, cache: "no-store", signal: AbortSignal.timeout(20000), redirect: "error" };
-  if (typeof payload.cookies === "string" && payload.cookies) {
-    headers.set("Cookie", payload.cookies);
-  }
   if (method === "POST") {
     headers.set("Content-Type", "application/json");
     fetchInit.body =
@@ -172,7 +168,7 @@ export async function POST(req: Request) {
 
   let photos;
   try {
-    const raw = await upstream.text();
+    const raw = (await boundedBytes(upstream, 8 * 1024 * 1024)).toString("utf8");
     photos = extractPhotos(raw);
   } catch {
     return NextResponse.json(

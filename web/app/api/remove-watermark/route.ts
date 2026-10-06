@@ -1,6 +1,7 @@
 import { isAllowedHost } from "@/lib/parse";
 import { abuseResponse, checkSameOrigin, rateLimit, reserveWatermark, watermarkQuota } from "@/lib/abuse";
 import { boundedBytes, editWithOpenAI, imageType, providerEndpoint, providerImage } from "@/lib/image-provider";
+import { readJsonBody } from "@/lib/request-body";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -66,9 +67,8 @@ export async function POST(req: Request) {
 
   let body: { imageUrl?: unknown; provider?: unknown };
   try {
-    const raw = await boundedBytes(new Response(req.body), 16 * 1024);
-    body = JSON.parse(raw.toString("utf8"));
-  } catch { return Response.json({ error: "Body JSON tidak valid atau terlalu besar." }, { status: 400 }); }
+    body = await readJsonBody(req);
+  } catch (error) { return abuseResponse(error); }
   if (!body || typeof body.imageUrl !== "string" || !isAllowedHost(body.imageUrl)) return Response.json({ error: "URL foto tidak valid atau host tidak diizinkan." }, { status: 400 });
   const provider = body.provider || "gemini";
   if (!["gemini", "openai", "dewatermark"].includes(provider as string)) return Response.json({ error: "Provider tidak dikenal." }, { status: 400 });

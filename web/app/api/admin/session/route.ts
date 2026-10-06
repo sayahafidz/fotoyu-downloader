@@ -1,5 +1,6 @@
 import { abuseResponse, checkSameOrigin, rateLimit } from "@/lib/abuse";
 import { adminCookie, loginAdmin, logoutAdmin, requireAdmin } from "@/lib/admin";
+import { readJsonBody } from "@/lib/request-body";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     checkSameOrigin(req); await rateLimit(req, "admin-login", 5, 900);
-    const body = await req.json();
+    const body = await readJsonBody(req, 2048);
     const token = await loginAdmin(body.password);
     return Response.json({ authenticated: true }, { headers: { "Set-Cookie": adminCookie(req, token), "Cache-Control": "no-store" } });
   } catch (error) { return abuseResponse(error); }

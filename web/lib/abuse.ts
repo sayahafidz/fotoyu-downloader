@@ -66,7 +66,8 @@ export async function rateLimit(req: Request, scope: string, limit: number, seco
 
 export function checkSameOrigin(req: Request) {
   const origin = req.headers.get("origin");
-  if (req.headers.get("sec-fetch-site") === "cross-site" || (origin && origin !== new URL(req.url).origin && origin !== process.env.APP_ORIGIN)) {
+  const allowedOrigin = process.env.APP_ORIGIN || (process.env.NODE_ENV !== "production" ? new URL(req.url).origin : null);
+  if (!origin || !allowedOrigin || req.headers.get("sec-fetch-site") === "cross-site" || origin !== allowedOrigin) {
     throw new AbuseError("Permintaan harus berasal dari aplikasi ini.", 403, 0, "ORIGIN_REJECTED");
   }
 }
@@ -111,6 +112,8 @@ redis.call('EXPIRE', KEYS[3], 180)
 return paid + 1`;
 
 const finishScript = `
+if redis.call('EXISTS', KEYS[6]) == 1 then return 0 end
+redis.call('SET', KEYS[6], '1', 'EX', 172800)
 if redis.call('GET', KEYS[4]) == ARGV[1] then redis.call('DEL', KEYS[4]) end
 redis.call('ZREM', KEYS[3], ARGV[1])
 if ARGV[2] == '0' then
@@ -127,7 +130,7 @@ export async function reserveWatermark(req: Request) {
   const store = await abuseStore();
   const { identity, window, keys } = quotaKeys(req);
   const lease = randomUUID();
-  const allKeys = [...keys, "watermark:active", `watermark:lock:${identity.ip}`, `credits:${identity.browser}`];
+  const allKeys = [...keys, "watermark:active", `watermark:lock:${identity.ip}`, `credits:${identity.browser}`, `watermark:finished:${lease}`];
   const concurrency = Math.max(1, Math.min(16, Number(process.env.WATERMARK_CONCURRENCY) || 2));
   const result = Number(await store.eval(reserveScript, { keys: allKeys, arguments: [String(Date.now()), String(window.seconds), lease, String(concurrency)] }));
   if (result === -1) throw new AbuseError("Kuota 5 foto hari ini habis. Coba lagi besok pukul 00.00 WIB.", 429, window.seconds, "DAILY_QUOTA_EXCEEDED");
